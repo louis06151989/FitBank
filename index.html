@@ -717,7 +717,7 @@ function update(){
   $('fastDisplay').textContent=state.fastHours+':'+state.eatHours;
   $('fastSub').textContent=state.fasting?'Fast in progress':'Not fasting';
   $('fastBtn').textContent=state.fasting?'End fast':'Start fast';
-  renderMeals();renderWater();renderWeight();renderHistory();renderHabits();renderRoutines();renderWorkouts();save();
+  renderMeals();renderWater();renderWeight();renderHistory();renderHabits();renderRoutines();renderWorkouts();renderDashboard();save();
 }
 function openEdit(type,id,name,num){
   editCtx={type,id};$('editTitle').textContent='Edit '+type;$('editName').value=name||'';$('editNumber').value=(num??'');$('editNumber').style.display=['meal','workout'].includes(type)?'block':'none';$('editModal').classList.add('open');$('editModal').setAttribute('aria-hidden','false')
@@ -771,12 +771,32 @@ $('mealForm').onsubmit=e=>{
 };
 $('photo').onchange=()=>{const f=$('photo').files&&$('photo').files[0];if(!f)return;$('preview').src=URL.createObjectURL(f);$('preview').style.display='block'};
 
+function habitDoneOnDate(habitId,date=todayKey()){
+  return (state.habitLogs||[]).some(x=>x.habitId===habitId && x.date===date && x.done);
+}
+function setHabitDoneForDate(habit,date,done){
+  state.habitLogs=Array.isArray(state.habitLogs)?state.habitLogs:[];
+  let log=state.habitLogs.find(x=>x.habitId===habit.id && x.date===date);
+  if(log){
+    log.done=!!done;
+    log.name=habit.name;
+  }else{
+    state.habitLogs.push({id:uid(),habitId:habit.id,name:habit.name,date,done:!!done});
+  }
+}
 function renderHabits(){
   const l=$('habitList');l.innerHTML='';
+  const key=todayKey();
   state.habits.forEach(h=>{
     const r=document.createElement('div');r.className='item';
     const left=document.createElement('label');left.style.display='flex';left.style.gap='10px';left.style.alignItems='center';left.style.flex='1';
-    const cb=document.createElement('input');cb.type='checkbox';cb.checked=h.done;cb.onchange=()=>{h.done=cb.checked;update()};
+    const cb=document.createElement('input');cb.type='checkbox';
+    cb.checked=habitDoneOnDate(h.id,key);
+    cb.onchange=()=>{
+      setHabitDoneForDate(h,key,cb.checked);
+      h.done=cb.checked; // compatibility with older UI
+      update();
+    };
     const s=document.createElement('span');s.textContent=h.name;left.append(cb,s);
     const b=document.createElement('button');b.className='btn';b.textContent='Edit';b.onclick=()=>openEdit('habit',h.id,h.name);
     r.append(left,b);l.append(r)
@@ -1085,7 +1105,7 @@ $('weightForm').onsubmit=e=>{
   e.preventDefault();
   const weight=Number($('weightValue').value);
   if(!weight || weight<50 || weight>1000)return;
-  const date=$('weightDate').value || new Date().toISOString().slice(0,10);
+  const date=$('weightDate').value || todayKey();
   const existing=state.weightLogs.find(x=>x.date===date);
   if(existing) existing.weight=weight;
   else state.weightLogs.push({id:uid(),weight,date});
@@ -1100,7 +1120,11 @@ $('saveWeightGoal').onclick=()=>{
 };
 
 
-function todayKey(){ return new Date().toISOString().slice(0,10); }
+function todayKey(){
+  const d=new Date();
+  const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),day=String(d.getDate()).padStart(2,'0');
+  return `${y}-${m}-${day}`;
+}
 
 function syncTodayWaterLog(){
   state.waterLogs=Array.isArray(state.waterLogs)?state.waterLogs:[];
@@ -1112,6 +1136,12 @@ function syncTodayWaterLog(){
 
 function renderWater(){
   state.waterOz=Math.max(0,Number(state.waterOz)||0);
+  // Keep Home/History in sync with the live water total for the local calendar day.
+  state.waterLogs=Array.isArray(state.waterLogs)?state.waterLogs:[];
+  const localToday=todayKey();
+  let todayWater=state.waterLogs.find(x=>x.date===localToday);
+  if(todayWater) todayWater.oz=state.waterOz;
+  else if(state.waterOz>0) state.waterLogs.push({id:uid(),date:localToday,oz:state.waterOz});
   state.waterGoalOz=Math.max(8,Number(state.waterGoalOz)||100);
   if(!$('waterTotal'))return;
   $('waterTotal').textContent=Math.round(state.waterOz)+' oz';
@@ -1517,7 +1547,7 @@ $('finishWorkout').onclick=()=>{
       sets:(it.actualSets||[]).map(s=>({weight:Number(s.weight)||0,reps:Number(s.reps)||0}))
     }))
   };
-  completed.date=new Date().toISOString().slice(0,10);
+  completed.date=todayKey();
   state.workouts.push(completed);
   $('currentWorkoutCard').style.display='none';
   activeWorkoutRoutineId=null;
@@ -1528,7 +1558,7 @@ $('exerciseForm').onsubmit=e=>{
   e.preventDefault();
   const name=$('quickExerciseName').value.trim()||'Exercise';
   const mins=Math.max(1,Number($('exerciseMins').value)||1);
-  state.workouts.push({id:uid(),date:new Date().toISOString().slice(0,10),name,mins});
+  state.workouts.push({id:uid(),date:todayKey(),name,mins});
   $('quickExerciseName').value='';
   update();
 };
@@ -1540,7 +1570,7 @@ $('fastBtn').onclick=()=>{
     state.fastStart=Date.now();
   } else {
     if(state.fastStart){
-      state.fastingLogs.push({id:uid(),date:new Date(state.fastStart).toISOString().slice(0,10),start:state.fastStart,end:Date.now()});
+      state.fastingLogs.push({id:uid(),date:localDateKey(new Date(state.fastStart)),start:state.fastStart,end:Date.now()});
     }
     state.fasting=false;
     state.fastStart=null;
@@ -1613,7 +1643,7 @@ function weightToGrams(weight, unit){
 function autoCalculateFood(){
   if(!$('mealName')||!$('mealWeight'))return;
   const info=findFoodNutrition($('mealName').value);
-  const grams=weightToGrams($('mealWeight').value,$('mealUnit')?$('mealUnit').value:'g');
+  const grams=weightToGrams($('mealWeight').value,$('mealWeightUnit')?$('mealWeightUnit').value:'g');
   const hint=$('foodAutoCalcHint');
   if(!info){
     if(hint)hint.textContent='Food not in the built-in list yet — you can still enter calories and macros manually.';
@@ -1668,7 +1698,7 @@ if($('mealName')){
   $('mealName').addEventListener('change',autoCalculateFood);
 }
 if($('mealWeight'))$('mealWeight').addEventListener('input',autoCalculateFood);
-if($('mealUnit'))$('mealUnit').addEventListener('change',autoCalculateFood);
+if($('mealWeightUnit'))$('mealWeightUnit').addEventListener('change',autoCalculateFood);
 
 
 // ---------- FitBank 3.0 widget dashboard ----------
@@ -1769,10 +1799,11 @@ function renderDashboard(){
   const bank=Math.max(0,weeklyGoal-weekEaten)*(Number(state.bankPercent ?? 100)/100);
   $('dashBank').textContent='+'+Math.round(bank).toLocaleString()+' cal';
 
-  const water=datedWater(key),waterGoal=Number(state.waterGoalOz)||100;
-  $('dashWater').textContent=Math.round(water)+' oz';
-  $('dashWaterSub').textContent='of '+Math.round(waterGoal)+' oz';
-  $('dashWaterBar').style.width=Math.max(0,Math.min(100,(water/waterGoal)*100))+'%';
+  const water=(key===todayKey()) ? (Number(state.waterOz)||0) : datedWater(key);
+  const waterGoal=Number(state.waterGoalOz)||100;
+  if($('dashWater'))$('dashWater').textContent=Math.round(water)+' oz';
+  if($('dashWaterSub'))$('dashWaterSub').textContent='of '+Math.round(waterGoal)+' oz';
+  if($('dashWaterBar'))$('dashWaterBar').style.width=Math.max(0,Math.min(100,(water/waterGoal)*100))+'%';
 
   if(key===todayKey() && state.fasting && state.fastStart){
     const hrs=(Date.now()-state.fastStart)/3600000;
@@ -1817,7 +1848,7 @@ function renderDashboard(){
 
   const habitLogs=(state.habitLogs||[]).filter(h=>h.date===key&&h.done);
   const totalHabits=(state.habits||[]).length;
-  const done=Math.min(totalHabits,habitLogs.length || (key===todayKey()?(state.habits||[]).filter(h=>h.done).length:0));
+  const done=Math.min(totalHabits,habitLogs.length);
   const pct=totalHabits?Math.round(done/totalHabits*100):0;
   $('dashHabitText').textContent=`${done} of ${totalHabits} complete`;
   $('dashHabitPct').textContent=pct+'%';$('dashHabitBar').style.width=pct+'%';
