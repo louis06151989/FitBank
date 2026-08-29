@@ -95,6 +95,45 @@
     </div>
 
     <div class="card" style="margin-top:12px">
+      <div class="row">
+        <div>
+          <strong>Water intake</strong>
+          <div class="muted">Track your water here with your food.</div>
+        </div>
+        <div style="text-align:right">
+          <div id="waterTotal" style="font-size:24px;font-weight:800">0 oz</div>
+          <div id="waterGoalText" class="tiny">Goal: 100 oz</div>
+        </div>
+      </div>
+
+      <div style="height:10px;background:rgba(127,127,127,.18);border-radius:999px;overflow:hidden;margin-top:12px">
+        <div id="waterBar" style="height:100%;width:0%;background:var(--accent);border-radius:999px"></div>
+      </div>
+
+      <div class="actions" style="margin-top:12px;flex-wrap:wrap">
+        <button class="btn waterQuick" type="button" data-oz="8">+8 oz</button>
+        <button class="btn waterQuick" type="button" data-oz="16">+16 oz</button>
+        <button class="btn waterQuick" type="button" data-oz="20">+20 oz</button>
+        <button class="btn waterQuick" type="button" data-oz="32">+32 oz</button>
+      </div>
+
+      <div class="grid grid2" style="margin-top:10px">
+        <input id="waterCustom" type="number" min="1" max="300" step="1" placeholder="Custom ounces">
+        <button id="addWaterCustom" class="btn primary" type="button">Add water</button>
+      </div>
+
+      <div class="grid grid2" style="margin-top:10px">
+        <input id="waterGoalInput" type="number" min="8" max="300" step="1" placeholder="Daily goal (oz)">
+        <button id="saveWaterGoal" class="btn" type="button">Set daily goal</button>
+      </div>
+
+      <div class="actions" style="margin-top:10px">
+        <button id="undoWater" class="btn" type="button">Undo 8 oz</button>
+        <button id="resetWater" class="btn danger" type="button">Reset today</button>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:12px">
       <strong>Portion accuracy</strong>
       <div class="muted" style="margin-top:6px">For best results, weigh the food after cooking and enter the weight in grams or ounces. When AI nutrition is connected, FitBank will use that portion weight to improve calories, macros, and micronutrients.</div>
     </div>
@@ -292,7 +331,7 @@ const defaults={
   habits:[{id:1,name:'Drink water',done:false},{id:2,name:'Hit protein goal',done:false},{id:3,name:'No late-night snack',done:false}],
   exercises:[{id:1,name:'Walking'},{id:2,name:'Strength training'},{id:3,name:'Running'},{id:4,name:'Cardio'}],
   routines:[],
-  meals:[],workouts:[],
+  meals:[],workouts:[],waterOz:0,waterGoalOz:100,
   reminders:{breakfast:'08:30',lunch:'12:30',dinner:'18:30',repeat:'60'}
 };
 let state=JSON.parse(JSON.stringify(defaults));
@@ -324,7 +363,7 @@ function update(){
   $('fastDisplay').textContent=state.fastHours+':'+state.eatHours;
   $('fastSub').textContent=state.fasting?'Fast in progress':'Not fasting';
   $('fastBtn').textContent=state.fasting?'End fast':'Start fast';
-  renderMeals();renderHabits();renderExerciseTypes();renderRoutines();renderWorkouts();save();
+  renderMeals();renderWater();renderHabits();renderExerciseTypes();renderRoutines();renderWorkouts();save();
 }
 function openEdit(type,id,name,num){
   editCtx={type,id};$('editTitle').textContent='Edit '+type;$('editName').value=name||'';$('editNumber').value=(num??'');$('editNumber').style.display=['meal','workout'].includes(type)?'block':'none';$('editModal').classList.add('open');$('editModal').setAttribute('aria-hidden','false')
@@ -411,6 +450,49 @@ function renderWorkouts(){
 $('exerciseForm').onsubmit=e=>{e.preventDefault();const mins=Number($('exerciseMins').value),id=Number($('exerciseSelect').value),ex=state.exercises.find(x=>x.id===id);if(ex&&mins>0&&mins<=600){state.workouts.push({id:uid(),name:ex.name,mins});update()}};
 
 
+
+
+function renderWater(){
+  state.waterOz=Math.max(0,Number(state.waterOz)||0);
+  state.waterGoalOz=Math.max(8,Number(state.waterGoalOz)||100);
+  if(!$('waterTotal'))return;
+  $('waterTotal').textContent=Math.round(state.waterOz)+' oz';
+  $('waterGoalText').textContent='Goal: '+Math.round(state.waterGoalOz)+' oz';
+  $('waterGoalInput').value=Math.round(state.waterGoalOz);
+  const pct=Math.max(0,Math.min(100,(state.waterOz/state.waterGoalOz)*100));
+  $('waterBar').style.width=pct+'%';
+}
+
+document.querySelectorAll('.waterQuick').forEach(btn=>{
+  btn.onclick=()=>{
+    state.waterOz=(Number(state.waterOz)||0)+Number(btn.dataset.oz||0);
+    update();
+  };
+});
+
+$('addWaterCustom').onclick=()=>{
+  const oz=Math.max(0,Number($('waterCustom').value)||0);
+  if(!oz)return;
+  state.waterOz=(Number(state.waterOz)||0)+oz;
+  $('waterCustom').value='';
+  update();
+};
+
+$('saveWaterGoal').onclick=()=>{
+  const goal=Math.max(8,Math.min(300,Number($('waterGoalInput').value)||100));
+  state.waterGoalOz=goal;
+  update();
+};
+
+$('undoWater').onclick=()=>{
+  state.waterOz=Math.max(0,(Number(state.waterOz)||0)-8);
+  update();
+};
+
+$('resetWater').onclick=()=>{
+  state.waterOz=0;
+  update();
+};
 
 let workoutShotUrl=null;
 
