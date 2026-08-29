@@ -377,16 +377,35 @@
   <section id="fasting" class="panel">
     <div class="card" style="text-align:center">
       <div class="muted">Intermittent fasting</div>
+      <div id="fastStartedLine" class="muted" style="margin-top:7px;display:none">⭐ Started —</div>
       <div id="fastDisplay" class="big" style="margin-top:8px">16:8</div>
       <div id="fastSub" class="muted">Not fasting</div>
+      <div id="fastElapsed" class="muted" style="margin-top:8px;display:none">Elapsed: —</div>
+      <div id="fastEndsLine" class="muted" style="margin-top:6px;display:none">Ends at: —</div>
       <button id="fastBtn" class="btn primary" style="margin-top:16px">Start fast</button>
     </div>
+
     <div class="card" style="margin-top:12px">
       <strong>Fasting settings</strong>
       <div class="grid grid2" style="margin-top:12px">
         <div><label class="muted">Fast length (hours)</label><input id="fastHours" type="number" min="1" max="48" value="16"></div>
         <div><label class="muted">Eating window (hours)</label><input id="eatHours" type="number" min="1" max="23" value="8"></div>
       </div>
+
+      <div class="grid grid2" style="margin-top:12px">
+        <div>
+          <label class="muted">Start time ⭐</label>
+          <input id="fastStartTime" type="time">
+          <div class="tiny">Set the time you actually started.</div>
+        </div>
+        <div>
+          <label class="muted">Expected end time</label>
+          <input id="fastEndTime" type="time">
+          <div class="tiny">Updates from your fasting length, or change it yourself.</div>
+        </div>
+      </div>
+
+      <div class="tiny" id="fastTimeHint" style="margin-top:10px">If you forgot to start FitBank on time, enter the real start time before tapping Start fast.</div>
       <button id="saveFastSettings" class="btn" style="margin-top:10px">Save fasting settings</button>
     </div>
   </section>
@@ -672,7 +691,7 @@
 <script>
 const defaults={
   goal:2000,eaten:0,bankPercent:100,priorBank:0,
-  fasting:false,fastStart:null,fastHours:16,eatHours:8,
+  fasting:false,fastStart:null,fastExpectedEnd:null,fastHours:16,eatHours:8,
   habits:[{id:1,name:'Drink water',done:false},{id:2,name:'Hit protein goal',done:false},{id:3,name:'No late-night snack',done:false}],
   exercises:[{id:1,name:'Walking'},{id:2,name:'Strength training'},{id:3,name:'Running'},{id:4,name:'Cardio'}],
   routines:[],
@@ -717,6 +736,7 @@ function update(){
   $('fastDisplay').textContent=state.fastHours+':'+state.eatHours;
   $('fastSub').textContent=state.fasting?'Fast in progress':'Not fasting';
   $('fastBtn').textContent=state.fasting?'End fast':'Start fast';
+  if(typeof renderFastingTimes==='function')renderFastingTimes();
   renderMeals();renderWater();renderWeight();renderHistory();renderHabits();renderRoutines();renderWorkouts();if(dashboardReady)renderDashboard();save();
 }
 function openEdit(type,id,name,num){
@@ -1571,21 +1591,134 @@ $('exerciseForm').onsubmit=e=>{
   update();
 };
 
+function clockValue(d){
+  if(!(d instanceof Date) || isNaN(d))return '';
+  return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+}
+function formatClock(ts){
+  if(!ts)return '—';
+  return new Date(ts).toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'});
+}
+function formatElapsed(ms){
+  const total=Math.max(0,Math.floor(ms/1000));
+  const h=Math.floor(total/3600);
+  const m=Math.floor((total%3600)/60);
+  const s=total%60;
+  return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+}
+function startTimestampFromClock(value){
+  const now=new Date();
+  if(!value)return now.getTime();
+  const [hh,mm]=value.split(':').map(Number);
+  const d=new Date(now);
+  d.setSeconds(0,0); d.setHours(hh||0,mm||0,0,0);
+  // If the selected clock time is later than now, assume the fast started yesterday.
+  if(d.getTime()>now.getTime()+5*60*1000)d.setDate(d.getDate()-1);
+  return d.getTime();
+}
+function expectedEndFromClocks(startTs,endClock){
+  const start=new Date(startTs);
+  if(!endClock)return startTs+(Number(state.fastHours)||16)*3600000;
+  const [hh,mm]=endClock.split(':').map(Number);
+  const end=new Date(start);
+  end.setHours(hh||0,mm||0,0,0);
+  while(end.getTime()<=startTs)end.setDate(end.getDate()+1);
+  return end.getTime();
+}
+function calculateEndClockFromStart(){
+  const startVal=$('fastStartTime')&&$('fastStartTime').value;
+  if(!startVal || !$('fastEndTime'))return;
+  const [hh,mm]=startVal.split(':').map(Number);
+  const base=new Date(2000,0,1,hh||0,mm||0,0,0);
+  base.setMinutes(base.getMinutes()+(Number($('fastHours').value)||16)*60);
+  $('fastEndTime').value=clockValue(base);
+}
+function renderFastingTimes(){
+  if(!$('fastStartTime')||!$('fastEndTime'))return;
+  const started=$('fastStartedLine'),elapsed=$('fastElapsed'),ends=$('fastEndsLine');
+
+  if(state.fasting && state.fastStart){
+    const startDate=new Date(state.fastStart);
+    $('fastStartTime').value=clockValue(startDate);
+    if(!state.fastExpectedEnd)state.fastExpectedEnd=state.fastStart+(Number(state.fastHours)||16)*3600000;
+    $('fastEndTime').value=clockValue(new Date(state.fastExpectedEnd));
+
+    started.style.display='block';
+    started.textContent='⭐ Started '+(localDateKey(startDate)===todayKey()?'today ':'')+'at '+formatClock(state.fastStart);
+    elapsed.style.display='block';
+    elapsed.textContent='Elapsed: '+formatElapsed(Date.now()-state.fastStart);
+    ends.style.display='block';
+    ends.innerHTML='Ends at: <strong>'+formatClock(state.fastExpectedEnd)+'</strong>';
+  }else{
+    started.style.display='none';
+    elapsed.style.display='none';
+    ends.style.display='none';
+
+    if(!$('fastStartTime').value){
+      const now=new Date();
+      now.setSeconds(0,0);
+      $('fastStartTime').value=clockValue(now);
+    }
+    if(!$('fastEndTime').value)calculateEndClockFromStart();
+  }
+}
+
+if($('fastStartTime'))$('fastStartTime').addEventListener('change',()=>{
+  calculateEndClockFromStart();
+  if(state.fasting){
+    state.fastStart=startTimestampFromClock($('fastStartTime').value);
+    state.fastExpectedEnd=expectedEndFromClocks(state.fastStart,$('fastEndTime').value);
+    save(); renderFastingTimes(); if(dashboardReady)renderDashboard();
+  }
+});
+if($('fastHours'))$('fastHours').addEventListener('input',()=>{
+  calculateEndClockFromStart();
+});
+if($('fastEndTime'))$('fastEndTime').addEventListener('change',()=>{
+  if(state.fasting && state.fastStart){
+    state.fastExpectedEnd=expectedEndFromClocks(state.fastStart,$('fastEndTime').value);
+    save(); renderFastingTimes(); if(dashboardReady)renderDashboard();
+  }
+});
+
 $('fastBtn').onclick=()=>{
   state.fastingLogs=Array.isArray(state.fastingLogs)?state.fastingLogs:[];
   if(!state.fasting){
+    state.fastHours=Math.min(Math.max(Number($('fastHours').value)||16,1),48);
+    state.eatHours=Math.min(Math.max(Number($('eatHours').value)||8,1),23);
+    state.fastStart=startTimestampFromClock($('fastStartTime').value);
+    state.fastExpectedEnd=expectedEndFromClocks(state.fastStart,$('fastEndTime').value);
     state.fasting=true;
-    state.fastStart=Date.now();
   } else {
     if(state.fastStart){
-      state.fastingLogs.push({id:uid(),date:localDateKey(new Date(state.fastStart)),start:state.fastStart,end:Date.now()});
+      state.fastingLogs.push({
+        id:uid(),
+        date:localDateKey(new Date(state.fastStart)),
+        start:state.fastStart,
+        end:Date.now(),
+        expectedEnd:state.fastExpectedEnd||null
+      });
     }
     state.fasting=false;
     state.fastStart=null;
+    state.fastExpectedEnd=null;
+    if($('fastStartTime'))$('fastStartTime').value='';
+    if($('fastEndTime'))$('fastEndTime').value='';
   }
-  update()
+  update();
 };
-$('saveFastSettings').onclick=()=>{state.fastHours=Math.min(Math.max(Number($('fastHours').value)||16,1),48);state.eatHours=Math.min(Math.max(Number($('eatHours').value)||8,1),23);update()};
+
+$('saveFastSettings').onclick=()=>{
+  state.fastHours=Math.min(Math.max(Number($('fastHours').value)||16,1),48);
+  state.eatHours=Math.min(Math.max(Number($('eatHours').value)||8,1),23);
+  if(state.fasting && state.fastStart){
+    state.fastStart=startTimestampFromClock($('fastStartTime').value);
+    state.fastExpectedEnd=expectedEndFromClocks(state.fastStart,$('fastEndTime').value);
+  }else{
+    calculateEndClockFromStart();
+  }
+  update();
+};
 $('saveCalSettings').onclick=()=>{state.goal=Math.min(Math.max(Number($('goalInput').value)||2000,800),6000);state.bankPercent=Number($('bankPercent').value)||0;update()};
 $('saveReminderSettings').onclick=()=>{state.reminders={breakfast:$('breakfastTime').value,lunch:$('lunchTime').value,dinner:$('dinnerTime').value,repeat:$('reminderRepeat').value};update()};
 $('resetAll').onclick=()=>{if(confirm('Reset all FitBank data on this device?')){state=JSON.parse(JSON.stringify(defaults));update()}};
@@ -1709,6 +1842,16 @@ if($('mealWeight'))$('mealWeight').addEventListener('input',autoCalculateFood);
 if($('mealWeightUnit'))$('mealWeightUnit').addEventListener('change',autoCalculateFood);
 
 
+// Keep fasting elapsed time live while the app is open.
+setInterval(()=>{
+  if(state.fasting){
+    try{
+      if(typeof renderFastingTimes==='function')renderFastingTimes();
+      if(typeof dashboardReady!=='undefined' && dashboardReady && typeof renderDashboard==='function')renderDashboard();
+    }catch(err){}
+  }
+},1000);
+
 // ---------- FitBank 3.0 widget dashboard ----------
 dashboardReady=true;
 
@@ -1821,10 +1964,11 @@ function renderDashboard(){
   if($('dashWaterBar'))$('dashWaterBar').style.width=Math.max(0,Math.min(100,(water/waterGoal)*100))+'%';
 
   if(key===todayKey() && state.fasting && state.fastStart){
-    const hrs=(Date.now()-state.fastStart)/3600000;
+    const hrs=Math.max(0,(Date.now()-state.fastStart)/3600000);
     const h=Math.floor(hrs),m=Math.floor((hrs-h)*60);
     $('dashFasting').textContent=`${h}:${String(m).padStart(2,'0')}`;
-    $('dashFastingSub').textContent=(state.fastHours||16)+' hr goal';
+    const endTs=state.fastExpectedEnd||state.fastStart+(Number(state.fastHours)||16)*3600000;
+    $('dashFastingSub').textContent='ends '+formatClock(endTs);
   }else{
     const f=(state.fastingLogs||[]).filter(x=>x.date===key).sort((a,b)=>(b.end||0)-(a.end||0))[0];
     if(f&&f.start&&f.end){
