@@ -58,6 +58,8 @@
 .habit-day-labels{display:grid;grid-template-columns:repeat(14,minmax(0,1fr));gap:4px;margin-top:5px}
 .habit-day-labels span{font-size:9px;color:var(--muted);text-align:center;overflow:hidden}
 
+
+.morning-options{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:12px}.morning-btn{padding:10px 3px;border:1px solid var(--border);border-radius:14px;background:transparent;color:var(--text);font-size:12px;min-width:0}.morning-btn .face{display:block;font-size:24px;margin-bottom:3px}.morning-btn.selected{border-color:#22c55e;box-shadow:inset 0 0 0 1px #22c55e}.habit-day.note{border-color:#22c55e!important;box-shadow:inset 0 0 0 1px #22c55e}.habit-history-grid{display:grid;grid-template-columns:repeat(14,minmax(0,1fr));gap:4px;margin-top:10px}.range-row{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px}.range-row .btn{white-space:nowrap;padding:9px 12px}.weight-form-stack{display:grid;grid-template-columns:1fr;gap:10px}.journey-message{padding:12px;border:1px solid var(--border);border-radius:14px;margin-top:12px;color:var(--muted)}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 
@@ -84,6 +86,8 @@
   .workout-grid{grid-template-columns:1fr 1fr}
   .set-log{grid-template-columns:38px 1fr 1fr 40px}
 }
+
+.morning-options{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:12px}.morning-btn{padding:10px 3px;border:1px solid var(--border);border-radius:14px;background:transparent;color:var(--text);font-size:12px;min-width:0}.morning-btn .face{display:block;font-size:24px;margin-bottom:3px}.morning-btn.selected{border-color:#22c55e;box-shadow:inset 0 0 0 1px #22c55e}.habit-day.note{border-color:#22c55e!important;box-shadow:inset 0 0 0 1px #22c55e}.habit-history-grid{display:grid;grid-template-columns:repeat(14,minmax(0,1fr));gap:4px;margin-top:10px}.range-row{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px}.range-row .btn{white-space:nowrap;padding:9px 12px}.weight-form-stack{display:grid;grid-template-columns:1fr;gap:10px}.journey-message{padding:12px;border:1px solid var(--border);border-radius:14px;margin-top:12px;color:var(--muted)}
 </style>
 
 
@@ -124,6 +128,8 @@
   .stat4,.weekly-report-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
   .quick-menu{grid-template-columns:repeat(5,minmax(0,1fr))}
 }
+
+.morning-options{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:12px}.morning-btn{padding:10px 3px;border:1px solid var(--border);border-radius:14px;background:transparent;color:var(--text);font-size:12px;min-width:0}.morning-btn .face{display:block;font-size:24px;margin-bottom:3px}.morning-btn.selected{border-color:#22c55e;box-shadow:inset 0 0 0 1px #22c55e}.habit-day.note{border-color:#22c55e!important;box-shadow:inset 0 0 0 1px #22c55e}.habit-history-grid{display:grid;grid-template-columns:repeat(14,minmax(0,1fr));gap:4px;margin-top:10px}.range-row{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px}.range-row .btn{white-space:nowrap;padding:9px 12px}.weight-form-stack{display:grid;grid-template-columns:1fr;gap:10px}.journey-message{padding:12px;border:1px solid var(--border);border-radius:14px;margin-top:12px;color:var(--muted)}
 </style>
 
 </head>
@@ -425,6 +431,12 @@
 
   <section id="habits" class="panel">
     <div class="card">
+      <div class="row"><div><strong>☀️ Morning check-in</strong><div class="muted">How did you wake up?</div></div><div id="morningTodayLabel" class="tiny">Today</div></div>
+      <div id="morningOptions" class="morning-options"></div>
+      <textarea id="morningNote" style="margin-top:10px" placeholder="Optional note — sleep, energy, how you feel..."></textarea>
+      <button id="saveMorning" class="btn" type="button" style="margin-top:8px">Save check-in</button>
+    </div>
+    <div class="card" style="margin-top:12px">
       <strong>Your habits</strong>
       <form id="habitForm" style="margin-top:12px">
         <input id="habitName" maxlength="60" placeholder="Add a new habit">
@@ -490,7 +502,7 @@
     </div>
 
     <form id="routineExerciseForm" style="margin-top:12px">
-      <input id="routineExerciseName" maxlength="80" placeholder="Exercise name, e.g. Squat">
+      <input id="routineExerciseName" list="routineExerciseSuggestions" maxlength="80" placeholder="Exercise name or choose from list"><datalist id="routineExerciseSuggestions"></datalist><div id="routineGroupHint" class="tiny" style="margin:-4px 0 8px">Suggestions match your routine group. You can still type anything.</div>
       <div class="grid grid2">
         <input id="routineSets" type="number" min="1" max="20" value="3" placeholder="Working sets">
         <input id="routineReps" type="text" value="8-10" placeholder="Target reps, e.g. 8-10">
@@ -579,8 +591,14 @@
   </div>
 
   <div class="card" style="margin-top:12px">
-    <strong>Habits</strong>
-    <div id="historyHabits" class="list"></div>
+    <strong>Habit history</strong>
+    <div class="muted">Review consistency and notes up to one year back.</div>
+    <div id="habitHistoryRanges" class="range-row" style="margin-top:12px"></div>
+    <select id="habitHistorySelect" style="margin-top:10px"></select>
+    <div id="habitHistoryStats" class="muted" style="margin-top:10px"></div>
+    <div id="habitHistoryGraph" style="margin-top:10px"></div>
+    <div id="habitHistoryNotes" class="list" style="margin-top:10px"></div>
+    <div style="display:none"><div id="historyHabits"></div></div>
   </div>
 </section>
 
@@ -598,7 +616,7 @@
     </div>
 
     <form id="weightForm" style="margin-top:12px">
-      <div class="grid grid2">
+      <div class="weight-form-stack">
         <input id="weightValue" type="number" min="50" max="1000" step="0.1" placeholder="Weight (lb)">
         <input id="weightDate" type="date">
       </div>
@@ -629,10 +647,12 @@
       <svg id="weightChart" viewBox="0 0 700 260" role="img" aria-label="Body weight trend chart" style="width:100%;min-width:560px;height:auto;display:block"></svg>
     </div>
 
-    <div id="weightJourneyStats" class="grid grid3" style="margin-top:12px">
+    <div id="journeyMessage" class="journey-message" style="display:none"></div>
+    <div id="weightJourneyStats" class="grid grid2" style="margin-top:12px">
       <div class="target-box"><div class="target-label">Starting</div><div id="journeyStart" class="target-value" style="font-size:20px">—</div></div>
       <div class="target-box"><div class="target-label">Current</div><div id="journeyCurrent" class="target-value" style="font-size:20px">—</div></div>
       <div class="target-box"><div class="target-label">Lowest</div><div id="journeyLow" class="target-value" style="font-size:20px">—</div></div>
+      <div class="target-box"><div class="target-label">Highest</div><div id="journeyHigh" class="target-value" style="font-size:20px">—</div></div>
     </div>
   </div>
 
@@ -712,7 +732,7 @@ const defaults={
   habits:[{id:1,name:'Drink water',done:false},{id:2,name:'Hit protein goal',done:false},{id:3,name:'No late-night snack',done:false}],
   exercises:[{id:1,name:'Walking'},{id:2,name:'Strength training'},{id:3,name:'Running'},{id:4,name:'Cardio'}],
   routines:[],
-  meals:[],workouts:[],waterOz:0,waterGoalOz:100,waterLastDate:null,waterLogs:[],weightLogs:[],weightGoalLb:0,fastingLogs:[],habitLogs:[],
+  meals:[],workouts:[],waterOz:0,waterGoalOz:100,waterLastDate:null,waterLogs:[],weightLogs:[],weightGoalLb:0,fastingLogs:[],habitLogs:[],morningLogs:[],
   reminders:{breakfast:'08:30',lunch:'12:30',dinner:'18:30',repeat:'60'}
 };
 let state=JSON.parse(JSON.stringify(defaults));
@@ -993,24 +1013,29 @@ function renderWeightJourney(){
   const startEl=$('journeyStart');
   const currentEl=$('journeyCurrent');
   const lowEl=$('journeyLow');
+  const highEl=$('journeyHigh');
+  const msgEl=$('journeyMessage');
 
   if(!logs.length){
     svg.innerHTML='<text x="350" y="130" text-anchor="middle" fill="currentColor" opacity=".6" font-size="16">Log your weight to start your journey graph</text>';
     changeEl.textContent='—';
     startEl.textContent='—';
     currentEl.textContent='—';
-    lowEl.textContent='—';
+    lowEl.textContent='—'; if(highEl)highEl.textContent='—'; if(msgEl)msgEl.style.display='none';
     return;
   }
 
   const first=Number(logs[0].weight);
   const last=Number(logs[logs.length-1].weight);
   const low=Math.min(...logs.map(x=>Number(x.weight)));
+  const high=Math.max(...logs.map(x=>Number(x.weight)));
   const change=last-first;
 
   startEl.textContent=first.toFixed(1)+' lb';
   currentEl.textContent=last.toFixed(1)+' lb';
   lowEl.textContent=low.toFixed(1)+' lb';
+  if(highEl)highEl.textContent=high.toFixed(1)+' lb';
+  if(msgEl){msgEl.style.display=logs.length===1?'block':'none';msgEl.textContent='Add another weigh-in to see your change and trend.';}
 
   if(change<0){
     changeEl.textContent=Math.abs(change).toFixed(1)+' lb lost';
@@ -2461,6 +2486,86 @@ if(b.id==='openDailyCalories'){
 
   // Initial sync for the current day.
   syncSelectedDateEverywhere();
+})();
+</script>
+
+
+<script>
+(function(){
+  // V4.5 additions: habit notes, morning check-in, long-range habit history, exercise suggestions.
+  state.habitLogs=Array.isArray(state.habitLogs)?state.habitLogs:[];
+  state.morningLogs=Array.isArray(state.morningLogs)?state.morningLogs:[];
+  let morningChoice='';
+  const moods=[['great','😄','Great'],['good','🙂','Good'],['okay','😐','Okay'],['tired','😴','Tired'],['rough','😩','Rough']];
+  function currentSelectedKey(){return (typeof selectedKey==='function')?selectedKey():todayKey();}
+  function habitLog(hid,date){return (state.habitLogs||[]).find(x=>x.habitId===hid&&x.date===date);}
+  function editHabitNote(habit,date){
+    let log=habitLog(habit.id,date);
+    const old=log&&log.note?log.note:'';
+    const note=prompt(`${habit.name} — ${prettyDate(date)}\n\nAdd or edit note:`,old);
+    if(note===null)return;
+    if(!log){log={id:uid(),habitId:habit.id,name:habit.name,date,done:false,note:''};state.habitLogs.push(log);}
+    log.note=note.trim(); save(); renderHabits(); renderHabitHistory();
+  }
+  function renderMorning(){
+    const wrap=$('morningOptions');if(!wrap)return;
+    const key=currentSelectedKey(), existing=(state.morningLogs||[]).find(x=>x.date===key);
+    morningChoice=existing?existing.mood:'';wrap.innerHTML='';
+    moods.forEach(([v,e,l])=>{const b=document.createElement('button');b.type='button';b.className='morning-btn'+(v===morningChoice?' selected':'');b.innerHTML=`<span class="face">${e}</span>${l}`;b.onclick=()=>{morningChoice=v;renderMorning();};wrap.append(b);});
+    $('morningNote').value=existing?.note||'';
+    $('morningTodayLabel').textContent=key===todayKey()?'Today':prettyDate(key);
+  }
+  if($('saveMorning'))$('saveMorning').onclick=()=>{
+    const key=currentSelectedKey();if(!morningChoice){alert('Choose how you woke up first.');return;}
+    let x=state.morningLogs.find(x=>x.date===key);if(!x){x={id:uid(),date:key};state.morningLogs.push(x);}
+    x.mood=morningChoice;x.note=$('morningNote').value.trim();save();renderMorning();renderHistory();
+  };
+
+  const oldRenderHabitTrends=renderHabitTrends;
+  renderHabitTrends=function(){
+    const wrap=$('habitTrendList'); if(!wrap)return; wrap.innerHTML='';
+    const anchor=selectedDateObj(); anchor.setHours(12,0,0,0);
+    (state.habits||[]).forEach(h=>{
+      const days=[];let completed=0,lastDone=null;
+      for(let i=13;i>=0;i--){const d=new Date(anchor);d.setDate(d.getDate()-i);const dk=localDateKey(d),log=habitLog(h.id,dk),done=!!log?.done;if(done){completed++;lastDone=d;}days.push({d,dk,done,note:log?.note||''});}
+      let lastText='No completions in the last 14 days';if(lastDone){const diff=Math.round((anchor-lastDone)/86400000);lastText=diff===0?'Completed today':diff===1?'Last completed yesterday':`Last completed ${diff} days ago`;}
+      const card=document.createElement('div');card.className='habit-trend-card';
+      const title=document.createElement('div');title.className='row';title.innerHTML='<div><div class="item-title"></div><div class="tiny"></div></div><div class="tiny"></div>';title.children[0].children[0].textContent=h.name;title.children[0].children[1].textContent=lastText;title.children[1].textContent=`${completed}/14 days`;
+      const graph=document.createElement('div');graph.className='habit-trend-grid';const labels=document.createElement('div');labels.className='habit-day-labels';
+      days.forEach(x=>{const b=document.createElement('button');b.type='button';b.className='habit-day'+(x.done?' done':'')+(x.note?' note':'');b.title=x.note||`${x.d.toLocaleDateString()} — ${x.done?'Completed':'Missed'}`;b.onclick=()=>editHabitNote(h,x.dk);graph.append(b);const lab=document.createElement('span');lab.textContent=x.d.toLocaleDateString(undefined,{weekday:'narrow'});labels.append(lab);});
+      card.append(title,graph,labels);wrap.append(card);
+    });
+  };
+
+  let habitHistoryRange=14;
+  function renderHabitHistory(){
+    const sel=$('habitHistorySelect'),ranges=$('habitHistoryRanges'),graph=$('habitHistoryGraph');if(!sel||!ranges||!graph)return;
+    const habits=state.habits||[];const cur=sel.value;ranges.innerHTML='';[14,30,60,120,240,365].forEach(n=>{const b=document.createElement('button');b.type='button';b.className='btn'+(n===habitHistoryRange?' primary':'');b.textContent=n+' days';b.onclick=()=>{habitHistoryRange=n;renderHabitHistory();};ranges.append(b);});
+    sel.innerHTML='';habits.forEach(h=>{const o=document.createElement('option');o.value=h.id;o.textContent=h.name;sel.append(o);});if(cur&&habits.some(h=>h.id===cur))sel.value=cur;sel.onchange=renderHabitHistory;
+    const h=habits.find(x=>x.id===sel.value)||habits[0];if(!h){$('habitHistoryStats').textContent='Add a habit to see history.';graph.innerHTML='';return;}
+    const anchor=new Date();anchor.setHours(12,0,0,0);const days=[];let done=0,last=null,notes=[];
+    for(let i=habitHistoryRange-1;i>=0;i--){const d=new Date(anchor);d.setDate(d.getDate()-i);const dk=localDateKey(d),log=habitLog(h.id,dk);if(log?.done){done++;last=d;}if(log?.note)notes.push({date:dk,note:log.note});days.push({d,dk,done:!!log?.done,note:log?.note||''});}
+    $('habitHistoryStats').textContent=`${done}/${habitHistoryRange} days • ${Math.round(done/habitHistoryRange*100)}% complete`+(last?` • Last completed ${prettyDate(localDateKey(last))}`:' • No completions');
+    graph.innerHTML='';const g=document.createElement('div');g.className='habit-history-grid';days.forEach(x=>{const b=document.createElement('button');b.type='button';b.className='habit-day'+(x.done?' done':'')+(x.note?' note':'');b.title=prettyDate(x.dk)+(x.note?' — '+x.note:'');b.onclick=()=>editHabitNote(h,x.dk);g.append(b);});graph.append(g);
+    const nw=$('habitHistoryNotes');nw.innerHTML='';notes.slice().reverse().forEach(n=>{const r=document.createElement('div');r.className='item';r.innerHTML=`<div><div class="item-title">${prettyDate(n.date)}</div><div class="tiny"></div></div>`;r.querySelector('.tiny').textContent=n.note;nw.append(r);});
+  }
+
+  const exerciseGroups={
+    legs:['Back Squat','Front Squat','Leg Press','Hack Squat','Romanian Deadlift','Deadlift','Walking Lunge','Reverse Lunge','Bulgarian Split Squat','Leg Extension','Hamstring Curl','Hip Thrust','Glute Bridge','Standing Calf Raise','Seated Calf Raise'],
+    chest:['Bench Press','Incline Bench Press','Decline Bench Press','Dumbbell Bench Press','Incline Dumbbell Press','Chest Press Machine','Cable Fly','Pec Deck','Push-Up','Dips'],
+    back:['Deadlift','Barbell Row','Dumbbell Row','Lat Pulldown','Pull-Up','Chin-Up','Seated Cable Row','Chest-Supported Row','T-Bar Row','Straight-Arm Pulldown'],
+    shoulders:['Overhead Press','Dumbbell Shoulder Press','Arnold Press','Lateral Raise','Front Raise','Rear Delt Fly','Face Pull','Upright Row'],
+    arms:['Barbell Curl','Dumbbell Curl','Hammer Curl','Preacher Curl','Cable Curl','Triceps Pushdown','Skull Crusher','Overhead Triceps Extension','Close-Grip Bench Press','Dips'],
+    core:['Plank','Side Plank','Crunch','Cable Crunch','Hanging Leg Raise','Ab Wheel','Russian Twist','Dead Bug','Pallof Press'],
+    full:['Squat','Deadlift','Bench Press','Overhead Press','Barbell Row','Pull-Up','Lunge','Push-Up','Farmer Carry','Kettlebell Swing']
+  };
+  function routineGroup(name){name=(name||'').toLowerCase();for(const g of Object.keys(exerciseGroups))if(name.includes(g))return g;if(name.includes('arm')||name.includes('bicep')||name.includes('tricep'))return'arms';if(name.includes('shoulder')||name.includes('delt'))return'shoulders';return'full';}
+  function updateExerciseSuggestions(){const r=(state.routines||[]).find(x=>x.id===activeRoutineId),dl=$('routineExerciseSuggestions');if(!dl)return;const g=routineGroup(r?.name);dl.innerHTML=exerciseGroups[g].map(x=>`<option value="${x}"></option>`).join('');if($('routineGroupHint'))$('routineGroupHint').textContent=`${g[0].toUpperCase()+g.slice(1)} suggestions — or type any exercise.`;}
+  const oldOpenRoutineBuilder=openRoutineBuilder;openRoutineBuilder=function(id){oldOpenRoutineBuilder(id);updateExerciseSuggestions();};
+
+  const oldRenderHistory=renderHistory;renderHistory=function(){oldRenderHistory();renderHabitHistory();};
+  const oldRenderHabits2=renderHabits;renderHabits=function(){oldRenderHabits2();renderMorning();};
+  renderMorning();renderHabitHistory();updateExerciseSuggestions();
 })();
 </script>
 
