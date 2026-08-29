@@ -149,7 +149,15 @@
     <div id="dashCaloriesLeft" class="hero-number">—</div>
     <div id="dashCalorieSub" class="muted" style="margin-top:6px">—</div>
     <div class="mini-progress"><div id="dashCalorieBar" style="width:0%"></div></div>
-    <div class="stat3">
+    <div style="margin-top:14px;text-align:left">
+      <div class="row">
+        <div class="muted">Protein</div>
+        <div id="dashProteinRemaining" style="font-weight:900">—</div>
+      </div>
+      <div class="mini-progress"><div id="dashProteinBar" style="width:0%"></div></div>
+      <div id="dashProteinSub" class="tiny" style="margin-top:5px">—</div>
+    </div>
+    <div class="stat3" style="opacity:.82">
       <div class="stat-box"><div class="k">Protein</div><div id="dashProtein" class="v">0g</div></div>
       <div class="stat-box"><div class="k">Carbs</div><div id="dashCarbs" class="v">0g</div></div>
       <div class="stat-box"><div class="k">Fat</div><div id="dashFat" class="v">0g</div></div>
@@ -313,6 +321,14 @@
         </div>
       </div>
       <div class="mini-progress"><div id="mealDayBar" style="width:0%"></div></div>
+      <div style="margin-top:14px">
+        <div class="row">
+          <div class="muted">Protein</div>
+          <div id="mealProteinRemaining" style="font-weight:900">—</div>
+        </div>
+        <div class="mini-progress"><div id="mealProteinBar" style="width:0%"></div></div>
+        <div id="mealProteinSub" class="tiny" style="margin-top:5px">—</div>
+      </div>
 
       <div class="stat3">
         <div class="stat-box"><div class="k">Protein</div><div id="mealDayProtein" class="v">0g</div></div>
@@ -632,7 +648,16 @@
       <div class="muted">All entries are saved on this device.</div>
       <button id="resetAll" class="btn danger" style="margin-top:10px">Reset all FitBank data</button>
     </div>
-  </section>
+  
+  <div class="card" style="margin-top:12px">
+    <strong>Protein goal</strong>
+    <div class="grid grid2" style="margin-top:10px">
+      <input id="proteinGoal" type="number" min="0" step="1" placeholder="Daily protein goal (g)">
+      <button id="saveProteinGoal" class="btn primary" type="button">Save goal</button>
+    </div>
+    <div class="tiny">Used for your Food and Home protein progress.</div>
+  </div>
+</section>
 </div>
 
 <div id="editModal" class="modal" aria-hidden="true">
@@ -675,6 +700,7 @@ function update(){
   state.habitLogs=Array.isArray(state.habitLogs)?state.habitLogs:[];
   state.dailyNotes=Array.isArray(state.dailyNotes)?state.dailyNotes:[];
   state.progressPhotos=Array.isArray(state.progressPhotos)?state.progressPhotos:[];
+  state.proteinGoal=Number(state.proteinGoal)||180;
   recalcEaten();
   const rem=state.goal-state.eaten;
   const bank=Math.max(state.priorBank + Math.max(rem,0)*(state.bankPercent/100),0);
@@ -1531,6 +1557,16 @@ if('serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js').the
 
 
 
+
+if($('proteinGoal')){
+  $('proteinGoal').value=Number(state.proteinGoal)||180;
+}
+if($('saveProteinGoal'))$('saveProteinGoal').onclick=()=>{
+  state.proteinGoal=Math.max(0,Number($('proteinGoal').value)||0);
+  save();
+  update();
+};
+
 // ---------- Built-in food nutrition lookup (per 100 g) ----------
 const FOOD_DB = {
   "white rice, cooked": {cal:130, protein:2.7, carbs:28.2, fat:0.3},
@@ -1616,6 +1652,11 @@ function renderMealDaySummary(key){
   $('mealDayProtein').textContent=Math.round(protein)+'g';
   $('mealDayCarbs').textContent=Math.round(carbs)+'g';
   $('mealDayFat').textContent=Math.round(fat)+'g';
+  const pGoal=Number(state.proteinGoal)||180;
+  const pLeft=Math.max(0,pGoal-protein);
+  if($('mealProteinRemaining'))$('mealProteinRemaining').textContent=Math.round(pLeft)+' g left';
+  if($('mealProteinBar'))$('mealProteinBar').style.width=Math.max(0,Math.min(100,(protein/pGoal)*100))+'%';
+  if($('mealProteinSub'))$('mealProteinSub').textContent=Math.round(protein)+' of '+Math.round(pGoal)+' g';
 }
 if($('mealDate')){
   $('mealDate').value=todayKey();
@@ -1715,6 +1756,11 @@ function renderDashboard(){
   $('dashProtein').textContent=Math.round(protein)+'g';
   $('dashCarbs').textContent=Math.round(carbs)+'g';
   $('dashFat').textContent=Math.round(fat)+'g';
+  const pGoal=Number(state.proteinGoal)||180;
+  const pLeft=Math.max(0,pGoal-protein);
+  if($('dashProteinRemaining'))$('dashProteinRemaining').textContent=Math.round(pLeft)+' g left';
+  if($('dashProteinBar'))$('dashProteinBar').style.width=Math.max(0,Math.min(100,(protein/pGoal)*100))+'%';
+  if($('dashProteinSub'))$('dashProteinSub').textContent=Math.round(protein)+' of '+Math.round(pGoal)+' g';
 
   // Reuse current weekly-bank math when available; fallback from week's calorie totals.
   const wk=weekDataForDate(d);
