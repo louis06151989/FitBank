@@ -71,6 +71,23 @@
 .chart-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px}.chart-head strong{font-size:18px}.chart-filter{width:auto;min-width:104px;padding:9px 10px}
 .fast-complete{border:1px solid var(--border);border-radius:18px;padding:16px;background:rgba(255,255,255,.01)}.fast-total{font-size:30px;font-weight:950;color:#22c55e;margin-top:8px}.fast-over{color:#22c55e;font-size:13px;margin-top:4px}.fast-pair{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}.fast-mini{border-top:1px solid var(--border);padding-top:10px}.fast-mini .v{font-weight:850;font-size:17px;margin-top:2px}.fast-week-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:12px}.fast-week-stat{border:1px solid var(--border);border-radius:14px;padding:12px}.fast-week-stat .k{font-size:11px;color:var(--muted)}.fast-week-stat .v{font-size:20px;font-weight:900;margin-top:4px}.fast-day-row{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;padding:11px 0;border-top:1px solid var(--border)}.fast-day-row:first-child{border-top:0}.fast-day-time{font-weight:800;text-align:right}.fast-day-sub{font-size:10px;color:var(--muted)}
 @media(max-width:420px){.journey-summary{gap:6px}.journey-stat{padding:12px 5px}.journey-stat .v{font-size:18px}.journey-stat .k{font-size:11px}.morning-options{gap:5px}.morning-btn .face{font-size:24px}}
+
+/* ---------- FitBank V5.0 full punch-list test build ---------- */
+.habit-day{appearance:none;padding:0;cursor:pointer;background:rgba(148,163,184,.08)!important;border:1px solid rgba(148,163,184,.18)!important}
+.habit-day.done{background:transparent!important;border-color:rgba(255,255,255,.9)!important;box-shadow:inset 0 0 0 1px rgba(255,255,255,.22)}
+.habit-day.note{background:transparent!important;border-color:#22c55e!important;box-shadow:inset 0 0 0 1px #22c55e!important}
+.habit-day.note.done{border-color:#22c55e!important}
+.habit-day.future{opacity:.3}
+.habit7{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-top:10px}
+.habit7-day{text-align:center;min-width:0}.habit7-label{font-size:9px;color:var(--muted);margin-bottom:5px}.habit7-dot{width:24px;height:24px;margin:0 auto;border-radius:50%;border:1px solid var(--border);display:grid;place-items:center;font-size:12px;color:var(--muted);background:rgba(255,255,255,.02)}.habit7-dot.done{border-color:#22c55e;color:#22c55e;background:rgba(34,197,94,.10)}.habit7-dot.full{background:#22c55e;color:#06130b;border-color:#22c55e;font-weight:900}
+.fast-edit{display:none;margin-top:14px;padding-top:14px;border-top:1px solid var(--border)}.fast-edit.open{display:block}.fast-edit-grid{display:grid;grid-template-columns:1fr;gap:10px}.fast-edit label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px}.fast-edit input{width:100%}.fast-action-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.fast-action-row .btn{flex:1;min-width:110px}
+.fast-week-nav{display:flex;gap:6px;align-items:center;justify-content:flex-end}.fast-week-nav .btn{padding:8px 10px}
+.label-scan-panel{display:none;margin-top:10px;padding:12px;border:1px solid var(--border);border-radius:14px;background:rgba(255,255,255,.015)}.label-scan-panel.open{display:block}.label-scan-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.label-scan-result{padding:10px;border:1px solid var(--border);border-radius:12px}.label-scan-result .k{font-size:11px;color:var(--muted)}.label-scan-result .v{font-size:18px;font-weight:900;margin-top:2px}.label-scan-preview{width:100%;max-height:230px;object-fit:contain;border-radius:12px;display:none;margin-top:10px;background:#0b1220}
+.group-row{display:grid;grid-template-columns:1fr;gap:8px;margin-bottom:8px}.group-row select{width:100%}
+.inline-note{font-size:11px;color:var(--muted);margin-top:5px}
+.fast-history-list .item{align-items:flex-start}
+@media(min-width:520px){.fast-edit-grid{grid-template-columns:1fr 1fr}.group-row{grid-template-columns:1fr 1fr}}
+
 </style>
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 
@@ -219,10 +236,16 @@
       <div style="font-size:24px">🔥</div><div class="dash-widget-title">Logging streak</div>
       <div id="dashStreak" class="dash-widget-value">0 days</div><div class="dash-widget-sub">days with food logged</div>
     </div>
-    <div class="dash-widget">
-      <div style="font-size:24px">🏆</div><div class="dash-widget-title">Latest PR</div>
-      <div id="dashPR" class="dash-widget-value">—</div><div id="dashPRSub" class="dash-widget-sub">no PRs yet</div>
-    </div>
+    <button id="dashHabitsWidget" class="dash-widget" type="button" data-open-tab="habits" style="text-align:left">
+      <div class="row" style="align-items:flex-start">
+        <div><div style="font-size:24px">✓</div><div class="dash-widget-title">Habits</div></div>
+        <div style="font-size:22px;color:#22c55e;font-weight:900" id="dashHabitsCount">0 of 0</div>
+      </div>
+      <div id="dashHabitsSub" class="dash-widget-sub">completed today</div>
+      <div id="dashHabits7" class="habit7" aria-label="7 day habit progress"></div>
+      <div id="dashHabitStreak" class="tiny" style="margin-top:9px">—</div>
+      <div style="display:none"><span id="dashPR"></span><span id="dashPRSub"></span></div>
+    </button>
   </div>
 
   <div class="card" style="margin-top:12px">
@@ -257,10 +280,7 @@
     </button>
   </div>
 
-  <div class="card" style="margin-top:12px">
-    <div class="row"><div><div class="muted">Habits</div><div id="dashHabitText" style="font-size:20px;font-weight:900;margin-top:2px">0 of 0 complete</div></div><div id="dashHabitPct" style="font-size:28px;font-weight:900">0%</div></div>
-    <div class="mini-progress"><div id="dashHabitBar" style="width:0%"></div></div>
-  </div>
+  <div style="display:none" aria-hidden="true"><span id="dashHabitText"></span><span id="dashHabitPct"></span><span id="dashHabitBar"></span></div>
 
   <div id="weeklyReportPanel" class="card quick-panel">
     <div class="row"><strong>Weekly report</strong><button class="btn" type="button" data-close-panel="weeklyReportPanel">Close</button></div>
@@ -364,7 +384,31 @@
         <div class="stat-box"><div class="k">Fat</div><div id="mealDayFat" class="v">0g</div></div>
       </div>
 
-      <strong style="display:block;margin-top:16px">Add meal</strong>
+      <div class="row" style="margin-top:16px">
+        <strong>Add meal</strong>
+        <button id="toggleLabelScan" class="btn" type="button">📷 Scan nutrition label</button>
+      </div>
+      <div id="labelScanPanel" class="label-scan-panel">
+        <div class="row"><div><strong>Nutrition label scan</strong><div class="tiny">Reads the label on this phone, then fills the food form.</div></div><button id="closeLabelScan" class="btn" type="button">Close</button></div>
+        <input id="labelPhoto" type="file" accept="image/*" capture="environment" style="margin-top:10px">
+        <img id="labelPreview" class="label-scan-preview" alt="Nutrition label preview">
+        <button id="readNutritionLabel" class="btn primary" type="button" style="margin-top:10px;width:100%">Read nutrition label</button>
+        <div id="labelScanStatus" class="muted" style="margin-top:8px"></div>
+        <div id="labelScanResults" style="display:none;margin-top:10px">
+          <div class="label-scan-grid">
+            <div class="label-scan-result"><div class="k">Calories / serving</div><div class="v" id="scanCalories">—</div></div>
+            <div class="label-scan-result"><div class="k">Protein</div><div class="v" id="scanProtein">—</div></div>
+            <div class="label-scan-result"><div class="k">Carbs</div><div class="v" id="scanCarbs">—</div></div>
+            <div class="label-scan-result"><div class="k">Fat</div><div class="v" id="scanFat">—</div></div>
+          </div>
+          <div class="grid grid2" style="margin-top:10px">
+            <div><label class="tiny">Serving size from label</label><input id="scanServingSize" placeholder="e.g. 28 g"></div>
+            <div><label class="tiny">Servings you ate</label><input id="scanServingsEaten" type="number" min="0.1" max="50" step="0.1" value="1"></div>
+          </div>
+          <button id="applyNutritionLabel" class="btn primary" type="button" style="width:100%;margin-top:10px">Use these numbers</button>
+          <div class="tiny" style="margin-top:7px">Check the numbers before saving. Label OCR can misread small print.</div>
+        </div>
+      </div>
       <form id="mealForm" style="margin-top:12px">
         <label class="tiny" for="mealDate">Date</label>
         <input id="mealDate" type="date">
@@ -425,10 +469,19 @@
         <div class="fast-mini"><div class="tiny">Ended</div><div class="v" id="todayFastEnded">—</div><div class="tiny" id="todayFastEndedDate"></div></div>
       </div>
       <div class="tiny" id="todayFastGoal" style="margin-top:12px"></div>
+      <button id="editCompletedFast" class="btn" type="button" style="width:100%;margin-top:12px">✎ Edit fast</button>
+      <div id="fastEditPanel" class="fast-edit">
+        <div class="fast-edit-grid">
+          <div><label>Actual start date & time</label><input id="editFastStart" type="datetime-local"></div>
+          <div><label>Actual end date & time</label><input id="editFastEnd" type="datetime-local"></div>
+        </div>
+        <div id="fastEditError" class="tiny" style="margin-top:7px;color:#fca5a5"></div>
+        <div class="fast-action-row"><button id="saveFastEdit" class="btn primary" type="button">Save changes</button><button id="cancelFastEdit" class="btn" type="button">Cancel</button></div>
+      </div>
     </div>
 
     <div class="card" style="margin-top:12px">
-      <div class="row"><div><strong>Weekly fasting report</strong><div class="muted" id="fastWeekLabel">This week</div></div></div>
+      <div class="row"><div><strong>Weekly fasting report</strong><div class="muted" id="fastWeekLabel">This week</div></div><div class="fast-week-nav"><button id="fastPrevWeek" class="btn" type="button">←</button><button id="fastThisWeek" class="btn" type="button">Today</button><button id="fastNextWeek" class="btn" type="button">→</button></div></div>
       <div class="fast-week-grid">
         <div class="fast-week-stat"><div class="k">Average fast</div><div class="v" id="fastWeekAvg">—</div></div>
         <div class="fast-week-stat"><div class="k">Total fasted</div><div class="v" id="fastWeekTotal">—</div></div>
@@ -436,6 +489,11 @@
         <div class="fast-week-stat"><div class="k">Goal achieved</div><div class="v" id="fastWeekGoals">—</div></div>
       </div>
       <div id="fastWeekDays" style="margin-top:12px"></div>
+    </div>
+
+    <div class="card" style="margin-top:12px">
+      <div class="row"><div><strong>Fast history</strong><div class="muted">Your completed fasts stay editable.</div></div><button id="toggleFastHistory" class="btn" type="button">View</button></div>
+      <div id="fastHistoryList" class="list fast-history-list" style="display:none;margin-top:10px"></div>
     </div>
 
     <div class="card" style="margin-top:12px">
@@ -539,7 +597,8 @@
     </div>
 
     <form id="routineExerciseForm" style="margin-top:12px">
-      <input id="routineExerciseName" list="routineExerciseSuggestions" maxlength="80" placeholder="Exercise name or choose from list"><datalist id="routineExerciseSuggestions"></datalist><div id="routineGroupHint" class="tiny" style="margin:-4px 0 8px">Suggestions match your routine group. You can still type anything.</div>
+      <div class="group-row"><select id="routineMuscleGroup"><option value="legs">Legs</option><option value="chest">Chest</option><option value="back">Back</option><option value="shoulders">Shoulders</option><option value="arms">Arms</option><option value="core">Core</option><option value="full">Full Body</option></select><div id="routineGroupHint" class="tiny" style="align-self:center">Choose a muscle group for suggestions, or type any exercise.</div></div>
+      <input id="routineExerciseName" list="routineExerciseSuggestions" maxlength="80" placeholder="Exercise name or choose from list"><datalist id="routineExerciseSuggestions"></datalist>
       <div class="grid grid2">
         <input id="routineSets" type="number" min="1" max="20" value="3" placeholder="Working sets">
         <input id="routineReps" type="text" value="8-10" placeholder="Target reps, e.g. 8-10">
@@ -637,6 +696,14 @@
     <div id="habitHistoryNotes" class="list" style="margin-top:10px"></div>
     <div style="display:none"><div id="historyHabits"></div></div>
   </div>
+
+  <div class="card" style="margin-top:12px">
+    <strong>Morning check-in history</strong>
+    <div class="muted">See how your energy and mornings have been trending.</div>
+    <div id="morningHistoryRanges" class="range-row" style="margin-top:12px"></div>
+    <div id="morningHistorySummary" class="weekly-report-grid" style="margin-top:10px"></div>
+    <div id="morningHistoryList" class="list" style="margin-top:10px"></div>
+  </div>
 </section>
 
 <section id="weight" class="panel">
@@ -703,6 +770,7 @@
     <div class="card" style="margin-top:12px">
       <strong>Data</strong>
       <div class="muted">All entries are saved on this device.</div>
+      <div class="tiny" style="margin-top:6px">FitBank V5.0 • Full punch-list test build</div>
       <button id="resetAll" class="btn danger" style="margin-top:10px">Reset all FitBank data</button>
     </div>
   
@@ -934,7 +1002,8 @@ function inWeek(dateStr,range){
   return dateStr>=range.startKey && dateStr<=range.endKey;
 }
 function prettyDate(d){
-  return d.toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'});
+  const x=d instanceof Date?d:new Date(String(d).length===10?String(d)+'T12:00:00':d);
+  return Number.isFinite(x.getTime())?x.toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'}):String(d||'');
 }
 function renderHistoryList(id,items,emptyText){
   const wrap=$(id); if(!wrap)return;
@@ -2504,6 +2573,12 @@ if(b.id==='openDailyCalories'){
     });
   };
 
+  // Expose date helpers used by later FitBank feature layers.
+  window.selectedKey=selectedKey;
+  window.selectedDateObj=selectedDateObj;
+  window.renderHabitTrends=renderHabitTrends;
+  window.syncSelectedDateEverywhere=syncSelectedDateEverywhere;
+
   // Initial sync for the current day.
   syncSelectedDateEverywhere();
 })();
@@ -2633,5 +2708,159 @@ if(b.id==='openDailyCalories'){
   renderCompletedFastUI();renderFastingWeeklyReport();
 })();
 </script>
+
+<script>
+// ---------- FitBank V5.0 full punch-list behavior ----------
+(function(){
+  const $v=id=>document.getElementById(id);
+  const clamp=(n,a,b)=>Math.min(b,Math.max(a,Number(n)||0));
+  function keyForDate(d){return localDateKey(d)}
+  function dateAtNoon(key){return new Date(key+'T12:00:00')}
+  function isoLocalDateTime(ts){
+    const d=new Date(ts),p=n=>String(n).padStart(2,'0');
+    return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`;
+  }
+  function parseLocalDateTime(v){const d=new Date(v);return Number.isFinite(d.getTime())?d.getTime():0;}
+  function fmtDurV5(ms){const mins=Math.max(0,Math.round((Number(ms)||0)/60000)),h=Math.floor(mins/60),m=mins%60;return h+'h '+String(m).padStart(2,'0')+'m';}
+  function selectedDashKey(){return typeof dashKey==='function'?dashKey():todayKey()}
+  function selectedDashDate(){return typeof dashDate==='function'?dashDate():new Date()}
+
+  // Correct weekly bank semantics: only unused calories from completed days roll forward.
+  function earnedBankForDate(anchor){
+    const goal=Number(state.goal)||2000,pct=(Number(state.bankPercent??100)||0)/100,start=startOfWeek(anchor);
+    const anchorKey=keyForDate(anchor),today=todayKey();
+    let through=new Date(anchor); through.setHours(12,0,0,0);
+    // Today's remaining calories are not "earned" yet. Past selected dates count through that day.
+    if(anchorKey>=today) through.setDate(through.getDate()-1);
+    let total=0;
+    for(let d=new Date(start);d<=through;d.setDate(d.getDate()+1)){
+      const k=keyForDate(d),eaten=(state.meals||[]).filter(m=>m.date===k).reduce((a,m)=>a+(Number(m.cal)||0),0);
+      total+=Math.max(0,goal-eaten)*pct;
+    }
+    return Math.round(total);
+  }
+
+  // Home Habits widget: selected-day count + rolling 7-day view + full-day streak.
+  function habitCountFor(key){const total=(state.habits||[]).length,done=(state.habits||[]).filter(h=>habitDoneOnDate(h.id,key)).length;return {done,total};}
+  function habitFullDayStreak(anchor){
+    const total=(state.habits||[]).length;if(!total)return 0;let n=0,d=new Date(anchor);d.setHours(12,0,0,0);
+    while(n<365){const c=habitCountFor(keyForDate(d));if(c.done!==total)break;n++;d.setDate(d.getDate()-1);}return n;
+  }
+  function renderHomeHabitsV5(){
+    const box=$v('dashHabits7');if(!box)return;const anchor=selectedDashDate(),key=keyForDate(anchor),c=habitCountFor(key);
+    $v('dashHabitsCount').textContent=`${c.done} of ${c.total}`;$v('dashHabitsSub').textContent=key===todayKey()?'completed today':'completed this day';
+    box.innerHTML='';
+    for(let i=6;i>=0;i--){const d=new Date(anchor);d.setDate(d.getDate()-i);const k=keyForDate(d),x=habitCountFor(k),wrap=document.createElement('div');wrap.className='habit7-day';
+      const lab=document.createElement('div');lab.className='habit7-label';lab.textContent=d.toLocaleDateString(undefined,{weekday:'narrow'});
+      const dot=document.createElement('div');dot.className='habit7-dot'+(x.done?' done':'')+(x.total&&x.done===x.total?' full':'');dot.textContent=x.total?x.done:'';dot.title=`${prettyDate(k)} — ${x.done}/${x.total} habits`;
+      wrap.append(lab,dot);box.append(wrap);
+    }
+    const streak=habitFullDayStreak(anchor);$v('dashHabitStreak').textContent=streak?`${streak} day full-completion streak 🔥`:'Build your streak today';
+  }
+  const baseDashboard=window.renderDashboard;
+  if(typeof baseDashboard==='function'){
+    window.renderDashboard=function(){baseDashboard();try{$v('dashBank').textContent='+'+earnedBankForDate(selectedDashDate()).toLocaleString()+' cal';renderHomeHabitsV5();}catch(e){console.error('V5 dashboard',e)}};
+  }
+  if($v('dashHabitsWidget'))$v('dashHabitsWidget').addEventListener('click',()=>show('habits'));
+
+  // Richer habit history stats including current streak and longest missed stretch.
+  function habitHistoryStatsV5(h,range){
+    const anchor=new Date();anchor.setHours(12,0,0,0);let done=0,last=null,current=0,longestMiss=0,miss=0;const days=[];
+    for(let i=range-1;i>=0;i--){const d=new Date(anchor);d.setDate(d.getDate()-i);const k=keyForDate(d),yes=habitDoneOnDate(h.id,k);days.push(yes);if(yes){done++;last=d;miss=0}else{miss++;longestMiss=Math.max(longestMiss,miss)}}
+    for(let i=days.length-1;i>=0&&days[i];i--)current++;
+    return {done,last,current,longestMiss,pct:range?Math.round(done/range*100):0};
+  }
+  const historyObserver=new MutationObserver(()=>{
+    const sel=$v('habitHistorySelect'),stats=$v('habitHistoryStats');if(!sel||!stats||!sel.value)return;const h=(state.habits||[]).find(x=>String(x.id)===String(sel.value));if(!h)return;
+    let range=14;const active=[...document.querySelectorAll('#habitHistoryRanges .btn.primary')][0];if(active){range=parseInt(active.textContent)||14}const x=habitHistoryStatsV5(h,range);
+    const next=`${x.done}/${range} days • ${x.pct}% complete • Current streak ${x.current} day${x.current===1?'':'s'} • Longest missed stretch ${x.longestMiss} day${x.longestMiss===1?'':'s'}`+(x.last?` • Last completed ${prettyDate(keyForDate(x.last))}`:' • No completions');if(stats.textContent!==next)stats.textContent=next;
+  });
+  if($v('habitHistoryStats'))historyObserver.observe($v('habitHistoryStats'),{childList:true,characterData:true,subtree:true});
+
+  // Fasting: completed-fast editing + week navigation + history.
+  let activeFastId=null,fastWeekOffsetV5=0;
+  function fastDayKey(f){return f&&f.end?keyForDate(new Date(f.end)):(f?.date||'')}
+  function completedFastForSelected(){const key=selectedDashKey();return [...(state.fastingLogs||[])].filter(f=>f?.start&&f?.end&&(fastDayKey(f)===key||f.date===key)).sort((a,b)=>b.end-a.end)[0]||null;}
+  function openFastEditor(f){if(!f)return;activeFastId=f.id;$v('editFastStart').value=isoLocalDateTime(f.start);$v('editFastEnd').value=isoLocalDateTime(f.end);$v('fastEditError').textContent='';$v('fastEditPanel').classList.add('open');}
+  if($v('editCompletedFast'))$v('editCompletedFast').onclick=()=>openFastEditor(completedFastForSelected());
+  // The visible active-fast times are tappable shortcuts to the editable time fields below.
+  if($v('fastStartedLine')){$v('fastStartedLine').style.cursor='pointer';$v('fastStartedLine').title='Tap to edit start time';$v('fastStartedLine').onclick=()=>{$v('fastStartTime')?.scrollIntoView({behavior:'smooth',block:'center'});setTimeout(()=>$v('fastStartTime')?.focus(),250)}}
+  if($v('fastEndsLine')){$v('fastEndsLine').style.cursor='pointer';$v('fastEndsLine').title='Tap to edit expected end time';$v('fastEndsLine').onclick=()=>{$v('fastEndTime')?.scrollIntoView({behavior:'smooth',block:'center'});setTimeout(()=>$v('fastEndTime')?.focus(),250)}}
+  if($v('cancelFastEdit'))$v('cancelFastEdit').onclick=()=>{$v('fastEditPanel').classList.remove('open');activeFastId=null;};
+  if($v('saveFastEdit'))$v('saveFastEdit').onclick=()=>{
+    const f=(state.fastingLogs||[]).find(x=>x.id===activeFastId);if(!f)return;const start=parseLocalDateTime($v('editFastStart').value),end=parseLocalDateTime($v('editFastEnd').value);
+    if(!start||!end||end<=start){$v('fastEditError').textContent='End time must be after the start time.';return;}
+    f.start=start;f.end=end;f.date=keyForDate(new Date(start));f.expectedEnd=start+(Number(state.fastHours)||16)*3600000;save();$v('fastEditPanel').classList.remove('open');activeFastId=null;renderCompletedFastUI();renderFastingWeeklyReport();renderFastHistory();renderDashboard();renderHistory();
+  };
+
+  window.renderCompletedFastUI=function(){
+    const card=$v('todayFastCard'),f=completedFastForSelected();if(!card)return;if(!f){card.style.display='none';return;}card.style.display='block';
+    const dur=f.end-f.start,goal=(Number(state.fastHours)||16)*3600000,diff=dur-goal;$v('todayFastDuration').textContent=fmtDurV5(dur);$v('todayFastStarted').textContent=formatClock(f.start);$v('todayFastEnded').textContent=formatClock(f.end);$v('todayFastStartedDate').textContent=new Date(f.start).toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'});$v('todayFastEndedDate').textContent=new Date(f.end).toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'});$v('todayFastGoal').textContent='Goal: '+(Number(state.fastHours)||16)+'h';$v('todayFastOver').textContent=diff>=0?'✓ +'+fmtDurV5(diff)+' over goal':fmtDurV5(Math.abs(diff))+' under goal';$v('todayFastOver').style.color=diff>=0?'#22c55e':'var(--muted)';
+  };
+  window.renderFastingWeeklyReport=function(){
+    const box=$v('fastWeekDays');if(!box)return;const anchor=selectedDashDate();anchor.setDate(anchor.getDate()+fastWeekOffsetV5*7);const start=startOfWeek(anchor),end=new Date(start);end.setDate(end.getDate()+6),goal=(Number(state.fastHours)||16)*3600000;
+    const by={};(state.fastingLogs||[]).filter(f=>f?.start&&f?.end).forEach(f=>{const k=fastDayKey(f),d=dateAtNoon(k);if(d>=start&&d<=end){const ms=f.end-f.start;if(!by[k]||ms>by[k].ms)by[k]={...f,ms}}});
+    const vals=Object.values(by),total=vals.reduce((a,f)=>a+f.ms,0),avg=vals.length?total/vals.length:0,longest=vals.length?Math.max(...vals.map(f=>f.ms)):0,goals=vals.filter(f=>f.ms>=goal).length;
+    $v('fastWeekAvg').textContent=vals.length?fmtDurV5(avg):'—';$v('fastWeekTotal').textContent=vals.length?fmtDurV5(total):'—';$v('fastWeekLongest').textContent=vals.length?fmtDurV5(longest):'—';$v('fastWeekGoals').textContent=goals+' / 7';$v('fastWeekLabel').textContent=start.toLocaleDateString(undefined,{month:'short',day:'numeric'})+' – '+end.toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'});
+    box.innerHTML='';for(let i=0;i<7;i++){const d=new Date(start);d.setDate(d.getDate()+i);const k=keyForDate(d),f=by[k],row=document.createElement('div');row.className='fast-day-row';const left=document.createElement('div');left.textContent=d.toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric'});const right=document.createElement('div');right.className='fast-day-time';if(f){const diff=f.ms-goal;right.innerHTML=`<div>${fmtDurV5(f.ms)}</div><div class="fast-day-sub">${diff>=0?'Goal met • +'+fmtDurV5(diff):fmtDurV5(Math.abs(diff))+' under goal'}</div>`;}else right.innerHTML='<div>—</div><div class="fast-day-sub">No fast</div>';row.append(left,right);box.append(row)}
+  };
+  if($v('fastPrevWeek'))$v('fastPrevWeek').onclick=()=>{fastWeekOffsetV5--;renderFastingWeeklyReport()};if($v('fastNextWeek'))$v('fastNextWeek').onclick=()=>{fastWeekOffsetV5++;renderFastingWeeklyReport()};if($v('fastThisWeek'))$v('fastThisWeek').onclick=()=>{fastWeekOffsetV5=0;renderFastingWeeklyReport()};
+  function renderFastHistory(){const wrap=$v('fastHistoryList');if(!wrap)return;wrap.innerHTML='';const logs=[...(state.fastingLogs||[])].filter(f=>f?.start&&f?.end).sort((a,b)=>b.end-a.end);if(!logs.length){wrap.innerHTML='<div class="muted">No completed fasts yet.</div>';return;}logs.slice(0,60).forEach(f=>{const row=document.createElement('div');row.className='item';const main=document.createElement('div');main.className='item-main';main.innerHTML='<div class="item-title"></div><div class="tiny"></div>';main.children[0].textContent=fmtDurV5(f.end-f.start)+' • '+prettyDate(fastDayKey(f));main.children[1].textContent=`${formatClock(f.start)} → ${formatClock(f.end)}`;const b=document.createElement('button');b.className='btn';b.type='button';b.textContent='Edit';b.onclick=()=>{openFastEditor(f);$v('todayFastCard').style.display='block';$v('todayFastCard').scrollIntoView({behavior:'smooth',block:'start'})};row.append(main,b);wrap.append(row)});}
+  if($v('toggleFastHistory'))$v('toggleFastHistory').onclick=()=>{const w=$v('fastHistoryList'),open=w.style.display!=='none';w.style.display=open?'none':'block';$v('toggleFastHistory').textContent=open?'View':'Hide';if(!open)renderFastHistory()};
+
+  // Exercise suggestions: explicit group selector + custom text remains allowed.
+  const groups={
+    legs:['Back Squat','Front Squat','Leg Press','Hack Squat','Romanian Deadlift','Deadlift','Walking Lunge','Reverse Lunge','Bulgarian Split Squat','Leg Extension','Hamstring Curl','Hip Thrust','Glute Bridge','Standing Calf Raise','Seated Calf Raise'],
+    chest:['Bench Press','Incline Bench Press','Decline Bench Press','Dumbbell Bench Press','Incline Dumbbell Press','Chest Press Machine','Cable Fly','Pec Deck','Push-Up','Dips'],
+    back:['Deadlift','Barbell Row','Dumbbell Row','Lat Pulldown','Pull-Up','Chin-Up','Seated Cable Row','Chest-Supported Row','T-Bar Row','Straight-Arm Pulldown'],
+    shoulders:['Overhead Press','Dumbbell Shoulder Press','Arnold Press','Lateral Raise','Front Raise','Rear Delt Fly','Face Pull','Upright Row'],
+    arms:['Barbell Curl','Dumbbell Curl','Hammer Curl','Preacher Curl','Cable Curl','Triceps Pushdown','Skull Crusher','Overhead Triceps Extension','Close-Grip Bench Press','Dips'],
+    core:['Plank','Side Plank','Crunch','Cable Crunch','Hanging Leg Raise','Ab Wheel','Russian Twist','Dead Bug','Pallof Press'],
+    full:['Squat','Deadlift','Bench Press','Overhead Press','Barbell Row','Pull-Up','Lunge','Push-Up','Farmer Carry','Kettlebell Swing']
+  };
+  function guessedGroup(name){name=(name||'').toLowerCase();if(/leg|lower/.test(name))return'legs';if(/chest|push/.test(name))return'chest';if(/back|pull/.test(name))return'back';if(/shoulder|delt/.test(name))return'shoulders';if(/arm|bicep|tricep/.test(name))return'arms';if(/core|ab/.test(name))return'core';return'full'}
+  function fillGroup(){const g=$v('routineMuscleGroup')?.value||'full',dl=$v('routineExerciseSuggestions');if(dl)dl.innerHTML=(groups[g]||groups.full).map(x=>`<option value="${x}"></option>`).join('');if($v('routineGroupHint'))$v('routineGroupHint').textContent=(g==='full'?'Full Body':g[0].toUpperCase()+g.slice(1))+' suggestions — or type any exercise.';}
+  if($v('routineMuscleGroup'))$v('routineMuscleGroup').onchange=fillGroup;
+  const baseOpenRoutine=window.openRoutineBuilder;if(typeof baseOpenRoutine==='function'){window.openRoutineBuilder=function(id){baseOpenRoutine(id);const r=(state.routines||[]).find(x=>x.id===id);if($v('routineMuscleGroup'))$v('routineMuscleGroup').value=r?.group||guessedGroup(r?.name);fillGroup();}};
+  if($v('routineExerciseForm'))$v('routineExerciseForm').addEventListener('submit',()=>{const r=(state.routines||[]).find(x=>x.id===activeRoutineId);if(r){r.group=$v('routineMuscleGroup')?.value||r.group||'full';save()}},true);
+  fillGroup();
+
+  // Nutrition-label OCR. Runs locally with the Tesseract library already used by workout import.
+  let scanned={cal:0,protein:0,carbs:0,fat:0,serving:''};
+  function numberAfter(text,re){const m=text.match(re);return m?Number(String(m[1]).replace(',','.'))||0:0}
+  function parseLabel(text){
+    const cleaned=(text||'').replace(/\r/g,' '),lines=cleaned.split('\n').map(x=>x.trim()).filter(Boolean),joined=lines.join(' ');
+    let cal=numberAfter(joined,/calories?\s*[:\-]?\s*(\d{1,4})/i);if(!cal){const line=lines.find(x=>/^calories/i.test(x));if(line)cal=Number((line.match(/\d{1,4}/)||[])[0])||0}
+    const protein=numberAfter(joined,/protein\s*[:\-]?\s*(\d+(?:[\.,]\d+)?)\s*g/i),carbs=numberAfter(joined,/(?:total\s+)?carbohydrate\s*[:\-]?\s*(\d+(?:[\.,]\d+)?)\s*g/i),fat=numberAfter(joined,/(?:total\s+)?fat\s*[:\-]?\s*(\d+(?:[\.,]\d+)?)\s*g/i);
+    const sm=joined.match(/serving\s+size\s*[:\-]?\s*([^%]{1,45}?)(?=calories|amount\s+per|servings\s+per|$)/i);return {cal,protein,carbs,fat,serving:sm?sm[1].trim():''};
+  }
+  if($v('toggleLabelScan'))$v('toggleLabelScan').onclick=()=>{$v('labelScanPanel').classList.add('open')};if($v('closeLabelScan'))$v('closeLabelScan').onclick=()=>{$v('labelScanPanel').classList.remove('open')};
+  if($v('labelPhoto'))$v('labelPhoto').onchange=()=>{const f=$v('labelPhoto').files?.[0];if(!f)return;$v('labelPreview').src=URL.createObjectURL(f);$v('labelPreview').style.display='block';$v('labelScanStatus').textContent='Ready to read label.'};
+  if($v('readNutritionLabel'))$v('readNutritionLabel').onclick=async()=>{const f=$v('labelPhoto').files?.[0];if(!f){$v('labelScanStatus').textContent='Take or choose a nutrition-label photo first.';return}if(!window.Tesseract){$v('labelScanStatus').textContent='Label reader could not load. Check your internet connection.';return}
+    $v('readNutritionLabel').disabled=true;$v('labelScanStatus').textContent='Reading nutrition label…';try{const result=await Tesseract.recognize(f,'eng',{logger:m=>{if(m.status==='recognizing text')$v('labelScanStatus').textContent='Reading label… '+Math.round((m.progress||0)*100)+'%'}});scanned=parseLabel(result?.data?.text||'');$v('scanCalories').textContent=scanned.cal||'—';$v('scanProtein').textContent=scanned.protein?scanned.protein+'g':'—';$v('scanCarbs').textContent=scanned.carbs?scanned.carbs+'g':'—';$v('scanFat').textContent=scanned.fat?scanned.fat+'g':'—';$v('scanServingSize').value=scanned.serving;$v('labelScanResults').style.display='block';$v('labelScanStatus').textContent=(scanned.cal||scanned.protein||scanned.carbs||scanned.fat)?'Label read. Check the numbers below.':'I could not confidently find the nutrition numbers. Try a closer, straight-on photo.';}catch(e){console.error(e);$v('labelScanStatus').textContent='Could not read that label. Try a clearer photo.'}finally{$v('readNutritionLabel').disabled=false}};
+  if($v('applyNutritionLabel'))$v('applyNutritionLabel').onclick=()=>{const n=clamp($v('scanServingsEaten').value||1,.1,50);$v('mealCal').value=Math.round((scanned.cal||0)*n)||'';$v('mealProtein').value=((scanned.protein||0)*n).toFixed(1);$v('mealCarbs').value=((scanned.carbs||0)*n).toFixed(1);$v('mealFat').value=((scanned.fat||0)*n).toFixed(1);if(!$v('mealName').value)$v('mealName').value='Scanned food';$v('foodAutoCalcHint').textContent=`Nutrition label • ${n} serving${n===1?'':'s'}${scanned.serving?' • '+scanned.serving+' each':''}. Check before adding.`;$v('labelScanPanel').classList.remove('open');$v('mealName').scrollIntoView({behavior:'smooth',block:'center'})};
+
+  // Refresh dependent V5 views whenever an ordinary app update occurs.
+  const baseUpdate=window.update;if(typeof baseUpdate==='function'){window.update=function(){baseUpdate();try{renderHomeHabitsV5();renderCompletedFastUI();renderFastingWeeklyReport();renderFastHistory()}catch(e){console.error('V5 update refresh',e)}};}
+
+  // Morning check-in history and mood trend ranges.
+  let morningHistoryRangeV5=30;
+  function renderMorningHistoryV5(){
+    const ranges=$v('morningHistoryRanges'),sum=$v('morningHistorySummary'),list=$v('morningHistoryList');if(!ranges||!sum||!list)return;
+    ranges.innerHTML='';[14,30,60,120,240,365].forEach(n=>{const b=document.createElement('button');b.type='button';b.className='btn'+(n===morningHistoryRangeV5?' primary':'');b.textContent=n+' days';b.onclick=()=>{morningHistoryRangeV5=n;renderMorningHistoryV5()};ranges.append(b)});
+    const end=new Date();end.setHours(12,0,0,0);const start=new Date(end);start.setDate(start.getDate()-morningHistoryRangeV5+1);const sk=keyForDate(start),ek=keyForDate(end),rows=[...(state.morningLogs||[])].filter(x=>x.date>=sk&&x.date<=ek).sort((a,b)=>b.date.localeCompare(a.date));
+    const meta={great:['😄','Great'],good:['🙂','Good'],okay:['😐','Okay'],tired:['😴','Tired'],rough:['😩','Rough']};const counts={great:0,good:0,okay:0,tired:0,rough:0};rows.forEach(x=>{if(counts[x.mood]!==undefined)counts[x.mood]++});
+    sum.innerHTML=Object.entries(meta).map(([k,v])=>`<div class="stat-box"><div class="k">${v[0]} ${v[1]}</div><div class="v">${counts[k]}</div></div>`).join('');
+    list.innerHTML='';if(!rows.length){list.innerHTML='<div class="muted">No morning check-ins in this range.</div>';return}rows.slice(0,40).forEach(x=>{const row=document.createElement('div');row.className='item';const main=document.createElement('div');main.className='item-main';const m=meta[x.mood]||['•',x.mood||'Check-in'];main.innerHTML='<div class="item-title"></div><div class="tiny"></div>';main.children[0].textContent=`${m[0]} ${m[1]} • ${prettyDate(x.date)}`;main.children[1].textContent=x.note||'No note';row.append(main);list.append(row)});
+  }
+
+  // Rebuild weekly-report "bank" using rollover calories rather than untouched future-day budgets.
+  window.renderWeeklyReport=function(){const wk=weekDataForDate(new Date()),bank=earnedBankForDate(new Date());let text=`<div class="weekly-report-grid"><div class="stat-box"><div class="k">Avg calories</div><div class="v">${wk.avgCal||'—'}</div></div><div class="stat-box"><div class="k">Bank earned</div><div class="v">${bank} cal</div></div><div class="stat-box"><div class="k">Workouts</div><div class="v">${wk.workouts.length}</div></div><div class="stat-box"><div class="k">Water avg</div><div class="v">${wk.avgWater?wk.avgWater+' oz':'—'}</div></div></div>`;$v('weeklyReportBody').innerHTML=text};
+
+  // Make completed-fast duration show on the completion day in History text as well.
+  renderFastHistory();renderCompletedFastUI();renderFastingWeeklyReport();renderHomeHabitsV5();renderMorningHistoryV5();try{renderDashboard()}catch(e){console.error(e)}
+})();
+</script>
+
 </body>
 </html>
