@@ -693,6 +693,8 @@ document.querySelectorAll('[data-jump]').forEach(b=>b.addEventListener('click',(
 
 function recalcEaten(){state.eaten=state.meals.reduce((a,m)=>a+Number(m.cal||0),0)}
 function todayExercise(){return state.workouts.reduce((a,w)=>a+Number(w.mins||0),0)}
+let dashOffset=0;
+let dashboardReady=false;
 function update(){
   state.waterLogs=Array.isArray(state.waterLogs)?state.waterLogs:[];
   state.weightLogs=Array.isArray(state.weightLogs)?state.weightLogs:[];
@@ -717,7 +719,7 @@ function update(){
   $('fastDisplay').textContent=state.fastHours+':'+state.eatHours;
   $('fastSub').textContent=state.fasting?'Fast in progress':'Not fasting';
   $('fastBtn').textContent=state.fasting?'End fast':'Start fast';
-  renderMeals();renderWater();renderWeight();renderHistory();renderHabits();renderRoutines();renderWorkouts();renderDashboard();save();
+  renderMeals();renderWater();renderWeight();renderHistory();renderHabits();renderRoutines();renderWorkouts();if(dashboardReady)renderDashboard();save();
 }
 function openEdit(type,id,name,num){
   editCtx={type,id};$('editTitle').textContent='Edit '+type;$('editName').value=name||'';$('editNumber').value=(num??'');$('editNumber').style.display=['meal','workout'].includes(type)?'block':'none';$('editModal').classList.add('open');$('editModal').setAttribute('aria-hidden','false')
@@ -1129,19 +1131,27 @@ function todayKey(){
 function syncTodayWaterLog(){
   state.waterLogs=Array.isArray(state.waterLogs)?state.waterLogs:[];
   const d=todayKey();
+  const oz=Math.max(0,Number(state.waterOz)||0);
   const existing=state.waterLogs.find(x=>x.date===d);
-  if(existing) existing.oz=Number(state.waterOz)||0;
-  else state.waterLogs.push({id:uid(),date:d,oz:Number(state.waterOz)||0});
+  if(existing) existing.oz=oz;
+  else state.waterLogs.push({id:uid(),date:d,oz});
+  save();
+  if(dashboardReady)renderDashboard();
 }
 
 function renderWater(){
-  state.waterOz=Math.max(0,Number(state.waterOz)||0);
-  // Keep Home/History in sync with the live water total for the local calendar day.
   state.waterLogs=Array.isArray(state.waterLogs)?state.waterLogs:[];
   const localToday=todayKey();
   let todayWater=state.waterLogs.find(x=>x.date===localToday);
-  if(todayWater) todayWater.oz=state.waterOz;
-  else if(state.waterOz>0) state.waterLogs.push({id:uid(),date:localToday,oz:state.waterOz});
+
+  // Migrate the old running water total into today's dated record once.
+  if(!todayWater && Number(state.waterOz)>0){
+    todayWater={id:uid(),date:localToday,oz:Math.max(0,Number(state.waterOz)||0)};
+    state.waterLogs.push(todayWater);
+  }
+
+  // Today's dated record is now the source of truth.
+  state.waterOz=todayWater ? Math.max(0,Number(todayWater.oz)||0) : 0;
   state.waterGoalOz=Math.max(8,Number(state.waterGoalOz)||100);
   if(!$('waterTotal'))return;
   $('waterTotal').textContent=Math.round(state.waterOz)+' oz';
@@ -1702,7 +1712,7 @@ if($('mealWeightUnit'))$('mealWeightUnit').addEventListener('change',autoCalcula
 
 
 // ---------- FitBank 3.0 widget dashboard ----------
-let dashOffset=0;
+dashboardReady=true;
 
 function localDateKey(d=new Date()){
   const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),day=String(d.getDate()).padStart(2,'0');
@@ -1799,7 +1809,9 @@ function renderDashboard(){
   const bank=Math.max(0,weeklyGoal-weekEaten)*(Number(state.bankPercent ?? 100)/100);
   $('dashBank').textContent='+'+Math.round(bank).toLocaleString()+' cal';
 
-  const water=(key===todayKey()) ? (Number(state.waterOz)||0) : datedWater(key);
+  const water=(key===todayKey())
+    ? (datedWater(key) || Number(state.waterOz)||0)
+    : datedWater(key);
   const waterGoal=Number(state.waterGoalOz)||100;
   if($('dashWater'))$('dashWater').textContent=Math.round(water)+' oz';
   if($('dashWaterSub'))$('dashWaterSub').textContent='of '+Math.round(waterGoal)+' oz';
@@ -1857,6 +1869,15 @@ function renderDashboard(){
   $('dashNoteStatus').textContent=note&&note.text?'View note':'Add note';
   $('dashPhotoCount').textContent=(state.progressPhotos||[]).length+' photo'+((state.progressPhotos||[]).length===1?'':'s');
 }
+// Dashboard definitions are ready; do one clean refresh now.
+try{
+  renderWater();
+  renderDashboard();
+  save();
+}catch(err){
+  console.error('FitBank dashboard initialization error',err);
+}
+
 function switchTabById(id){
   const btn=[...document.querySelectorAll('.tab')].find(b=>b.dataset.tab===id);
   if(btn)btn.click();
@@ -1954,10 +1975,20 @@ function renderProgressPhotos(){
   });
 }
 
-// Patch global update to keep the home widgets live.
+// Keep the selected Food-day summary refreshed after normal updates.
 const fitbankOriginalUpdate=update;
-update=function(){fitbankOriginalUpdate();renderDashboard();renderMealDaySummary(($('mealDate')&&$('mealDate').value)||todayKey())};
-setTimeout(()=>{renderDashboard();renderProgressPhotos();renderMealDaySummary(todayKey())},0);
+update=function(){
+  fitbankOriginalUpdate();
+  if($('mealDate'))renderMealDaySummary($('mealDate').value||todayKey());
+};
+setTimeout(()=>{
+  try{
+    renderWater();
+    renderDashboard();
+    renderProgressPhotos();
+    renderMealDaySummary(todayKey());
+  }catch(err){console.error('FitBank delayed refresh error',err)}
+},0);
 
 </script>
 
