@@ -123,6 +123,14 @@
 
   
 <section id="home" class="panel active">
+
+  <div id="legacyHomeCompat" style="display:none!important" aria-hidden="true">
+    <span id="remaining"></span><span id="eaten"></span><span id="goal"></span>
+    <span id="bank"></span><span id="weekTarget"></span><span id="weekendBudget"></span>
+    <span id="homeHabits"></span><span id="homeExercise"></span><span id="homeFast"></span>
+    <div id="bar"></div>
+  </div>
+
   <div class="dashboard-head">
     <button id="dashPrevDay" class="btn" type="button">←</button>
     <div class="dashboard-title">
@@ -637,6 +645,12 @@ document.querySelectorAll('[data-jump]').forEach(b=>b.addEventListener('click',(
 function recalcEaten(){state.eaten=state.meals.reduce((a,m)=>a+Number(m.cal||0),0)}
 function todayExercise(){return state.workouts.reduce((a,w)=>a+Number(w.mins||0),0)}
 function update(){
+  state.waterLogs=Array.isArray(state.waterLogs)?state.waterLogs:[];
+  state.weightLogs=Array.isArray(state.weightLogs)?state.weightLogs:[];
+  state.fastingLogs=Array.isArray(state.fastingLogs)?state.fastingLogs:[];
+  state.habitLogs=Array.isArray(state.habitLogs)?state.habitLogs:[];
+  state.dailyNotes=Array.isArray(state.dailyNotes)?state.dailyNotes:[];
+  state.progressPhotos=Array.isArray(state.progressPhotos)?state.progressPhotos:[];
   recalcEaten();
   const rem=state.goal-state.eaten;
   const bank=Math.max(state.priorBank + Math.max(rem,0)*(state.bankPercent/100),0);
@@ -694,7 +708,7 @@ $('mealForm').onsubmit=e=>{
   const name=$('mealName').value.trim(),cal=Number($('mealCal').value);
   if(!name||!Number.isFinite(cal)||cal<=0)return;
   state.meals.push({
-    id:uid(),date:new Date().toISOString().slice(0,10),name,cal,
+    id:uid(),date:localDateKey(new Date()),name,cal,
     weight:Number($('mealWeight').value)||0,
     weightUnit:$('mealWeightUnit').value||'g',
     protein:Number($('mealProtein').value)||0,
@@ -1566,7 +1580,7 @@ function renderDashboard(){
   const protein=meals.reduce((a,m)=>a+(Number(m.protein)||0),0);
   const carbs=meals.reduce((a,m)=>a+(Number(m.carbs)||0),0);
   const fat=meals.reduce((a,m)=>a+(Number(m.fat)||0),0);
-  const goal=Number(state.calGoal)||2000;
+  const goal=Number(state.goal)||2000;
   const left=goal-eaten;
   $('dashCaloriesLeft').textContent=Math.round(left).toLocaleString();
   $('dashCalorieSub').textContent=`${Math.round(eaten).toLocaleString()} eaten of ${Math.round(goal).toLocaleString()}`;
@@ -1579,7 +1593,7 @@ function renderDashboard(){
   const wk=weekDataForDate(d);
   const weeklyGoal=goal*7;
   const weekEaten=wk.meals.reduce((a,m)=>a+(Number(m.cal)||0),0);
-  const bank=Math.max(0,weeklyGoal-weekEaten)*(Number(state.bankPct ?? 100)/100);
+  const bank=Math.max(0,weeklyGoal-weekEaten)*(Number(state.bankPercent ?? 100)/100);
   $('dashBank').textContent='+'+Math.round(bank).toLocaleString()+' cal';
 
   const water=datedWater(key),waterGoal=Number(state.waterGoalOz)||100;
@@ -1676,9 +1690,9 @@ $('openWeeklyReport').onclick=()=>{renderWeeklyReport();openPanel('weeklyReportP
 function renderWeeklyReport(){
   const wk=weekDataForDate(new Date());
   let text='';
-  const calGoal=Number(state.calGoal)||2000;
+  const calGoal=Number(state.goal)||2000;
   const totalCal=wk.meals.reduce((a,m)=>a+(Number(m.cal)||0),0);
-  const bank=Math.max(0,calGoal*7-totalCal)*(Number(state.bankPct ?? 100)/100);
+  const bank=Math.max(0,calGoal*7-totalCal)*(Number(state.bankPercent ?? 100)/100);
   text+=`<div class="weekly-report-grid">
     <div class="stat-box"><div class="k">Avg calories</div><div class="v">${wk.avgCal||'—'}</div></div>
     <div class="stat-box"><div class="k">Bank</div><div class="v">${Math.round(bank)} cal</div></div>
