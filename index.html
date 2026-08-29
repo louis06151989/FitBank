@@ -1500,7 +1500,7 @@ $('saveCalSettings').onclick=()=>{state.goal=Math.min(Math.max(Number($('goalInp
 $('saveReminderSettings').onclick=()=>{state.reminders={breakfast:$('breakfastTime').value,lunch:$('lunchTime').value,dinner:$('dinnerTime').value,repeat:$('reminderRepeat').value};update()};
 $('resetAll').onclick=()=>{if(confirm('Reset all FitBank data on this device?')){state=JSON.parse(JSON.stringify(defaults));update()}};
 
-load();update();
+load();try{update();}catch(e){console.error('FitBank startup update error',e)}
 if('serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js').then(r=>r.update()).catch(()=>{})}
 
 // ---------- FitBank 3.0 widget dashboard ----------
@@ -1760,5 +1760,124 @@ update=function(){fitbankOriginalUpdate();renderDashboard()};
 setTimeout(()=>{renderDashboard();renderProgressPhotos()},0);
 
 </script>
+
+<script id="fitbank-home-controls-v32">
+(function(){
+  function el(id){return document.getElementById(id)}
+  function activatePanel(id){
+    if(id==='fasting') id = document.getElementById('fasting') ? 'fasting' : 'settings';
+    document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('active',p.id===id));
+    document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===id));
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+  function openCard(id){
+    const p=el(id);
+    if(!p)return;
+    p.style.display='block';
+    setTimeout(()=>p.scrollIntoView({behavior:'smooth',block:'start'}),10);
+  }
+  function closeCard(id){const p=el(id);if(p)p.style.display='none'}
+
+  // Capture phase means these controls work even if an older handler failed to attach.
+  document.addEventListener('click',function(e){
+    const b=e.target.closest('button');
+    if(!b)return;
+
+    if(b.id==='quickAddBtn'){
+      e.preventDefault(); e.stopImmediatePropagation();
+      const p=el('quickAddPanel');
+      if(p)p.style.display=p.style.display==='block'?'none':'block';
+      return;
+    }
+
+    if(b.dataset.quick){
+      e.preventDefault(); e.stopImmediatePropagation();
+      closeCard('quickAddPanel');
+      const q=b.dataset.quick;
+      if(q==='food'||q==='water')activatePanel('food');
+      else if(q==='weight')activatePanel('weight');
+      else if(q==='workout')activatePanel('exercise');
+      else if(q==='note'){
+        try{ if(typeof loadDailyNote==='function')loadDailyNote() }catch(_){}
+        openCard('dailyNotePanel');
+      }
+      return;
+    }
+
+    if(b.dataset.openTab){
+      e.preventDefault(); e.stopImmediatePropagation();
+      activatePanel(b.dataset.openTab);
+      return;
+    }
+
+    if(b.id==='openWeeklyReport'){
+      e.preventDefault(); e.stopImmediatePropagation();
+      try{ if(typeof renderWeeklyReport==='function')renderWeeklyReport() }catch(err){console.error(err)}
+      openCard('weeklyReportPanel');
+      return;
+    }
+
+    if(b.id==='openProgressPhotos'){
+      e.preventDefault(); e.stopImmediatePropagation();
+      try{ if(typeof renderProgressPhotos==='function')renderProgressPhotos() }catch(err){console.error(err)}
+      openCard('progressPhotosPanel');
+      return;
+    }
+
+    if(b.id==='openDailyNote'){
+      e.preventDefault(); e.stopImmediatePropagation();
+      try{ if(typeof loadDailyNote==='function')loadDailyNote() }catch(err){console.error(err)}
+      openCard('dailyNotePanel');
+      return;
+    }
+
+    if(b.dataset.closePanel){
+      e.preventDefault(); e.stopImmediatePropagation();
+      closeCard(b.dataset.closePanel);
+      return;
+    }
+
+    if(b.id==='dashStartWorkout'){
+      e.preventDefault(); e.stopImmediatePropagation();
+      try{
+        if(typeof state!=='undefined' && state.routines && state.routines.length && typeof startRoutine==='function'){
+          startRoutine(state.routines[0].id);
+        }
+      }catch(err){console.error(err)}
+      activatePanel('exercise');
+      return;
+    }
+
+    if(b.id==='dashPrevDay' || b.id==='dashNextDay'){
+      e.preventDefault(); e.stopImmediatePropagation();
+      try{
+        if(typeof dashOffset!=='undefined'){
+          dashOffset += b.id==='dashPrevDay' ? -1 : 1;
+          if(typeof renderDashboard==='function')renderDashboard();
+          return;
+        }
+      }catch(err){console.error(err)}
+      // visual fallback if dashboard state failed
+      const lab=el('dashDayLabel');
+      if(lab)lab.textContent=b.id==='dashPrevDay'?'Previous day':'Next day';
+      return;
+    }
+  },true);
+
+  // Ensure ordinary bottom/top tabs remain navigable too.
+  document.addEventListener('click',function(e){
+    const b=e.target.closest('[data-tab]');
+    if(!b)return;
+    e.preventDefault();
+    activatePanel(b.dataset.tab);
+  },true);
+
+  // Try a fresh dashboard render after everything has loaded, without blocking controls.
+  window.addEventListener('load',function(){
+    try{ if(typeof renderDashboard==='function')renderDashboard() }catch(err){console.error('Dashboard render error',err)}
+  });
+})();
+</script>
+
 </body>
 </html>
