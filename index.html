@@ -324,14 +324,29 @@
       <form id="mealForm" style="margin-top:12px">
         <label class="tiny" for="mealDate">Date</label>
         <input id="mealDate" type="date">
-        <input id="mealName" placeholder="Meal name" required>
-        <input id="mealCal" type="number" min="1" max="5000" placeholder="Calories" required>
+        <input id="mealName" placeholder="Food" required list="foodSuggestions">
+        <datalist id="foodSuggestions">
+          <option value="White rice, cooked"></option>
+          <option value="Brown rice, cooked"></option>
+          <option value="Chicken breast, cooked"></option>
+          <option value="Ground beef 90/10, cooked"></option>
+          <option value="Egg, whole"></option>
+          <option value="Oatmeal, cooked"></option>
+          <option value="Potato, baked"></option>
+          <option value="Sweet potato, baked"></option>
+          <option value="Broccoli, cooked"></option>
+          <option value="Banana"></option>
+          <option value="Apple"></option>
+          <option value="Greek yogurt, nonfat"></option>
+        </datalist>
+        <input id="mealCal" type="number" min="1" max="5000" placeholder="Calories (auto or manual)" required>
         <div class="grid grid2">
           <input id="mealWeight" type="number" min="0" max="10000" step="0.1" placeholder="Food weight">
           <select id="mealWeightUnit">
             <option value="g">grams (g)</option>
             <option value="oz">ounces (oz)</option>
           </select>
+        <div id="foodAutoCalcHint" class="tiny" style="margin-top:6px">Choose a common food and enter its weight to calculate calories and macros automatically.</div>
         </div>
         <div class="grid grid4">
           <input id="mealProtein" type="number" min="0" max="1000" placeholder="Protein g">
@@ -1515,6 +1530,71 @@ load();try{update();}catch(e){console.error('FitBank startup update error',e)}
 if('serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js').then(r=>r.update()).catch(()=>{})}
 
 
+
+// ---------- Built-in food nutrition lookup (per 100 g) ----------
+const FOOD_DB = {
+  "white rice, cooked": {cal:130, protein:2.7, carbs:28.2, fat:0.3},
+  "rice": {cal:130, protein:2.7, carbs:28.2, fat:0.3},
+  "brown rice, cooked": {cal:123, protein:2.7, carbs:25.6, fat:1.0},
+  "chicken breast, cooked": {cal:165, protein:31.0, carbs:0, fat:3.6},
+  "ground beef 90/10, cooked": {cal:217, protein:26.1, carbs:0, fat:11.8},
+  "egg, whole": {cal:143, protein:12.6, carbs:0.7, fat:9.5},
+  "oatmeal, cooked": {cal:71, protein:2.5, carbs:12.0, fat:1.5},
+  "potato, baked": {cal:93, protein:2.5, carbs:21.2, fat:0.1},
+  "sweet potato, baked": {cal:90, protein:2.0, carbs:20.7, fat:0.2},
+  "broccoli, cooked": {cal:35, protein:2.4, carbs:7.2, fat:0.4},
+  "banana": {cal:89, protein:1.1, carbs:22.8, fat:0.3},
+  "apple": {cal:52, protein:0.3, carbs:13.8, fat:0.2},
+  "greek yogurt, nonfat": {cal:59, protein:10.3, carbs:3.6, fat:0.4}
+};
+
+function normalizeFoodName(s){
+  return String(s||'').trim().toLowerCase().replace(/\s+/g,' ');
+}
+function findFoodNutrition(name){
+  const key=normalizeFoodName(name);
+  if(FOOD_DB[key]) return FOOD_DB[key];
+  // Friendly partial matches, e.g. "white rice" or "rice cooked"
+  if(key.includes('white rice') || (key==='rice') || key.includes('rice cooked')) return FOOD_DB["white rice, cooked"];
+  if(key.includes('brown rice')) return FOOD_DB["brown rice, cooked"];
+  if(key.includes('chicken breast')) return FOOD_DB["chicken breast, cooked"];
+  if(key.includes('ground beef') && key.includes('90')) return FOOD_DB["ground beef 90/10, cooked"];
+  if(key==='egg' || key.includes('whole egg')) return FOOD_DB["egg, whole"];
+  if(key.includes('oatmeal')) return FOOD_DB["oatmeal, cooked"];
+  if(key.includes('sweet potato')) return FOOD_DB["sweet potato, baked"];
+  if(key.includes('potato')) return FOOD_DB["potato, baked"];
+  if(key.includes('broccoli')) return FOOD_DB["broccoli, cooked"];
+  if(key.includes('banana')) return FOOD_DB["banana"];
+  if(key.includes('apple')) return FOOD_DB["apple"];
+  if(key.includes('greek yogurt')) return FOOD_DB["greek yogurt, nonfat"];
+  return null;
+}
+function weightToGrams(weight, unit){
+  const w=Number(weight)||0;
+  if(w<=0)return 0;
+  return unit==='oz' ? w*28.349523125 : w;
+}
+function autoCalculateFood(){
+  if(!$('mealName')||!$('mealWeight'))return;
+  const info=findFoodNutrition($('mealName').value);
+  const grams=weightToGrams($('mealWeight').value,$('mealUnit')?$('mealUnit').value:'g');
+  const hint=$('foodAutoCalcHint');
+  if(!info){
+    if(hint)hint.textContent='Food not in the built-in list yet — you can still enter calories and macros manually.';
+    return;
+  }
+  if(!grams){
+    if(hint)hint.textContent='Enter the food weight to calculate calories and macros automatically.';
+    return;
+  }
+  const factor=grams/100;
+  $('mealCal').value=Math.round(info.cal*factor);
+  $('mealProtein').value=(info.protein*factor).toFixed(1);
+  $('mealCarbs').value=(info.carbs*factor).toFixed(1);
+  $('mealFat').value=(info.fat*factor).toFixed(1);
+  if(hint)hint.textContent=`Auto-calculated from ${Math.round(grams)} g using built-in nutrition data. You can still edit any value.`;
+}
+
 // ---------- Daily calorie entry screen ----------
 function renderMealDaySummary(key){
   if(!$('mealDayTitle'))return;
@@ -1541,6 +1621,14 @@ if($('mealDate')){
   $('mealDate').value=todayKey();
   $('mealDate').addEventListener('change',()=>renderMealDaySummary($('mealDate').value));
 }
+
+if($('mealName')){
+  $('mealName').addEventListener('input',autoCalculateFood);
+  $('mealName').addEventListener('change',autoCalculateFood);
+}
+if($('mealWeight'))$('mealWeight').addEventListener('input',autoCalculateFood);
+if($('mealUnit'))$('mealUnit').addEventListener('change',autoCalculateFood);
+
 
 // ---------- FitBank 3.0 widget dashboard ----------
 let dashOffset=0;
