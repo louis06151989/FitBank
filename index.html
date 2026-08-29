@@ -3,32 +3,45 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#111827">
+  <meta name="theme-color" content="#0a1220">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="apple-touch-icon" href="icon-192.png">
   <title>FitBank</title>
   <style>
     :root{
-      --bg:#0f172a;--card:#111827;--panel:#1f2937;--text:#f8fafc;--muted:#94a3b8;--border:#334155;--accent:#22c55e;
+      --bg:#0a1220;--card:#111827;--panel:#182334;--text:#f8fafc;--muted:#94a3b8;
+      --border:#2f3d52;--accent:#22c55e;--danger:#ef4444;
     }
     *{box-sizing:border-box}
     body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--text)}
-    .wrap{max-width:820px;margin:0 auto;padding:16px}
-    .tabs{display:flex;gap:8px;overflow:auto;padding-bottom:8px;position:sticky;top:0;background:var(--bg);z-index:5}
+    .wrap{max-width:860px;margin:0 auto;padding:16px 16px calc(24px + env(safe-area-inset-bottom))}
+    .tabs{display:flex;gap:8px;overflow:auto;padding:4px 0 10px;position:sticky;top:0;background:var(--bg);z-index:5}
     button,input,select{font:inherit}
-    button{min-height:44px}
+    button{min-height:44px;cursor:pointer}
     .tab,.btn{border:1px solid var(--border);background:transparent;color:var(--text);border-radius:14px;padding:10px 14px}
-    .tab.active,.btn.primary{background:var(--accent);border-color:var(--accent);color:#06240f;font-weight:700}
+    .tab.active,.btn.primary{background:var(--accent);border-color:var(--accent);color:#06230f;font-weight:800}
+    .btn.danger{border-color:#7f1d1d;color:#fecaca}
     .grid{display:grid;gap:12px}.grid2{grid-template-columns:repeat(2,minmax(0,1fr))}.grid4{grid-template-columns:repeat(4,minmax(0,1fr))}
     .card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:16px}
-    .muted{color:var(--muted);font-size:14px}.big{font-size:34px;font-weight:800}.row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
-    .progress{height:12px;background:var(--panel);border-radius:999px;overflow:hidden}.progress>div{height:100%;background:var(--accent);width:67.5%}
+    .muted{color:var(--muted);font-size:14px}.tiny{color:var(--muted);font-size:12px}.big{font-size:34px;font-weight:800}
+    .row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+    .progress{height:12px;background:var(--panel);border-radius:999px;overflow:hidden}.progress>div{height:100%;background:var(--accent)}
     .panel{display:none}.panel.active{display:block}
-    input,select{width:100%;min-height:44px;border-radius:12px;border:1px solid var(--border);background:#0b1220;color:var(--text);padding:10px 12px;font-size:16px}
+    input,select{width:100%;min-height:44px;border-radius:12px;border:1px solid var(--border);background:#0b1422;color:var(--text);padding:10px 12px;font-size:16px}
+    input[type=checkbox]{width:22px;min-height:22px}
     form{display:grid;gap:10px}.actions{display:flex;gap:8px;flex-wrap:wrap}
-    .list{display:grid;gap:8px;margin-top:12px}.item{background:var(--panel);padding:10px 12px;border-radius:12px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+    .list{display:grid;gap:8px;margin-top:12px}
+    .item{background:var(--panel);padding:11px 12px;border-radius:12px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+    .item-main{min-width:0;flex:1}.item-title{font-weight:700;word-break:break-word}
     .week{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center;font-size:12px}.week span{display:block;color:var(--muted)}
     img{max-width:100%;border-radius:14px;margin-top:12px}
+    .notice{background:#10251a;border:1px solid #275e3b;border-radius:14px;padding:12px}
+    .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:30;align-items:flex-end;justify-content:center}
+    .modal.open{display:flex}
+    .sheet{width:min(100%,720px);background:var(--card);border:1px solid var(--border);border-radius:20px 20px 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom))}
+    @media(min-width:720px){.modal{align-items:center}.sheet{border-radius:20px}}
     @media(max-width:640px){.grid2,.grid4{grid-template-columns:1fr}.week{font-size:11px}}
   </style>
 </head>
@@ -47,86 +60,281 @@
     <div class="grid grid2">
       <div class="card">
         <div class="muted">Calories today</div>
-        <div class="row"><div><span id="remaining" class="big">650</span> left</div><div class="muted"><span id="eaten">1350</span> / <span id="goal">2000</span></div></div>
+        <div class="row"><div><span id="remaining" class="big">0</span> left</div><div class="muted"><span id="eaten">0</span> / <span id="goal">0</span></div></div>
         <div class="progress" style="margin-top:14px"><div id="bar"></div></div>
       </div>
-      <div class="card"><div class="muted">Weekly bank</div><div id="bank" class="big">+1800</div><div class="muted">saved calories this week</div></div>
+      <div class="card"><div class="muted">Weekly bank</div><div id="bank" class="big">0</div><div class="muted">available this week</div></div>
     </div>
+
     <div class="grid grid4" style="margin-top:12px">
-      <button class="card" data-jump="food"><div class="muted">Food</div><strong>Log a meal</strong></button>
+      <button class="card" data-jump="food"><div class="muted">Food</div><strong>Log or edit meals</strong></button>
       <button class="card" data-jump="fasting"><div class="muted">Fast</div><strong id="homeFast">Not fasting</strong></button>
-      <button class="card" data-jump="habits"><div class="muted">Habits</div><strong id="homeHabits">0 / 3 complete</strong></button>
+      <button class="card" data-jump="habits"><div class="muted">Habits</div><strong id="homeHabits">0 / 0 complete</strong></button>
       <button class="card" data-jump="exercise"><div class="muted">Exercise</div><strong id="homeExercise">0 min today</strong></button>
     </div>
+
     <div class="card" style="margin-top:12px">
-      <div class="row"><div><strong>This week's calorie bank</strong><div class="muted">Unused calories carry through Sunday.</div></div><div class="muted">Target <span id="weekTarget">14000</span></div></div>
-      <div class="week" style="margin-top:14px"><div><span>Mon</span><b>+300</b></div><div><span>Tue</span><b>+250</b></div><div><span>Wed</span><b>+400</b></div><div><span>Thu</span><b>+200</b></div><div><span>Fri</span><b id="friBank">+650</b></div><div><span>Sat</span><b>—</b></div><div><span>Sun</span><b>—</b></div></div>
-      <div class="item" style="margin-top:14px"><span>Projected Saturday budget</span><strong id="weekendBudget">3800 calories</strong></div>
+      <div class="row">
+        <div><strong>Weekly calorie bank</strong><div class="muted">Unused calories roll forward until your weekly reset.</div></div>
+        <div class="muted">Weekly target <span id="weekTarget">0</span></div>
+      </div>
+      <div class="item" style="margin-top:14px"><span>Projected weekend spending room</span><strong id="weekendBudget">0 cal</strong></div>
     </div>
   </section>
 
   <section id="food" class="panel">
     <div class="card">
-      <strong>Photo meal estimate</strong>
-      <div class="muted">Choose a meal photo. This version previews it and uses a demo estimate.</div>
-      <input id="photo" type="file" accept="image/*" style="margin-top:12px">
-      <button id="estimateBtn" class="btn primary" style="margin-top:10px">Estimate meal</button>
+      <strong>Photo calorie estimate</strong>
+      <div class="notice" style="margin-top:12px">
+        <strong>Real AI photo estimates are not connected yet.</strong>
+        <div class="tiny" style="margin-top:4px">I removed the fake estimate. GitHub Pages is static, so we need a secure backend before a photo can be analyzed by AI.</div>
+      </div>
+      <input id="photo" type="file" accept="image/*" capture="environment" style="margin-top:12px">
       <img id="preview" style="display:none" alt="Meal preview">
-      <div id="estimate" class="item" style="display:none;margin-top:12px"><span>Chicken, rice & vegetables<br><small class="muted">48g protein · 76g carbs · 24g fat</small></span><strong>720 cal</strong></div>
-      <button id="saveEstimate" class="btn" style="display:none;margin-top:10px">Add estimate</button>
     </div>
+
     <div class="card" style="margin-top:12px">
-      <strong>Manual meal</strong>
-      <form id="mealForm" style="margin-top:12px"><input id="mealName" placeholder="Meal name" required><input id="mealCal" type="number" min="1" max="5000" placeholder="Calories" required><button class="btn">Add meal</button></form>
+      <strong>Add meal</strong>
+      <form id="mealForm" style="margin-top:12px">
+        <input id="mealName" placeholder="Meal name" required>
+        <input id="mealCal" type="number" min="1" max="5000" placeholder="Calories" required>
+        <div class="grid grid4">
+          <input id="mealProtein" type="number" min="0" max="1000" placeholder="Protein g">
+          <input id="mealCarbs" type="number" min="0" max="1000" placeholder="Carbs g">
+          <input id="mealFat" type="number" min="0" max="1000" placeholder="Fat g">
+          <button class="btn primary" type="submit">Add meal</button>
+        </div>
+      </form>
       <div id="meals" class="list"></div>
     </div>
   </section>
 
   <section id="fasting" class="panel">
-    <div class="card" style="text-align:center"><div class="muted">Intermittent fasting</div><div id="fastDisplay" class="big" style="margin-top:8px">16:8</div><div id="fastSub" class="muted">Eating window 12 PM–8 PM</div><button id="fastBtn" class="btn primary" style="margin-top:16px">Start fast</button></div>
+    <div class="card" style="text-align:center">
+      <div class="muted">Intermittent fasting</div>
+      <div id="fastDisplay" class="big" style="margin-top:8px">16:8</div>
+      <div id="fastSub" class="muted">Not fasting</div>
+      <button id="fastBtn" class="btn primary" style="margin-top:16px">Start fast</button>
+    </div>
+    <div class="card" style="margin-top:12px">
+      <strong>Fasting settings</strong>
+      <div class="grid grid2" style="margin-top:12px">
+        <div><label class="muted">Fast length (hours)</label><input id="fastHours" type="number" min="1" max="48" value="16"></div>
+        <div><label class="muted">Eating window (hours)</label><input id="eatHours" type="number" min="1" max="23" value="8"></div>
+      </div>
+      <button id="saveFastSettings" class="btn" style="margin-top:10px">Save fasting settings</button>
+    </div>
   </section>
 
   <section id="habits" class="panel">
-    <div class="card"><strong>Your habits</strong><form id="habitForm" style="margin-top:12px"><input id="habitName" maxlength="60" placeholder="Add a new habit"><button class="btn">Add habit</button></form><div id="habitList" class="list"></div></div>
+    <div class="card">
+      <strong>Your habits</strong>
+      <form id="habitForm" style="margin-top:12px">
+        <input id="habitName" maxlength="60" placeholder="Add a new habit">
+        <button class="btn primary">Add habit</button>
+      </form>
+      <div id="habitList" class="list"></div>
+    </div>
   </section>
 
   <section id="exercise" class="panel">
-    <div class="card"><strong>Add an exercise</strong><form id="exerciseAddForm" style="margin-top:12px"><input id="exerciseName" maxlength="60" placeholder="e.g. Yard work"><button class="btn">Add exercise</button></form></div>
-    <div class="card" style="margin-top:12px"><strong>Log exercise</strong><form id="exerciseForm" style="margin-top:12px"><select id="exerciseSelect"></select><input id="exerciseMins" type="number" min="1" max="600" value="30"><button class="btn">Log workout</button></form><div id="exerciseLog" class="list"></div></div>
+    <div class="card">
+      <strong>Your exercise types</strong>
+      <form id="exerciseAddForm" style="margin-top:12px">
+        <input id="exerciseName" maxlength="60" placeholder="e.g. Yard work">
+        <button class="btn primary">Add exercise</button>
+      </form>
+      <div id="exerciseTypes" class="list"></div>
+    </div>
+
+    <div class="card" style="margin-top:12px">
+      <strong>Log exercise</strong>
+      <form id="exerciseForm" style="margin-top:12px">
+        <select id="exerciseSelect"></select>
+        <input id="exerciseMins" type="number" min="1" max="600" value="30">
+        <button class="btn">Log workout</button>
+      </form>
+      <div id="exerciseLog" class="list"></div>
+    </div>
   </section>
 
   <section id="settings" class="panel">
-    <div class="card"><strong>Calorie settings</strong><label class="muted" style="display:block;margin-top:12px">Daily calorie goal</label><input id="goalInput" type="number" min="800" max="6000" value="2000">
-      <div class="item" style="margin-top:12px"><span>Weekly calorie bank</span><input id="bankEnabled" type="checkbox" checked style="width:auto;min-height:auto"></div>
+    <div class="card">
+      <strong>Calories & weekly bank</strong>
+      <div class="grid grid2" style="margin-top:12px">
+        <div><label class="muted">Daily calorie goal</label><input id="goalInput" type="number" min="800" max="6000"></div>
+        <div><label class="muted">Bank percentage</label>
+          <select id="bankPercent">
+            <option value="0">Off</option>
+            <option value="50">Bank 50%</option>
+            <option value="75">Bank 75%</option>
+            <option value="100">Bank 100%</option>
+          </select>
+        </div>
+      </div>
+      <button id="saveCalSettings" class="btn primary" style="margin-top:10px">Save calorie settings</button>
     </div>
-    <div class="card" style="margin-top:12px"><strong>Aggressive meal reminders</strong><div class="muted">These are settings only in this web version. Native push reminders would come in the full iPhone app.</div>
-      <div class="grid grid2" style="margin-top:12px"><div><label class="muted">Breakfast</label><input type="time" value="08:30"></div><div><label class="muted">Lunch</label><input type="time" value="12:30"></div><div><label class="muted">Dinner</label><input type="time" value="18:30"></div></div>
+
+    <div class="card" style="margin-top:12px">
+      <strong>Meal reminders</strong>
+      <div class="muted">Times are saved here. Push notifications require the native/secure backend version.</div>
+      <div class="grid grid2" style="margin-top:12px">
+        <div><label class="muted">Breakfast</label><input id="breakfastTime" type="time"></div>
+        <div><label class="muted">Lunch</label><input id="lunchTime" type="time"></div>
+        <div><label class="muted">Dinner</label><input id="dinnerTime" type="time"></div>
+        <div><label class="muted">Repeat reminders</label>
+          <select id="reminderRepeat">
+            <option value="30">Every 30 min</option>
+            <option value="60">Every hour</option>
+            <option value="120">Every 2 hours</option>
+          </select>
+        </div>
+      </div>
+      <button id="saveReminderSettings" class="btn" style="margin-top:10px">Save reminder settings</button>
+    </div>
+
+    <div class="card" style="margin-top:12px">
+      <strong>Data</strong>
+      <div class="muted">All entries are saved on this device.</div>
+      <button id="resetAll" class="btn danger" style="margin-top:10px">Reset all FitBank data</button>
     </div>
   </section>
 </div>
+
+<div id="editModal" class="modal" aria-hidden="true">
+  <div class="sheet">
+    <div class="row"><strong id="editTitle">Edit</strong><button id="closeEdit" class="btn">Close</button></div>
+    <form id="editForm" style="margin-top:12px">
+      <input id="editName" placeholder="Name">
+      <input id="editNumber" type="number" placeholder="Value">
+      <div class="actions"><button class="btn primary" type="submit">Save changes</button><button id="deleteEdit" class="btn danger" type="button">Delete</button></div>
+    </form>
+  </div>
+</div>
+
 <script>
-const state={goal:2000,eaten:1350,priorBank:1150,fasting:false,totalExercise:0,habits:[['Drink water',false],['Hit protein goal',false],['No late-night snack',false]],exercises:['Walking','Strength training','Running','Cardio']};
-const $=id=>document.getElementById(id); const fmt=n=>Math.round(n).toLocaleString();
-function save(){localStorage.setItem('fitbank-state',JSON.stringify(state))}
-function load(){try{const x=JSON.parse(localStorage.getItem('fitbank-state'));if(x)Object.assign(state,x)}catch{}}
+const defaults={
+  goal:2000,eaten:0,bankPercent:100,priorBank:0,
+  fasting:false,fastStart:null,fastHours:16,eatHours:8,
+  habits:[{id:1,name:'Drink water',done:false},{id:2,name:'Hit protein goal',done:false},{id:3,name:'No late-night snack',done:false}],
+  exercises:[{id:1,name:'Walking'},{id:2,name:'Strength training'},{id:3,name:'Running'},{id:4,name:'Cardio'}],
+  meals:[],workouts:[],
+  reminders:{breakfast:'08:30',lunch:'12:30',dinner:'18:30',repeat:'60'}
+};
+let state=JSON.parse(JSON.stringify(defaults));
+let editCtx=null;
+const $=id=>document.getElementById(id),fmt=n=>Math.round(Number(n)||0).toLocaleString();
+function uid(){return Date.now()+Math.floor(Math.random()*10000)}
+function save(){localStorage.setItem('fitbank-v2',JSON.stringify(state))}
+function load(){try{const x=JSON.parse(localStorage.getItem('fitbank-v2'));if(x)state={...defaults,...x,reminders:{...defaults.reminders,...(x.reminders||{})}}}catch{}}
 function show(id){document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('active',p.id===id));document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===id))}
-document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>show(b.dataset.tab));document.querySelectorAll('[data-jump]').forEach(b=>b.onclick=()=>show(b.dataset.jump));
-function update(){const rem=state.goal-state.eaten,bank=Math.max(state.priorBank+($('bankEnabled').checked?rem:0),0);$('remaining').textContent=rem>=0?fmt(rem):fmt(Math.abs(rem))+' over';$('eaten').textContent=fmt(state.eaten);$('goal').textContent=fmt(state.goal);$('bank').textContent='+'+fmt(bank);$('bar').style.width=Math.min(state.eaten/state.goal*100,100)+'%';$('weekTarget').textContent=fmt(state.goal*7);$('friBank').textContent=(rem>=0?'+':'')+fmt(rem);$('weekendBudget').textContent=fmt(state.goal+bank)+' calories';$('homeFast').textContent=state.fasting?'Fasting now':'Not fasting';$('homeExercise').textContent=fmt(state.totalExercise)+' min today';$('goalInput').value=state.goal;renderHabits();renderExercises();save()}
-function addMeal(name,cal){state.eaten+=cal;const r=document.createElement('div');r.className='item';r.innerHTML='<span></span><strong></strong>';r.children[0].textContent=name;r.children[1].textContent=fmt(cal)+' cal';$('meals').prepend(r);update()}
-$('mealForm').onsubmit=e=>{e.preventDefault();const n=$('mealName').value.trim(),c=Number($('mealCal').value);if(n&&c>0&&c<=5000){addMeal(n,c);$('mealName').value='';$('mealCal').value=''}}
-$('photo').onchange=()=>{const f=$('photo').files&&$('photo').files[0];if(!f)return;$('preview').src=URL.createObjectURL(f);$('preview').style.display='block'}
-$('estimateBtn').onclick=()=>{$('estimate').style.display='flex';$('saveEstimate').style.display='block'}
-$('saveEstimate').onclick=()=>{addMeal('Photo estimate: chicken, rice & vegetables',720);$('estimate').style.display='none';$('saveEstimate').style.display='none'}
-$('fastBtn').onclick=()=>{state.fasting=!state.fasting;$('fastDisplay').textContent=state.fasting?'Fasting now':'16:8';$('fastSub').textContent=state.fasting?'Target 16 hours':'Eating window 12 PM–8 PM';$('fastBtn').textContent=state.fasting?'End fast':'Start fast';update()}
-function renderHabits(){const l=$('habitList');l.innerHTML='';state.habits.forEach((h,i)=>{const r=document.createElement('div');r.className='item';const left=document.createElement('label');left.style.display='flex';left.style.gap='10px';left.style.alignItems='center';const cb=document.createElement('input');cb.type='checkbox';cb.checked=h[1];cb.style.width='auto';cb.style.minHeight='auto';cb.onchange=()=>{state.habits[i][1]=cb.checked;update()};const s=document.createElement('span');s.textContent=h[0];left.append(cb,s);const rm=document.createElement('button');rm.className='btn';rm.textContent='Remove';rm.onclick=()=>{state.habits.splice(i,1);update()};r.append(left,rm);l.append(r)});$('homeHabits').textContent=state.habits.filter(h=>h[1]).length+' / '+state.habits.length+' complete'}
-$('habitForm').onsubmit=e=>{e.preventDefault();const n=$('habitName').value.trim();if(n){state.habits.push([n,false]);$('habitName').value='';update()}}
-function renderExercises(){const s=$('exerciseSelect'),cur=s.value;s.innerHTML='';state.exercises.forEach(x=>{const o=document.createElement('option');o.textContent=x;o.value=x;s.append(o)});if(state.exercises.includes(cur))s.value=cur}
-$('exerciseAddForm').onsubmit=e=>{e.preventDefault();const n=$('exerciseName').value.trim();if(n&&!state.exercises.includes(n)){state.exercises.push(n);$('exerciseName').value='';update();$('exerciseSelect').value=n}}
-$('exerciseForm').onsubmit=e=>{e.preventDefault();const m=Number($('exerciseMins').value);if(m>0&&m<=600){state.totalExercise+=m;const r=document.createElement('div');r.className='item';r.textContent=$('exerciseSelect').value+' — '+m+' min';$('exerciseLog').prepend(r);update()}}
-$('goalInput').onchange=()=>{const n=Number($('goalInput').value);state.goal=Number.isFinite(n)?Math.min(Math.max(n,800),6000):2000;update()}
-$('bankEnabled').onchange=update;
-load(); update();
-if('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js');
+document.querySelectorAll('[data-tab]').forEach(b=>b.addEventListener('click',()=>show(b.dataset.tab)));
+document.querySelectorAll('[data-jump]').forEach(b=>b.addEventListener('click',()=>show(b.dataset.jump)));
+
+function recalcEaten(){state.eaten=state.meals.reduce((a,m)=>a+Number(m.cal||0),0)}
+function todayExercise(){return state.workouts.reduce((a,w)=>a+Number(w.mins||0),0)}
+function update(){
+  recalcEaten();
+  const rem=state.goal-state.eaten;
+  const bank=Math.max(state.priorBank + Math.max(rem,0)*(state.bankPercent/100),0);
+  $('remaining').textContent=rem>=0?fmt(rem):fmt(Math.abs(rem))+' over';
+  $('eaten').textContent=fmt(state.eaten);$('goal').textContent=fmt(state.goal);
+  $('bank').textContent='+'+fmt(bank);$('bar').style.width=Math.min(Math.max(state.eaten/state.goal*100,0),100)+'%';
+  $('weekTarget').textContent=fmt(state.goal*7);$('weekendBudget').textContent=fmt(state.goal+bank)+' cal';
+  $('homeHabits').textContent=state.habits.filter(h=>h.done).length+' / '+state.habits.length+' complete';
+  $('homeExercise').textContent=fmt(todayExercise())+' min today';
+  $('homeFast').textContent=state.fasting?'Fasting now':'Not fasting';
+  $('goalInput').value=state.goal;$('bankPercent').value=String(state.bankPercent);
+  $('fastHours').value=state.fastHours;$('eatHours').value=state.eatHours;
+  $('breakfastTime').value=state.reminders.breakfast;$('lunchTime').value=state.reminders.lunch;$('dinnerTime').value=state.reminders.dinner;$('reminderRepeat').value=state.reminders.repeat;
+  $('fastDisplay').textContent=state.fastHours+':'+state.eatHours;
+  $('fastSub').textContent=state.fasting?'Fast in progress':'Not fasting';
+  $('fastBtn').textContent=state.fasting?'End fast':'Start fast';
+  renderMeals();renderHabits();renderExerciseTypes();renderWorkouts();save();
+}
+function openEdit(type,id,name,num){
+  editCtx={type,id};$('editTitle').textContent='Edit '+type;$('editName').value=name||'';$('editNumber').value=(num??'');$('editNumber').style.display=['meal','workout'].includes(type)?'block':'none';$('editModal').classList.add('open');$('editModal').setAttribute('aria-hidden','false')
+}
+function closeEdit(){$('editModal').classList.remove('open');$('editModal').setAttribute('aria-hidden','true');editCtx=null}
+$('closeEdit').onclick=closeEdit;
+$('editModal').addEventListener('click',e=>{if(e.target===$('editModal'))closeEdit()});
+
+$('editForm').onsubmit=e=>{
+  e.preventDefault(); if(!editCtx)return;
+  const name=$('editName').value.trim(),num=Number($('editNumber').value);
+  if(editCtx.type==='meal'){const x=state.meals.find(x=>x.id===editCtx.id);if(x&&name&&num>0){x.name=name;x.cal=num}}
+  if(editCtx.type==='habit'){const x=state.habits.find(x=>x.id===editCtx.id);if(x&&name)x.name=name}
+  if(editCtx.type==='exercise'){const x=state.exercises.find(x=>x.id===editCtx.id);if(x&&name)x.name=name}
+  if(editCtx.type==='workout'){const x=state.workouts.find(x=>x.id===editCtx.id);if(x&&name&&num>0){x.name=name;x.mins=num}}
+  closeEdit();update()
+};
+$('deleteEdit').onclick=()=>{
+  if(!editCtx)return;
+  const map={meal:'meals',habit:'habits',exercise:'exercises',workout:'workouts'};
+  const key=map[editCtx.type]; state[key]=state[key].filter(x=>x.id!==editCtx.id);closeEdit();update()
+};
+
+function renderMeals(){
+  const l=$('meals');l.innerHTML='';
+  state.meals.slice().reverse().forEach(m=>{
+    const r=document.createElement('div');r.className='item';
+    const main=document.createElement('div');main.className='item-main';main.innerHTML='<div class="item-title"></div><div class="tiny"></div>';
+    main.children[0].textContent=m.name;main.children[1].textContent=fmt(m.cal)+' cal'+(m.protein||m.carbs||m.fat?` · P ${m.protein||0}g · C ${m.carbs||0}g · F ${m.fat||0}g`:'');
+    const b=document.createElement('button');b.className='btn';b.textContent='Edit';b.onclick=()=>openEdit('meal',m.id,m.name,m.cal);
+    r.append(main,b);l.append(r)
+  })
+}
+$('mealForm').onsubmit=e=>{
+  e.preventDefault();
+  const name=$('mealName').value.trim(),cal=Number($('mealCal').value);
+  if(!name||!Number.isFinite(cal)||cal<=0)return;
+  state.meals.push({id:uid(),name,cal,protein:Number($('mealProtein').value)||0,carbs:Number($('mealCarbs').value)||0,fat:Number($('mealFat').value)||0});
+  ['mealName','mealCal','mealProtein','mealCarbs','mealFat'].forEach(id=>$(id).value='');update()
+};
+$('photo').onchange=()=>{const f=$('photo').files&&$('photo').files[0];if(!f)return;$('preview').src=URL.createObjectURL(f);$('preview').style.display='block'};
+
+function renderHabits(){
+  const l=$('habitList');l.innerHTML='';
+  state.habits.forEach(h=>{
+    const r=document.createElement('div');r.className='item';
+    const left=document.createElement('label');left.style.display='flex';left.style.gap='10px';left.style.alignItems='center';left.style.flex='1';
+    const cb=document.createElement('input');cb.type='checkbox';cb.checked=h.done;cb.onchange=()=>{h.done=cb.checked;update()};
+    const s=document.createElement('span');s.textContent=h.name;left.append(cb,s);
+    const b=document.createElement('button');b.className='btn';b.textContent='Edit';b.onclick=()=>openEdit('habit',h.id,h.name);
+    r.append(left,b);l.append(r)
+  })
+}
+$('habitForm').onsubmit=e=>{e.preventDefault();const n=$('habitName').value.trim();if(n){state.habits.push({id:uid(),name:n,done:false});$('habitName').value='';update()}};
+
+function renderExerciseTypes(){
+  const l=$('exerciseTypes');l.innerHTML='';const s=$('exerciseSelect');const current=s.value;s.innerHTML='';
+  state.exercises.forEach(x=>{
+    const o=document.createElement('option');o.value=x.id;o.textContent=x.name;s.append(o);
+    const r=document.createElement('div');r.className='item';const t=document.createElement('div');t.className='item-title';t.textContent=x.name;
+    const b=document.createElement('button');b.className='btn';b.textContent='Edit';b.onclick=()=>openEdit('exercise',x.id,x.name);
+    r.append(t,b);l.append(r)
+  });
+  if([...s.options].some(o=>o.value===current))s.value=current
+}
+$('exerciseAddForm').onsubmit=e=>{e.preventDefault();const n=$('exerciseName').value.trim();if(n){state.exercises.push({id:uid(),name:n});$('exerciseName').value='';update()}};
+
+function renderWorkouts(){
+  const l=$('exerciseLog');l.innerHTML='';
+  state.workouts.slice().reverse().forEach(w=>{
+    const r=document.createElement('div');r.className='item';const main=document.createElement('div');main.className='item-main';main.innerHTML='<div class="item-title"></div><div class="tiny"></div>';main.children[0].textContent=w.name;main.children[1].textContent=w.mins+' min';
+    const b=document.createElement('button');b.className='btn';b.textContent='Edit';b.onclick=()=>openEdit('workout',w.id,w.name,w.mins);r.append(main,b);l.append(r)
+  })
+}
+$('exerciseForm').onsubmit=e=>{e.preventDefault();const mins=Number($('exerciseMins').value),id=Number($('exerciseSelect').value),ex=state.exercises.find(x=>x.id===id);if(ex&&mins>0&&mins<=600){state.workouts.push({id:uid(),name:ex.name,mins});update()}};
+
+$('fastBtn').onclick=()=>{state.fasting=!state.fasting;state.fastStart=state.fasting?Date.now():null;update()};
+$('saveFastSettings').onclick=()=>{state.fastHours=Math.min(Math.max(Number($('fastHours').value)||16,1),48);state.eatHours=Math.min(Math.max(Number($('eatHours').value)||8,1),23);update()};
+$('saveCalSettings').onclick=()=>{state.goal=Math.min(Math.max(Number($('goalInput').value)||2000,800),6000);state.bankPercent=Number($('bankPercent').value)||0;update()};
+$('saveReminderSettings').onclick=()=>{state.reminders={breakfast:$('breakfastTime').value,lunch:$('lunchTime').value,dinner:$('dinnerTime').value,repeat:$('reminderRepeat').value};update()};
+$('resetAll').onclick=()=>{if(confirm('Reset all FitBank data on this device?')){state=JSON.parse(JSON.stringify(defaults));update()}};
+
+load();update();
+if('serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js').then(r=>r.update()).catch(()=>{})}
 </script>
 </body>
 </html>
