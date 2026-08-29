@@ -48,6 +48,16 @@
 #openDailyCalories{font:inherit;cursor:pointer;appearance:none;-webkit-appearance:none}
 #openDailyCalories:active{transform:scale(.995)}
 
+
+.global-date-nav{position:relative;z-index:3;margin-top:14px;margin-bottom:14px;padding:2px 0 0}
+.habit-trend-card{border:1px solid var(--border);border-radius:16px;padding:12px;background:rgba(255,255,255,.015)}
+.habit-trend-grid{display:grid;grid-template-columns:repeat(14,minmax(0,1fr));gap:4px;margin-top:10px;align-items:end}
+.habit-day{height:28px;border-radius:6px;background:rgba(148,163,184,.14);border:1px solid rgba(148,163,184,.18);position:relative}
+.habit-day.done{background:var(--green);border-color:var(--green)}
+.habit-day.future{opacity:.28}
+.habit-day-labels{display:grid;grid-template-columns:repeat(14,minmax(0,1fr));gap:4px;margin-top:5px}
+.habit-day-labels span{font-size:9px;color:var(--muted);text-align:center;overflow:hidden}
+
 </style>
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 
@@ -128,7 +138,15 @@
     <button class="tab" data-tab="history">History</button><button class="tab" data-tab="weight">Weight</button><button class="tab" data-tab="settings">Settings</button>
   </div>
 
-  
+  <div class="dashboard-head global-date-nav">
+    <button id="dashPrevDay" class="btn" type="button">←</button>
+    <div class="dashboard-title">
+      <div class="tiny" style="letter-spacing:.14em;text-transform:uppercase">FitBank</div>
+      <div id="dashDayLabel" style="font-size:22px;font-weight:900">Today</div>
+    </div>
+    <button id="dashNextDay" class="btn" type="button">→</button>
+  </div>
+
 <section id="home" class="panel active">
 
   <div id="legacyHomeCompat" style="display:none!important" aria-hidden="true">
@@ -138,14 +156,6 @@
     <div id="bar"></div>
   </div>
 
-  <div class="dashboard-head">
-    <button id="dashPrevDay" class="btn" type="button">←</button>
-    <div class="dashboard-title">
-      <div class="tiny" style="letter-spacing:.14em;text-transform:uppercase">FitBank</div>
-      <div id="dashDayLabel" style="font-size:22px;font-weight:900">Today</div>
-    </div>
-    <button id="dashNextDay" class="btn" type="button">→</button>
-  </div>
 
   <button id="openDailyCalories" class="hero-widget" type="button" style="width:100%;color:inherit">
     <div class="muted">Calories left</div>
@@ -421,6 +431,10 @@
         <button class="btn primary">Add habit</button>
       </form>
       <div id="habitList" class="list"></div>
+    </div>
+    <div class="card" style="margin-top:12px">
+      <div class="row"><div><strong>Habit trends</strong><div class="muted">Last 14 days</div></div></div>
+      <div id="habitTrendList" class="list" style="margin-top:12px"></div>
     </div>
   </section>
 
@@ -2295,6 +2309,158 @@ if(b.id==='openDailyCalories'){
   window.addEventListener('load',function(){
     try{ if(typeof renderDashboard==='function')renderDashboard() }catch(err){console.error('Dashboard render error',err)}
   });
+})();
+</script>
+
+
+<script>
+// ---------- FitBank 4.4 date system + habit trends ----------
+(function(){
+  function selectedKey(){ return typeof dashKey==='function' ? dashKey() : todayKey(); }
+  function selectedDateObj(){ return typeof dashDate==='function' ? dashDate() : new Date(); }
+
+  // Migrate legacy undated meals using their timestamp-style ids when possible.
+  // This keeps older meals on the day they were actually created instead of treating them as "today" forever.
+  let migrated=false;
+  (state.meals||[]).forEach(m=>{
+    if(!m.date){
+      const n=Number(m.id);
+      if(Number.isFinite(n) && n>1000000000000){
+        m.date=localDateKey(new Date(n));
+      }
+      migrated=true;
+    }
+  });
+  if(migrated) save();
+
+  // Meals shown on Food are only for the selected date.
+  renderMeals=function(){
+    const l=$('meals'); if(!l)return; l.innerHTML='';
+    const key=($('mealDate')&&$('mealDate').value)||selectedKey();
+    const rows=(state.meals||[]).filter(m=>m.date===key).slice().reverse();
+    rows.forEach(m=>{
+      const r=document.createElement('div');r.className='item';
+      const main=document.createElement('div');main.className='item-main';main.innerHTML='<div class="item-title"></div><div class="tiny"></div>';
+      main.children[0].textContent=m.name;
+      const weightText=m.weight?` · ${m.weight}${m.weightUnit||'g'}`:'';
+      main.children[1].textContent=fmt(m.cal)+' cal'+weightText+(m.protein||m.carbs||m.fat?` · P ${m.protein||0}g · C ${m.carbs||0}g · F ${m.fat||0}g`: '');
+      const b=document.createElement('button');b.className='btn';b.textContent='Edit';b.onclick=()=>openEdit('meal',m.id,m.name,m.cal);
+      r.append(main,b);l.append(r);
+    });
+    if(!rows.length){
+      const e=document.createElement('div');e.className='muted';e.style.padding='10px 2px';e.textContent='No meals logged for this day.';l.append(e);
+    }
+  };
+
+  function habitTrendSummary(habit,key){
+    const anchor=selectedDateObj(); anchor.setHours(12,0,0,0);
+    const days=[]; let completed=0,lastDone=null;
+    for(let i=13;i>=0;i--){
+      const d=new Date(anchor);d.setDate(d.getDate()-i);
+      const dk=localDateKey(d),done=habitDoneOnDate(habit.id,dk);
+      if(done){completed++; if(!lastDone || d>lastDone)lastDone=new Date(d);}
+      days.push({d,dk,done});
+    }
+    let lastText='No completions in the last 14 days';
+    if(lastDone){
+      const diff=Math.round((anchor-lastDone)/86400000);
+      lastText=diff===0?'Completed today':diff===1?'Last completed yesterday':`Last completed ${diff} days ago`;
+    }
+    return {days,completed,lastText};
+  }
+
+  function renderHabitTrends(){
+    const wrap=$('habitTrendList'); if(!wrap)return; wrap.innerHTML='';
+    const key=selectedKey();
+    (state.habits||[]).forEach(h=>{
+      const info=habitTrendSummary(h,key);
+      const card=document.createElement('div');card.className='habit-trend-card';
+      const title=document.createElement('div');title.className='row';
+      title.innerHTML='<div><div class="item-title"></div><div class="tiny"></div></div><div class="tiny"></div>';
+      title.children[0].children[0].textContent=h.name;
+      title.children[0].children[1].textContent=info.lastText;
+      title.children[1].textContent=`${info.completed}/14 days`;
+      const graph=document.createElement('div');graph.className='habit-trend-grid';
+      const labels=document.createElement('div');labels.className='habit-day-labels';
+      info.days.forEach(x=>{
+        const b=document.createElement('div');b.className='habit-day'+(x.done?' done':'');
+        b.title=`${x.d.toLocaleDateString()} — ${x.done?'Completed':'Missed'}`;graph.append(b);
+        const lab=document.createElement('span');lab.textContent=x.d.toLocaleDateString(undefined,{weekday:'narrow'});labels.append(lab);
+      });
+      card.append(title,graph,labels);wrap.append(card);
+    });
+  }
+
+  // Habits follow the selected date instead of always forcing today.
+  renderHabits=function(){
+    const l=$('habitList'); if(!l)return; l.innerHTML='';
+    const key=selectedKey();
+    state.habits.forEach(h=>{
+      const r=document.createElement('div');r.className='item';
+      const left=document.createElement('label');left.style.display='flex';left.style.gap='10px';left.style.alignItems='center';left.style.flex='1';
+      const cb=document.createElement('input');cb.type='checkbox';cb.checked=habitDoneOnDate(h.id,key);
+      cb.onchange=()=>{setHabitDoneForDate(h,key,cb.checked); if(key===todayKey())h.done=cb.checked; save(); renderHabits(); renderDashboard();};
+      const span=document.createElement('span');span.textContent=h.name;left.append(cb,span);
+      const b=document.createElement('button');b.className='btn';b.textContent='Edit';b.onclick=()=>openEdit('habit',h.id,h.name);
+      r.append(left,b);l.append(r);
+    });
+    renderHabitTrends();
+  };
+
+  function syncSelectedDateEverywhere(){
+    const key=selectedKey();
+    if($('mealDate')) $('mealDate').value=key;
+    if($('weightDate')) $('weightDate').value=key;
+    if($('progressPhotoDate')) $('progressPhotoDate').value=key;
+    renderMealDaySummary(key);
+    renderMeals();
+    renderHabits();
+    renderWeight();
+    renderWorkouts();
+    renderDashboard();
+  }
+
+  // Make the date arrows control every main page.
+  $('dashPrevDay').onclick=()=>{dashOffset--;syncSelectedDateEverywhere();};
+  $('dashNextDay').onclick=()=>{dashOffset++;syncSelectedDateEverywhere();};
+
+  // Whenever a tab opens, keep its date-aware controls synced to the global date.
+  document.querySelectorAll('.tab').forEach(btn=>btn.addEventListener('click',()=>setTimeout(syncSelectedDateEverywhere,0)));
+
+  if($('mealDate')) $('mealDate').onchange=()=>{
+    const d=new Date($('mealDate').value+'T12:00:00');
+    const now=new Date(); now.setHours(12,0,0,0);
+    if(!isNaN(d)) dashOffset=Math.round((d-now)/86400000);
+    syncSelectedDateEverywhere();
+  };
+
+  // Quick exercise entries and completed routines are recorded on the selected day.
+  if($('exerciseForm')) $('exerciseForm').onsubmit=e=>{
+    e.preventDefault();
+    const name=$('quickExerciseName').value.trim()||'Exercise';
+    const mins=Math.max(1,Number($('exerciseMins').value)||1);
+    state.workouts.push({id:uid(),date:selectedKey(),name,mins});
+    $('quickExerciseName').value='';update();syncSelectedDateEverywhere();
+  };
+  if($('finishWorkout')) $('finishWorkout').onclick=()=>{
+    const routine=state.routines.find(x=>x.id===activeWorkoutRoutineId);if(!routine)return;
+    const completed={id:uid(),date:selectedKey(),name:routine.name,mins:0,routineId:routine.id,completedAt:Date.now(),details:routine.items.map(it=>({name:it.name,sets:(it.actualSets||[]).map(s=>({weight:Number(s.weight)||0,reps:Number(s.reps)||0}))}))};
+    state.workouts.push(completed);$('currentWorkoutCard').style.display='none';activeWorkoutRoutineId=null;update();syncSelectedDateEverywhere();
+  };
+
+  // Filter quick workout history to the selected day.
+  renderWorkouts=function(){
+    const l=$('exerciseLog'); if(!l)return; l.innerHTML='';
+    const key=selectedKey();
+    (state.workouts||[]).filter(w=>(w.date||todayKey())===key).slice().reverse().forEach(w=>{
+      const r=document.createElement('div');r.className='item';const main=document.createElement('div');main.className='item-main';main.innerHTML='<div class="item-title"></div><div class="tiny"></div>';
+      main.children[0].textContent=w.name;main.children[1].textContent=(w.mins||0)+' min';
+      const b=document.createElement('button');b.className='btn';b.textContent='Edit';b.onclick=()=>openEdit('workout',w.id,w.name,w.mins||0);r.append(main,b);l.append(r);
+    });
+  };
+
+  // Initial sync for the current day.
+  syncSelectedDateEverywhere();
 })();
 </script>
 
