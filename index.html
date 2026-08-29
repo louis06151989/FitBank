@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#0a1220">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="apple-touch-icon" href="icon-192.png">
   <title>FitBank</title>
@@ -16,8 +16,9 @@
     }
     *{box-sizing:border-box}
     body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--text)}
+    body::before{content:"";position:fixed;top:0;left:0;right:0;height:env(safe-area-inset-top);background:var(--bg);z-index:50;pointer-events:none}
     .wrap{max-width:860px;margin:0 auto;padding:calc(18px + env(safe-area-inset-top)) 16px calc(24px + env(safe-area-inset-bottom))}
-    .tabs{display:flex;gap:8px;overflow:auto;padding:4px 0 10px;position:sticky;top:env(safe-area-inset-top);background:var(--bg);z-index:5;scrollbar-width:none}.tabs::-webkit-scrollbar{display:none}.tab{flex:0 0 auto}
+    .tabs{display:flex;gap:8px;overflow:auto;padding:4px 0 10px;position:sticky;top:0;background:var(--bg);z-index:40;scrollbar-width:none;box-shadow:0 8px 12px var(--bg)}.tabs::-webkit-scrollbar{display:none}.tab{flex:0 0 auto}
     button,input,select{font:inherit}
     button{min-height:44px;cursor:pointer}
     .tab,.btn{border:1px solid var(--border);background:transparent;color:var(--text);border-radius:14px;padding:10px 14px}
@@ -45,6 +46,32 @@
     @media(max-width:640px){.grid2,.grid4{grid-template-columns:1fr}.week{font-size:11px}}
   </style>
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+
+<style id="fitbank-v25-exercise-css">
+.workout-card{border:1px solid var(--border);border-radius:16px;padding:14px;margin-top:12px;background:var(--card)}
+.workout-card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.workout-card-title{font-size:18px;font-weight:800}
+.workout-meta{font-size:12px;color:var(--muted);margin-top:3px}
+.workout-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px}
+.workout-grid label{font-size:12px;color:var(--muted)}
+.workout-grid input{margin-top:5px;width:100%}
+.target-box{margin-top:12px;border:1px solid var(--border);border-radius:14px;padding:12px;text-align:center}
+.target-box .target-label{font-size:12px;color:var(--muted)}
+.target-box .target-value{font-size:28px;font-weight:900;margin-top:2px}
+.set-log{display:grid;grid-template-columns:48px minmax(0,1fr) minmax(0,1fr) 44px;gap:8px;align-items:center;margin-top:8px}
+.set-log .set-number{font-size:12px;color:var(--muted)}
+.set-log input{min-width:0}
+.exercise-notes{width:100%;min-height:70px;margin-top:10px}
+.clean-import-card{border:1px solid var(--border);border-radius:14px;padding:12px;margin-top:10px}
+.clean-import-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.clean-import-grid .full{grid-column:1/-1}
+.current-workout{margin-top:12px}
+@media(max-width:520px){
+  .workout-grid{grid-template-columns:1fr 1fr}
+  .set-log{grid-template-columns:38px 1fr 1fr 40px}
+}
+</style>
+
 </head>
 <body>
 <div class="wrap">
@@ -54,7 +81,7 @@
     <button class="tab" data-tab="fasting">Fasting</button>
     <button class="tab" data-tab="habits">Habits</button>
     <button class="tab" data-tab="exercise">Exercise</button>
-    <button class="tab" data-tab="settings">Settings</button>
+    <button class="tab" data-tab="weight">Weight</button><button class="tab" data-tab="settings">Settings</button>
   </div>
 
   <section id="home" class="panel active">
@@ -190,24 +217,30 @@
     </div>
   </section>
 
-  <section id="exercise" class="panel">
-    <div class="card">
-      <strong>Your exercise types</strong>
-      <form id="exerciseAddForm" style="margin-top:12px">
-        <input id="exerciseName" maxlength="60" placeholder="e.g. Yard work">
-        <button class="btn primary">Add exercise</button>
-      </form>
-      <div id="exerciseTypes" class="list"></div>
+  
+<section id="exercise" class="panel">
+  <div class="card">
+    <div class="row">
+      <div>
+        <strong>Workout routines</strong>
+        <div class="muted">Build a routine manually or import one from a screenshot.</div>
+      </div>
     </div>
 
-    <div class="card" style="margin-top:12px">
-      <div class="row">
-        <div>
-          <strong>Import workout from screenshot</strong>
-          <div class="muted">Upload a screenshot and FitBank will try to read the exercise names, sets, and reps.</div>
-        </div>
-      </div>
-      <input id="workoutShot" type="file" accept="image/*" style="margin-top:12px">
+    <div class="grid grid2" style="margin-top:12px">
+      <button id="showManualRoutine" class="btn primary" type="button">+ Create routine</button>
+      <button id="showScreenshotImport" class="btn" type="button">Import screenshot</button>
+    </div>
+
+    <div id="manualRoutinePanel" style="display:none;margin-top:12px">
+      <form id="routineForm">
+        <input id="routineName" maxlength="60" placeholder="Routine name, e.g. Legs #1">
+        <button class="btn primary">Create routine</button>
+      </form>
+    </div>
+
+    <div id="screenshotImportPanel" style="display:none;margin-top:12px">
+      <input id="workoutShot" type="file" accept="image/*">
       <img id="workoutShotPreview" style="display:none" alt="Workout screenshot preview">
       <button id="readWorkoutShot" class="btn primary" type="button" style="margin-top:10px">Read workout screenshot</button>
       <div id="ocrStatus" class="muted" style="margin-top:10px"></div>
@@ -215,62 +248,106 @@
       <div id="ocrReview" style="display:none;margin-top:14px">
         <label class="muted">Routine name</label>
         <input id="ocrRoutineName" value="Imported Workout">
-        <div id="ocrExerciseList" class="list"></div>
+        <div id="ocrExerciseList"></div>
         <div class="actions" style="margin-top:10px">
           <button id="ocrAddRow" class="btn" type="button">+ Add exercise</button>
           <button id="saveOcrRoutine" class="btn primary" type="button">Save routine</button>
         </div>
       </div>
-      <div class="tiny" style="margin-top:10px">Screenshot reading uses on-device/browser OCR. You can edit everything before saving.</div>
     </div>
 
-    <div class="card" style="margin-top:12px">
-      <div class="row">
-        <div>
-          <strong>Workout routines</strong>
-          <div class="muted">Build a routine once, then start it with one tap.</div>
-        </div>
+    <div id="routineList" class="list" style="margin-top:12px"></div>
+  </div>
+
+  <div id="routineBuilderCard" class="card" style="margin-top:12px;display:none">
+    <div class="row">
+      <div>
+        <strong id="routineBuilderTitle">Edit routine</strong>
+        <div class="muted">Set reps, percentage of max, and max weight for each exercise.</div>
       </div>
-      <form id="routineForm" style="margin-top:12px">
-        <input id="routineName" maxlength="60" placeholder="Routine name, e.g. Monday Upper Body">
-        <button class="btn primary">Create routine</button>
-      </form>
-      <div id="routineList" class="list"></div>
+      <button id="closeRoutineBuilder" class="btn" type="button">Done</button>
     </div>
 
-    <div id="routineBuilderCard" class="card" style="margin-top:12px;display:none">
-      <div class="row">
-        <div>
-          <strong id="routineBuilderTitle">Edit routine</strong>
-          <div class="muted">Add exercises, sets, reps, or time.</div>
-        </div>
-        <button id="closeRoutineBuilder" class="btn" type="button">Done</button>
+    <form id="routineExerciseForm" style="margin-top:12px">
+      <input id="routineExerciseName" maxlength="80" placeholder="Exercise name, e.g. Squat">
+      <div class="grid grid2">
+        <input id="routineSets" type="number" min="1" max="20" value="3" placeholder="Working sets">
+        <input id="routineReps" type="text" value="8-10" placeholder="Target reps, e.g. 8-10">
       </div>
+      <div class="grid grid2">
+        <input id="routinePercent" type="number" min="0" max="100" step="1" placeholder="% of max">
+        <input id="routineMax" type="number" min="0" max="2000" step="0.5" placeholder="Your max (lb)">
+      </div>
+      <div class="grid grid2">
+        <input id="routineRpe" type="text" placeholder="RPE, e.g. 8-9">
+        <input id="routineRest" type="text" placeholder="Rest, e.g. 3-4 min">
+      </div>
+      <textarea id="routineNotes" class="exercise-notes" placeholder="Notes or substitutions"></textarea>
+      <button class="btn primary" type="submit">Add exercise</button>
+    </form>
+    <div id="routineExerciseList"></div>
+  </div>
 
-      <form id="routineExerciseForm" style="margin-top:12px">
-        <select id="routineExerciseSelect"></select>
-        <div class="grid grid2">
-          <input id="routineSets" type="number" min="1" max="20" value="3" placeholder="Sets">
-          <input id="routineReps" type="number" min="0" max="500" value="10" placeholder="Reps">
-        </div>
-        <input id="routineMinutes" type="number" min="0" max="600" value="0" placeholder="Minutes (optional)">
-        <button class="btn" type="submit">Add to routine</button>
-      </form>
-      <div id="routineExerciseList" class="list"></div>
+  <div id="currentWorkoutCard" class="card current-workout" style="display:none">
+    <div class="row">
+      <div>
+        <strong id="currentWorkoutTitle">Current workout</strong>
+        <div class="muted">Log the weight and reps you actually complete.</div>
+      </div>
+      <button id="finishWorkout" class="btn primary" type="button">Finish</button>
+    </div>
+    <div id="currentWorkoutExercises"></div>
+  </div>
+
+  <div class="card" style="margin-top:12px">
+    <strong>Quick exercise log</strong>
+    <div class="muted">For walking, cardio, yard work, or anything you just want to track by time.</div>
+    <form id="exerciseForm" style="margin-top:12px">
+      <input id="quickExerciseName" maxlength="60" placeholder="Exercise name">
+      <input id="exerciseMins" type="number" min="1" max="600" value="30" placeholder="Minutes">
+      <button class="btn">Log workout</button>
+    </form>
+    <div id="exerciseLog" class="list"></div>
+  </div>
+</section>
+
+
+<section id="weight" class="panel">
+  <div class="card">
+    <div class="row">
+      <div>
+        <strong>Body weight</strong>
+        <div class="muted">Log your weight and watch the trend over time.</div>
+      </div>
+      <div style="text-align:right">
+        <div id="latestWeight" style="font-size:28px;font-weight:900">—</div>
+        <div id="weightChange" class="tiny">No entries yet</div>
+      </div>
     </div>
 
-    <div class="card" style="margin-top:12px">
-      <strong>Log exercise</strong>
-      <form id="exerciseForm" style="margin-top:12px">
-        <select id="exerciseSelect"></select>
-        <input id="exerciseMins" type="number" min="1" max="600" value="30">
-        <button class="btn">Log workout</button>
-      </form>
-      <div id="exerciseLog" class="list"></div>
-    </div>
-  </section>
+    <form id="weightForm" style="margin-top:12px">
+      <div class="grid grid2">
+        <input id="weightValue" type="number" min="50" max="1000" step="0.1" placeholder="Weight (lb)">
+        <input id="weightDate" type="date">
+      </div>
+      <button class="btn primary" type="submit">Log weight</button>
+    </form>
 
-  <section id="settings" class="panel">
+    <div class="grid grid2" style="margin-top:12px">
+      <input id="weightGoalInput" type="number" min="50" max="1000" step="0.1" placeholder="Goal weight (optional)">
+      <button id="saveWeightGoal" class="btn" type="button">Set goal</button>
+    </div>
+
+    <div id="weightGoalText" class="muted" style="margin-top:10px"></div>
+  </div>
+
+  <div class="card" style="margin-top:12px">
+    <strong>Weight history</strong>
+    <div id="weightHistory" class="list"></div>
+  </div>
+</section>
+
+<section id="settings" class="panel">
     <div class="card">
       <strong>Calories & weekly bank</strong>
       <div class="grid grid2" style="margin-top:12px">
@@ -331,7 +408,7 @@ const defaults={
   habits:[{id:1,name:'Drink water',done:false},{id:2,name:'Hit protein goal',done:false},{id:3,name:'No late-night snack',done:false}],
   exercises:[{id:1,name:'Walking'},{id:2,name:'Strength training'},{id:3,name:'Running'},{id:4,name:'Cardio'}],
   routines:[],
-  meals:[],workouts:[],waterOz:0,waterGoalOz:100,
+  meals:[],workouts:[],waterOz:0,waterGoalOz:100,weightLogs:[],weightGoalLb:0,
   reminders:{breakfast:'08:30',lunch:'12:30',dinner:'18:30',repeat:'60'}
 };
 let state=JSON.parse(JSON.stringify(defaults));
@@ -363,7 +440,7 @@ function update(){
   $('fastDisplay').textContent=state.fastHours+':'+state.eatHours;
   $('fastSub').textContent=state.fasting?'Fast in progress':'Not fasting';
   $('fastBtn').textContent=state.fasting?'End fast':'Start fast';
-  renderMeals();renderWater();renderHabits();renderExerciseTypes();renderRoutines();renderWorkouts();save();
+  renderMeals();renderWater();renderWeight();renderHabits();renderRoutines();renderWorkouts();save();
 }
 function openEdit(type,id,name,num){
   editCtx={type,id};$('editTitle').textContent='Edit '+type;$('editName').value=name||'';$('editNumber').value=(num??'');$('editNumber').style.display=['meal','workout'].includes(type)?'block':'none';$('editModal').classList.add('open');$('editModal').setAttribute('aria-hidden','false')
@@ -438,7 +515,7 @@ function renderExerciseTypes(){
   });
   if([...s.options].some(o=>o.value===current))s.value=current
 }
-$('exerciseAddForm').onsubmit=e=>{e.preventDefault();const n=$('exerciseName').value.trim();if(n){state.exercises.push({id:uid(),name:n});$('exerciseName').value='';update()}};
+if($('exerciseAddForm'))$('exerciseAddForm').onsubmit=e=>{e.preventDefault();const n=$('exerciseName').value.trim();if(n){state.exercises.push({id:uid(),name:n});$('exerciseName').value='';update()}};
 
 function renderWorkouts(){
   const l=$('exerciseLog');l.innerHTML='';
@@ -451,6 +528,97 @@ $('exerciseForm').onsubmit=e=>{e.preventDefault();const mins=Number($('exerciseM
 
 
 
+
+
+function renderWeight(){
+  state.weightLogs=Array.isArray(state.weightLogs)?state.weightLogs:[];
+  state.weightLogs.sort((a,b)=>String(b.date).localeCompare(String(a.date)));
+  const latest=state.weightLogs[0];
+  const previous=state.weightLogs[1];
+
+  if($('latestWeight')){
+    $('latestWeight').textContent=latest?Number(latest.weight).toFixed(1)+' lb':'—';
+    if(latest && previous){
+      const diff=Number(latest.weight)-Number(previous.weight);
+      const sign=diff>0?'+':'';
+      $('weightChange').textContent=sign+diff.toFixed(1)+' lb since last entry';
+    } else {
+      $('weightChange').textContent=latest?'First entry logged':'No entries yet';
+    }
+
+    $('weightGoalInput').value=state.weightGoalLb||'';
+    $('weightGoalText').textContent=state.weightGoalLb
+      ? 'Goal: '+Number(state.weightGoalLb).toFixed(1)+' lb'
+      : 'No goal weight set.';
+
+    const history=$('weightHistory');
+    history.innerHTML='';
+    if(!state.weightLogs.length){
+      const empty=document.createElement('div');
+      empty.className='muted';
+      empty.textContent='No weight entries yet.';
+      history.append(empty);
+    } else {
+      state.weightLogs.forEach(log=>{
+        const row=document.createElement('div');
+        row.className='item';
+
+        const main=document.createElement('div');
+        main.className='item-main';
+        main.innerHTML='<div class="item-title"></div><div class="tiny"></div>';
+        main.children[0].textContent=Number(log.weight).toFixed(1)+' lb';
+        main.children[1].textContent=log.date;
+
+        const actions=document.createElement('div');
+        actions.className='actions';
+
+        const edit=document.createElement('button');
+        edit.className='btn';
+        edit.type='button';
+        edit.textContent='Edit';
+        edit.onclick=()=>{
+          const val=prompt('Weight in pounds',log.weight);
+          if(val===null)return;
+          const w=Number(val);
+          if(!w || w<50 || w>1000)return;
+          log.weight=w;
+          update();
+        };
+
+        const del=document.createElement('button');
+        del.className='btn danger';
+        del.type='button';
+        del.textContent='Delete';
+        del.onclick=()=>{
+          state.weightLogs=state.weightLogs.filter(x=>x.id!==log.id);
+          update();
+        };
+
+        actions.append(edit,del);
+        row.append(main,actions);
+        history.append(row);
+      });
+    }
+  }
+}
+
+$('weightForm').onsubmit=e=>{
+  e.preventDefault();
+  const weight=Number($('weightValue').value);
+  if(!weight || weight<50 || weight>1000)return;
+  const date=$('weightDate').value || new Date().toISOString().slice(0,10);
+  const existing=state.weightLogs.find(x=>x.date===date);
+  if(existing) existing.weight=weight;
+  else state.weightLogs.push({id:uid(),weight,date});
+  $('weightValue').value='';
+  update();
+};
+
+$('saveWeightGoal').onclick=()=>{
+  const goal=Number($('weightGoalInput').value)||0;
+  state.weightGoalLb=goal;
+  update();
+};
 
 function renderWater(){
   state.waterOz=Math.max(0,Number(state.waterOz)||0);
@@ -494,7 +662,20 @@ $('resetWater').onclick=()=>{
   update();
 };
 
+
+// ---------- FitBank workout routines v2.5 ----------
 let workoutShotUrl=null;
+let activeRoutineId=null;
+let activeWorkoutRoutineId=null;
+
+$('showManualRoutine').onclick=()=>{
+  $('manualRoutinePanel').style.display=$('manualRoutinePanel').style.display==='none'?'block':'none';
+  $('screenshotImportPanel').style.display='none';
+};
+$('showScreenshotImport').onclick=()=>{
+  $('screenshotImportPanel').style.display=$('screenshotImportPanel').style.display==='none'?'block':'none';
+  $('manualRoutinePanel').style.display='none';
+};
 
 $('workoutShot').onchange=()=>{
   const f=$('workoutShot').files&&$('workoutShot').files[0];
@@ -507,39 +688,71 @@ $('workoutShot').onchange=()=>{
   $('ocrReview').style.display='none';
 };
 
-function addOcrRow(name='',sets=3,reps=10){
-  const row=document.createElement('div');
-  row.className='ocr-row';
-  const n=document.createElement('input');n.className='ocr-name';n.value=name;n.placeholder='Exercise name';
-  const s=document.createElement('input');s.type='number';s.min='1';s.max='20';s.value=sets||3;s.placeholder='Sets';
-  const r=document.createElement('input');r.type='number';r.min='0';r.max='500';r.value=reps||10;r.placeholder='Reps';
-  const b=document.createElement('button');b.type='button';b.className='btn danger ocr-remove';b.textContent='Remove';b.onclick=()=>row.remove();
-  row.append(n,s,r,b);$('ocrExerciseList').append(row);
+function cleanExerciseName(raw){
+  let s=(raw||'').replace(/[|]/g,' ').replace(/\s+/g,' ').trim();
+  s=s.replace(/^(exercise|week\s*\d*|warm.?up.*|working.*|reps?.*|load.*|rpe.*|rest.*|substitution.*|notes.*)$/i,'');
+  // Stop at the first obvious numeric workout column.
+  const m=s.match(/^(.+?)(?:\s+(?:\d{1,2}(?:-\d{1,2})?|\d{1,2}[xX×]\d{1,3})\b)/);
+  if(m && m[1].length>=3)s=m[1].trim();
+  s=s.replace(/\b(?:RPE|REST|OPTION|NOTES?)\b.*$/i,'').trim();
+  return s.slice(0,80);
 }
 
 function parseWorkoutText(text){
-  const lines=text.split(/\n+/).map(x=>x.trim()).filter(Boolean);
-  const ignore=/^(workout|exercise|sets?|reps?|routine|day\s*\d+|week\s*\d+)$/i;
+  const rawLines=(text||'').split(/\n+/).map(x=>x.trim()).filter(Boolean);
+  const header=/week|exercise|warm.?up|working sets|reps|load|rpe|rest|substitution|notes/i;
   const items=[];
-  for(const raw of lines){
-    if(ignore.test(raw) || raw.length<3)continue;
-    let m=raw.match(/^(.+?)\s+(\d{1,2})\s*[xX×]\s*(\d{1,3})(?:\s.*)?$/);
-    if(m){items.push({name:m[1].trim(),sets:Number(m[2]),reps:Number(m[3])});continue;}
-    m=raw.match(/^(.+?)\s+(\d{1,2})\s+sets?\s*(?:of\s*)?(\d{1,3})?/i);
-    if(m){items.push({name:m[1].trim(),sets:Number(m[2]),reps:Number(m[3]||10)});continue;}
-    m=raw.match(/^(.+?)\s+(\d{1,2})\s*[xX×]\s*(\d{1,3})\s*-\s*(\d{1,3})/);
-    if(m){items.push({name:m[1].trim(),sets:Number(m[2]),reps:Number(m[3])});continue;}
-  }
-  if(!items.length){
-    // fallback: use plausible exercise-like lines
-    for(const raw of lines.slice(0,12)){
-      if(/\d/.test(raw) && raw.length>3){
-        const name=raw.replace(/\b\d+\s*[xX×]\s*\d+\b.*$/,'').trim();
-        if(name && name.length>2) items.push({name,sets:3,reps:10});
-      }
+  for(const raw of rawLines){
+    if(header.test(raw) && raw.length<80) continue;
+    const name=cleanExerciseName(raw);
+    if(!name || name.length<3 || /^\d/.test(name))continue;
+
+    const nums=raw.match(/\b\d{1,2}(?:-\d{1,2})?\b/g)||[];
+    let sets=3, reps='8-10', rpe='', rest='';
+    if(nums.length>=2){
+      const possibleSet=parseInt(nums[1],10);
+      if(possibleSet>=1 && possibleSet<=10) sets=possibleSet;
     }
+    const repRange=raw.match(/\b(\d{1,2}-\d{1,2}|\d{1,2})\b(?=\s*(?:RPE|8-9|9-10|~|min|$))/i);
+    if(repRange) reps=repRange[1];
+    const rpeMatch=raw.match(/\b(?:RPE\s*)?(\d(?:\.\d)?-\d(?:\.\d)?|\d(?:\.\d)?)\b/i);
+    if(rpeMatch && Number(rpeMatch[1].split('-')[0])>=6) rpe=rpeMatch[1];
+    const restMatch=raw.match(/~?\s*(\d(?:-\d)?\s*min)/i);
+    if(restMatch) rest=restMatch[1];
+
+    // Avoid repeated garbage names.
+    if(items.some(x=>x.name.toLowerCase()===name.toLowerCase()))continue;
+    items.push({name,sets,reps,rpe,rest,percent:'',maxWeight:'',notes:''});
+    if(items.length>=16)break;
   }
-  return items.slice(0,20);
+  return items;
+}
+
+function addOcrRow(item={}){
+  const card=document.createElement('div');
+  card.className='clean-import-card';
+  card.innerHTML=`
+    <input class="ocr-name" placeholder="Exercise name">
+    <div class="clean-import-grid">
+      <input class="ocr-sets" type="number" min="1" max="20" placeholder="Working sets">
+      <input class="ocr-reps" type="text" placeholder="Target reps">
+      <input class="ocr-percent" type="number" min="0" max="100" placeholder="% of max">
+      <input class="ocr-max" type="number" min="0" max="2000" step="0.5" placeholder="Your max (lb)">
+      <input class="ocr-rpe" type="text" placeholder="RPE">
+      <input class="ocr-rest" type="text" placeholder="Rest">
+      <textarea class="ocr-notes full exercise-notes" placeholder="Notes / substitutions"></textarea>
+      <button class="btn danger full ocr-remove" type="button">Remove exercise</button>
+    </div>`;
+  card.querySelector('.ocr-name').value=item.name||'';
+  card.querySelector('.ocr-sets').value=item.sets||3;
+  card.querySelector('.ocr-reps').value=item.reps||'8-10';
+  card.querySelector('.ocr-percent').value=item.percent||'';
+  card.querySelector('.ocr-max').value=item.maxWeight||'';
+  card.querySelector('.ocr-rpe').value=item.rpe||'';
+  card.querySelector('.ocr-rest').value=item.rest||'';
+  card.querySelector('.ocr-notes').value=item.notes||'';
+  card.querySelector('.ocr-remove').onclick=()=>card.remove();
+  $('ocrExerciseList').append(card);
 }
 
 $('readWorkoutShot').onclick=async()=>{
@@ -547,7 +760,7 @@ $('readWorkoutShot').onclick=async()=>{
   if(!f){$('ocrStatus').textContent='Choose a workout screenshot first.';return;}
   if(!window.Tesseract){$('ocrStatus').textContent='Workout reader could not load. Check your internet connection and try again.';return;}
   $('readWorkoutShot').disabled=true;
-  $('ocrStatus').textContent='Reading screenshot... this can take a little while.';
+  $('ocrStatus').textContent='Reading screenshot...';
   try{
     const result=await Tesseract.recognize(f,'eng',{logger:m=>{
       if(m.status==='recognizing text' && typeof m.progress==='number'){
@@ -557,88 +770,84 @@ $('readWorkoutShot').onclick=async()=>{
     const items=parseWorkoutText(result.data.text||'');
     $('ocrExerciseList').innerHTML='';
     if(items.length){
-      items.forEach(it=>addOcrRow(it.name,it.sets,it.reps));
-      $('ocrStatus').textContent='Workout read. Review the exercises below before saving.';
+      items.forEach(addOcrRow);
+      $('ocrStatus').textContent='Workout read. Clean up anything that needs fixing, then save.';
     }else{
-      addOcrRow('',3,10);
-      $('ocrStatus').textContent='I could not confidently read the workout. You can still enter or correct it below.';
+      addOcrRow({name:'',sets:3,reps:'8-10'});
+      $('ocrStatus').textContent='I could not confidently separate the workout. Add the exercises below.';
     }
     $('ocrReview').style.display='block';
-  }catch(err){
-    $('ocrStatus').textContent='Could not read that screenshot. Try a clearer image or enter the routine manually.';
+  }catch(e){
+    $('ocrStatus').textContent='Could not read that screenshot. Try a clearer screenshot.';
   }finally{
     $('readWorkoutShot').disabled=false;
   }
 };
-
-$('ocrAddRow').onclick=()=>addOcrRow('',3,10);
+$('ocrAddRow').onclick=()=>addOcrRow({sets:3,reps:'8-10'});
 
 $('saveOcrRoutine').onclick=()=>{
   const name=$('ocrRoutineName').value.trim()||'Imported Workout';
-  const rows=[...$('ocrExerciseList').querySelectorAll('.ocr-row')];
+  const cards=[...$('ocrExerciseList').querySelectorAll('.clean-import-card')];
   const items=[];
-  rows.forEach(row=>{
-    const inputs=row.querySelectorAll('input');
-    const exName=inputs[0].value.trim();
-    const sets=Math.min(Math.max(Number(inputs[1].value)||1,1),20);
-    const reps=Math.min(Math.max(Number(inputs[2].value)||0,0),500);
+  cards.forEach(card=>{
+    const exName=card.querySelector('.ocr-name').value.trim();
     if(!exName)return;
-    let ex=state.exercises.find(x=>x.name.toLowerCase()===exName.toLowerCase());
-    if(!ex){
-      ex={id:uid(),name:exName};
-      state.exercises.push(ex);
-    }
-    items.push({id:uid(),exerciseId:ex.id,name:ex.name,sets,reps,minutes:0});
+    items.push({
+      id:uid(),name:exName,
+      sets:Math.max(1,Math.min(20,Number(card.querySelector('.ocr-sets').value)||1)),
+      reps:card.querySelector('.ocr-reps').value.trim()||'',
+      percent:Number(card.querySelector('.ocr-percent').value)||0,
+      maxWeight:Number(card.querySelector('.ocr-max').value)||0,
+      rpe:card.querySelector('.ocr-rpe').value.trim(),
+      rest:card.querySelector('.ocr-rest').value.trim(),
+      notes:card.querySelector('.ocr-notes').value.trim(),
+      actualSets:[]
+    });
   });
   if(!items.length){$('ocrStatus').textContent='Add at least one exercise before saving.';return;}
+  state.routines=state.routines||[];
   state.routines.push({id:uid(),name,items});
-  $('ocrStatus').textContent=name+' saved to Workout Routines.';
+  $('ocrStatus').textContent=name+' saved.';
   $('ocrReview').style.display='none';
   update();
 };
 
-let activeRoutineId=null;
+function calcTargetWeight(item){
+  const max=Number(item.maxWeight)||0;
+  const pct=Number(item.percent)||0;
+  if(!max || !pct)return 0;
+  return Math.round((max*pct/100)/5)*5;
+}
 
 function renderRoutines(){
-  const list=$('routineList');
-  if(!list)return;
+  const list=$('routineList'); if(!list)return;
   list.innerHTML='';
-  state.routines=(state.routines||[]);
+  state.routines=state.routines||[];
   if(!state.routines.length){
-    const empty=document.createElement('div');
-    empty.className='muted';
-    empty.textContent='No routines yet. Create one above.';
+    const empty=document.createElement('div');empty.className='muted';empty.textContent='No routines yet.';
     list.append(empty);
   }
   state.routines.forEach(r=>{
-    const row=document.createElement('div'); row.className='item';
-    const main=document.createElement('div'); main.className='item-main';
-    const totalSets=(r.items||[]).reduce((a,x)=>a+(Number(x.sets)||0),0);
+    const row=document.createElement('div');row.className='item';
+    const main=document.createElement('div');main.className='item-main';
     main.innerHTML='<div class="item-title"></div><div class="tiny"></div>';
     main.children[0].textContent=r.name;
-    main.children[1].textContent=(r.items||[]).length+' exercises'+(totalSets?' · '+totalSets+' sets':'');
-    const actions=document.createElement('div'); actions.className='actions';
-    const start=document.createElement('button'); start.className='btn primary'; start.type='button'; start.textContent='Start';
+    main.children[1].textContent=(r.items||[]).length+' exercises';
+    const actions=document.createElement('div');actions.className='actions';
+    const start=document.createElement('button');start.className='btn primary';start.type='button';start.textContent='Start';
     start.onclick=()=>startRoutine(r.id);
-    const edit=document.createElement('button'); edit.className='btn'; edit.type='button'; edit.textContent='Edit';
+    const edit=document.createElement('button');edit.className='btn';edit.type='button';edit.textContent='Edit';
     edit.onclick=()=>openRoutineBuilder(r.id);
-    const del=document.createElement('button'); del.className='btn danger'; del.type='button'; del.textContent='Delete';
-    del.onclick=()=>{state.routines=state.routines.filter(x=>x.id!==r.id); if(activeRoutineId===r.id)closeRoutineBuilder(); update()};
-    actions.append(start,edit,del); row.append(main,actions); list.append(row);
+    const del=document.createElement('button');del.className='btn danger';del.type='button';del.textContent='Delete';
+    del.onclick=()=>{state.routines=state.routines.filter(x=>x.id!==r.id);update()};
+    actions.append(start,edit,del);row.append(main,actions);list.append(row);
   });
-
-  const sel=$('routineExerciseSelect');
-  if(sel){
-    const cur=sel.value; sel.innerHTML='';
-    state.exercises.forEach(x=>{const o=document.createElement('option');o.value=x.id;o.textContent=x.name;sel.append(o)});
-    if([...sel.options].some(o=>o.value===cur))sel.value=cur;
-  }
   renderRoutineExerciseList();
 }
 
 function openRoutineBuilder(id){
   activeRoutineId=id;
-  const r=state.routines.find(x=>x.id===id); if(!r)return;
+  const r=state.routines.find(x=>x.id===id);if(!r)return;
   $('routineBuilderTitle').textContent='Edit: '+r.name;
   $('routineBuilderCard').style.display='block';
   renderRoutineExerciseList();
@@ -648,72 +857,186 @@ function closeRoutineBuilder(){activeRoutineId=null;$('routineBuilderCard').styl
 $('closeRoutineBuilder').onclick=closeRoutineBuilder;
 
 function renderRoutineExerciseList(){
-  const list=$('routineExerciseList'); if(!list)return;
+  const list=$('routineExerciseList');if(!list)return;
   list.innerHTML='';
-  const r=state.routines.find(x=>x.id===activeRoutineId); if(!r)return;
-  (r.items||[]).forEach((it,idx)=>{
-    const row=document.createElement('div');row.className='item';
-    const main=document.createElement('div');main.className='item-main';
-    main.innerHTML='<div class="item-title"></div><div class="tiny"></div>';
-    main.children[0].textContent=it.name;
-    const detail=[];
-    if(it.sets)detail.push(it.sets+' sets');
-    if(it.reps)detail.push(it.reps+' reps');
-    if(it.minutes)detail.push(it.minutes+' min');
-    main.children[1].textContent=detail.join(' · ');
-    const del=document.createElement('button');del.className='btn danger';del.type='button';del.textContent='Remove';
-    del.onclick=()=>{r.items.splice(idx,1);update()};
-    row.append(main,del);list.append(row);
+  const routine=state.routines.find(x=>x.id===activeRoutineId);if(!routine)return;
+  (routine.items||[]).forEach((it,idx)=>{
+    const card=document.createElement('div');card.className='workout-card';
+    const target=calcTargetWeight(it);
+    card.innerHTML=`
+      <div class="workout-card-head">
+        <div><div class="workout-card-title"></div><div class="workout-meta"></div></div>
+        <button class="btn danger remove-exercise" type="button">Remove</button>
+      </div>
+      <div class="workout-grid">
+        <label>Working sets<input class="edit-sets" type="number" min="1" max="20"></label>
+        <label>Target reps<input class="edit-reps" type="text"></label>
+        <label>% of max<input class="edit-percent" type="number" min="0" max="100"></label>
+        <label>Your max (lb)<input class="edit-max" type="number" min="0" max="2000" step="0.5"></label>
+        <label>RPE<input class="edit-rpe" type="text"></label>
+        <label>Rest<input class="edit-rest" type="text"></label>
+      </div>
+      <div class="target-box"><div class="target-label">Calculated target weight</div><div class="target-value">${target?target+' lb':'—'}</div></div>
+      <textarea class="exercise-notes edit-notes" placeholder="Notes / substitutions"></textarea>`;
+    card.querySelector('.workout-card-title').textContent=it.name;
+    card.querySelector('.workout-meta').textContent=(it.sets||1)+' working set'+((it.sets||1)==1?'':'s')+(it.reps?' · '+it.reps+' reps':'');
+    card.querySelector('.edit-sets').value=it.sets||1;
+    card.querySelector('.edit-reps').value=it.reps||'';
+    card.querySelector('.edit-percent').value=it.percent||'';
+    card.querySelector('.edit-max').value=it.maxWeight||'';
+    card.querySelector('.edit-rpe').value=it.rpe||'';
+    card.querySelector('.edit-rest').value=it.rest||'';
+    card.querySelector('.edit-notes').value=it.notes||'';
+    const sync=()=>{
+      it.sets=Math.max(1,Number(card.querySelector('.edit-sets').value)||1);
+      it.reps=card.querySelector('.edit-reps').value.trim();
+      it.percent=Number(card.querySelector('.edit-percent').value)||0;
+      it.maxWeight=Number(card.querySelector('.edit-max').value)||0;
+      it.rpe=card.querySelector('.edit-rpe').value.trim();
+      it.rest=card.querySelector('.edit-rest').value.trim();
+      it.notes=card.querySelector('.edit-notes').value.trim();
+      card.querySelector('.target-value').textContent=calcTargetWeight(it)?calcTargetWeight(it)+' lb':'—';
+      save();
+    };
+    card.querySelectorAll('input,textarea').forEach(el=>el.addEventListener('input',sync));
+    card.querySelector('.remove-exercise').onclick=()=>{routine.items.splice(idx,1);update()};
+    list.append(card);
   });
 }
 
 $('routineForm').onsubmit=e=>{
   e.preventDefault();
-  const name=$('routineName').value.trim();
-  if(!name)return;
+  const name=$('routineName').value.trim();if(!name)return;
   const r={id:uid(),name,items:[]};
-  state.routines.push(r);
-  $('routineName').value='';
-  update();
-  openRoutineBuilder(r.id);
+  state.routines=state.routines||[];state.routines.push(r);
+  $('routineName').value='';$('manualRoutinePanel').style.display='none';
+  update();openRoutineBuilder(r.id);
 };
 
 $('routineExerciseForm').onsubmit=e=>{
   e.preventDefault();
-  const r=state.routines.find(x=>x.id===activeRoutineId); if(!r)return;
-  const exId=Number($('routineExerciseSelect').value);
-  const ex=state.exercises.find(x=>x.id===exId); if(!ex)return;
-  const sets=Math.min(Math.max(Number($('routineSets').value)||1,1),20);
-  const reps=Math.min(Math.max(Number($('routineReps').value)||0,0),500);
-  const minutes=Math.min(Math.max(Number($('routineMinutes').value)||0,0),600);
-  r.items.push({id:uid(),exerciseId:ex.id,name:ex.name,sets,reps,minutes});
+  const r=state.routines.find(x=>x.id===activeRoutineId);if(!r)return;
+  const name=$('routineExerciseName').value.trim();if(!name)return;
+  r.items.push({
+    id:uid(),name,
+    sets:Math.max(1,Math.min(20,Number($('routineSets').value)||1)),
+    reps:$('routineReps').value.trim(),
+    percent:Number($('routinePercent').value)||0,
+    maxWeight:Number($('routineMax').value)||0,
+    rpe:$('routineRpe').value.trim(),
+    rest:$('routineRest').value.trim(),
+    notes:$('routineNotes').value.trim(),
+    actualSets:[]
+  });
+  $('routineExerciseName').value='';
+  $('routinePercent').value='';$('routineMax').value='';
+  $('routineRpe').value='';$('routineRest').value='';$('routineNotes').value='';
   update();
 };
 
 function startRoutine(id){
-  const r=state.routines.find(x=>x.id===id); if(!r)return;
-  if(!(r.items||[]).length){openRoutineBuilder(id);return;}
-  let totalMinutes=0;
-  r.items.forEach(it=>{
-    const mins=Number(it.minutes)||0;
-    totalMinutes+=mins;
-    state.workouts.push({
-      id:uid(),
-      name:it.name+' ('+r.name+')',
-      mins:mins || Math.max(1,(Number(it.sets)||1)*3),
-      routineId:r.id,
-      sets:it.sets||0,
-      reps:it.reps||0
-    });
-  });
-  update();
-  const msg=document.createElement('div');
-  msg.className='notice';
-  msg.style.marginTop='12px';
-  msg.textContent=r.name+' logged.';
-  $('exerciseLog').parentElement.prepend(msg);
-  setTimeout(()=>msg.remove(),2500);
+  const routine=state.routines.find(x=>x.id===id);if(!routine)return;
+  if(!(routine.items||[]).length){openRoutineBuilder(id);return;}
+  activeWorkoutRoutineId=id;
+  $('currentWorkoutTitle').textContent=routine.name;
+  $('currentWorkoutCard').style.display='block';
+  renderCurrentWorkout();
+  $('currentWorkoutCard').scrollIntoView({behavior:'smooth',block:'start'});
 }
+
+function renderCurrentWorkout(){
+  const wrap=$('currentWorkoutExercises');wrap.innerHTML='';
+  const routine=state.routines.find(x=>x.id===activeWorkoutRoutineId);if(!routine)return;
+  routine.items.forEach((it,exerciseIndex)=>{
+    it.actualSets=Array.isArray(it.actualSets)?it.actualSets:[];
+    while(it.actualSets.length<(Number(it.sets)||1)){
+      it.actualSets.push({weight:calcTargetWeight(it)||0,reps:''});
+    }
+    const card=document.createElement('div');card.className='workout-card';
+    const target=calcTargetWeight(it);
+    card.innerHTML=`
+      <div class="workout-card-head">
+        <div><div class="workout-card-title"></div><div class="workout-meta"></div></div>
+        <div class="tiny">${it.rest?'Rest '+it.rest:''}</div>
+      </div>
+      <div class="workout-grid">
+        <label>Your max (lb)<input class="live-max" type="number" min="0" max="2000" step="0.5"></label>
+        <label>Target %<input class="live-percent" type="number" min="0" max="100"></label>
+      </div>
+      <div class="target-box">
+        <div class="target-label">Target working weight</div>
+        <div class="target-value">${target?target+' lb':'—'}</div>
+        <div class="tiny">${it.sets||1} set${(it.sets||1)==1?'':'s'} × ${it.reps||'target reps'}</div>
+      </div>
+      <div class="tiny" style="margin-top:12px">What you actually did</div>
+      <div class="actual-sets"></div>
+      ${it.notes?`<details style="margin-top:12px"><summary>Notes & substitutions</summary><div class="muted" style="margin-top:8px"></div></details>`:''}`;
+    card.querySelector('.workout-card-title').textContent=it.name;
+    card.querySelector('.workout-meta').textContent=(it.rpe?'RPE '+it.rpe+' · ':'')+(it.reps?it.reps+' reps':'');
+    card.querySelector('.live-max').value=it.maxWeight||'';
+    card.querySelector('.live-percent').value=it.percent||'';
+    if(it.notes)card.querySelector('details .muted').textContent=it.notes;
+
+    const setWrap=card.querySelector('.actual-sets');
+    const drawSets=()=>{
+      setWrap.innerHTML='';
+      it.actualSets.slice(0,Math.max(1,Number(it.sets)||1)).forEach((set,setIndex)=>{
+        const row=document.createElement('div');row.className='set-log';
+        row.innerHTML=`<div class="set-number">Set ${setIndex+1}</div>
+          <input class="actual-weight" type="number" min="0" max="2000" step="0.5" placeholder="Weight">
+          <input class="actual-reps" type="number" min="0" max="500" placeholder="Reps">
+          <button class="btn set-done" type="button">✓</button>`;
+        row.querySelector('.actual-weight').value=set.weight||'';
+        row.querySelector('.actual-reps').value=set.reps||'';
+        row.querySelector('.actual-weight').oninput=e=>{set.weight=Number(e.target.value)||0;save()};
+        row.querySelector('.actual-reps').oninput=e=>{set.reps=Number(e.target.value)||0;save()};
+        row.querySelector('.set-done').onclick=()=>{row.querySelector('.set-done').textContent='✓';row.style.opacity='.7';save()};
+        setWrap.append(row);
+      });
+    };
+    drawSets();
+
+    const recalc=()=>{
+      it.maxWeight=Number(card.querySelector('.live-max').value)||0;
+      it.percent=Number(card.querySelector('.live-percent').value)||0;
+      const newTarget=calcTargetWeight(it);
+      card.querySelector('.target-value').textContent=newTarget?newTarget+' lb':'—';
+      it.actualSets.forEach(s=>{if(!s.weight)s.weight=newTarget||0});
+      save();
+    };
+    card.querySelector('.live-max').oninput=recalc;
+    card.querySelector('.live-percent').oninput=recalc;
+    wrap.append(card);
+  });
+}
+
+$('finishWorkout').onclick=()=>{
+  const routine=state.routines.find(x=>x.id===activeWorkoutRoutineId);if(!routine)return;
+  const completed={
+    id:uid(),
+    name:routine.name,
+    mins:0,
+    routineId:routine.id,
+    completedAt:Date.now(),
+    details:routine.items.map(it=>({
+      name:it.name,
+      sets:(it.actualSets||[]).map(s=>({weight:Number(s.weight)||0,reps:Number(s.reps)||0}))
+    }))
+  };
+  state.workouts.push(completed);
+  $('currentWorkoutCard').style.display='none';
+  activeWorkoutRoutineId=null;
+  update();
+};
+
+$('exerciseForm').onsubmit=e=>{
+  e.preventDefault();
+  const name=$('quickExerciseName').value.trim()||'Exercise';
+  const mins=Math.max(1,Number($('exerciseMins').value)||1);
+  state.workouts.push({id:uid(),name,mins});
+  $('quickExerciseName').value='';
+  update();
+};
 
 $('fastBtn').onclick=()=>{state.fasting=!state.fasting;state.fastStart=state.fasting?Date.now():null;update()};
 $('saveFastSettings').onclick=()=>{state.fastHours=Math.min(Math.max(Number($('fastHours').value)||16,1),48);state.eatHours=Math.min(Math.max(Number($('eatHours').value)||8,1),23);update()};
