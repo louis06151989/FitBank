@@ -16,8 +16,8 @@
     }
     *{box-sizing:border-box}
     body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--text)}
-    .wrap{max-width:860px;margin:0 auto;padding:16px 16px calc(24px + env(safe-area-inset-bottom))}
-    .tabs{display:flex;gap:8px;overflow:auto;padding:4px 0 10px;position:sticky;top:0;background:var(--bg);z-index:5}
+    .wrap{max-width:860px;margin:0 auto;padding:calc(18px + env(safe-area-inset-top)) 16px calc(24px + env(safe-area-inset-bottom))}
+    .tabs{display:flex;gap:8px;overflow:auto;padding:4px 0 10px;position:sticky;top:env(safe-area-inset-top);background:var(--bg);z-index:5;scrollbar-width:none}.tabs::-webkit-scrollbar{display:none}.tab{flex:0 0 auto}
     button,input,select{font:inherit}
     button{min-height:44px;cursor:pointer}
     .tab,.btn{border:1px solid var(--border);background:transparent;color:var(--text);border-radius:14px;padding:10px 14px}
@@ -34,7 +34,7 @@
     form{display:grid;gap:10px}.actions{display:flex;gap:8px;flex-wrap:wrap}
     .list{display:grid;gap:8px;margin-top:12px}
     .item{background:var(--panel);padding:11px 12px;border-radius:12px;display:flex;justify-content:space-between;align-items:center;gap:10px}
-    .item-main{min-width:0;flex:1}.item-title{font-weight:700;word-break:break-word}
+    .item-main{min-width:0;flex:1}.item-title{font-weight:700;word-break:break-word}.ocr-row{display:grid;grid-template-columns:minmax(0,1fr) 82px 82px auto;gap:8px;align-items:center}.ocr-row input{min-width:0}@media(max-width:560px){.ocr-row{grid-template-columns:1fr 1fr}.ocr-row .ocr-name{grid-column:1/-1}.ocr-row .ocr-remove{grid-column:1/-1}}
     .week{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center;font-size:12px}.week span{display:block;color:var(--muted)}
     img{max-width:100%;border-radius:14px;margin-top:12px}
     .notice{background:#10251a;border:1px solid #275e3b;border-radius:14px;padding:12px}
@@ -44,6 +44,7 @@
     @media(min-width:720px){.modal{align-items:center}.sheet{border-radius:20px}}
     @media(max-width:640px){.grid2,.grid4{grid-template-columns:1fr}.week{font-size:11px}}
   </style>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 </head>
 <body>
 <div class="wrap">
@@ -94,16 +95,29 @@
     </div>
 
     <div class="card" style="margin-top:12px">
+      <strong>Portion accuracy</strong>
+      <div class="muted" style="margin-top:6px">For best results, weigh the food after cooking and enter the weight in grams or ounces. When AI nutrition is connected, FitBank will use that portion weight to improve calories, macros, and micronutrients.</div>
+    </div>
+
+    <div class="card" style="margin-top:12px">
       <strong>Add meal</strong>
       <form id="mealForm" style="margin-top:12px">
         <input id="mealName" placeholder="Meal name" required>
         <input id="mealCal" type="number" min="1" max="5000" placeholder="Calories" required>
+        <div class="grid grid2">
+          <input id="mealWeight" type="number" min="0" max="10000" step="0.1" placeholder="Food weight">
+          <select id="mealWeightUnit">
+            <option value="g">grams (g)</option>
+            <option value="oz">ounces (oz)</option>
+          </select>
+        </div>
         <div class="grid grid4">
           <input id="mealProtein" type="number" min="0" max="1000" placeholder="Protein g">
           <input id="mealCarbs" type="number" min="0" max="1000" placeholder="Carbs g">
           <input id="mealFat" type="number" min="0" max="1000" placeholder="Fat g">
           <button class="btn primary" type="submit">Add meal</button>
         </div>
+        <div class="tiny">Tip: weighing food makes calorie, macro, and micronutrient estimates more accurate.</div>
       </form>
       <div id="meals" class="list"></div>
     </div>
@@ -145,6 +159,65 @@
         <button class="btn primary">Add exercise</button>
       </form>
       <div id="exerciseTypes" class="list"></div>
+    </div>
+
+    <div class="card" style="margin-top:12px">
+      <div class="row">
+        <div>
+          <strong>Import workout from screenshot</strong>
+          <div class="muted">Upload a screenshot and FitBank will try to read the exercise names, sets, and reps.</div>
+        </div>
+      </div>
+      <input id="workoutShot" type="file" accept="image/*" style="margin-top:12px">
+      <img id="workoutShotPreview" style="display:none" alt="Workout screenshot preview">
+      <button id="readWorkoutShot" class="btn primary" type="button" style="margin-top:10px">Read workout screenshot</button>
+      <div id="ocrStatus" class="muted" style="margin-top:10px"></div>
+
+      <div id="ocrReview" style="display:none;margin-top:14px">
+        <label class="muted">Routine name</label>
+        <input id="ocrRoutineName" value="Imported Workout">
+        <div id="ocrExerciseList" class="list"></div>
+        <div class="actions" style="margin-top:10px">
+          <button id="ocrAddRow" class="btn" type="button">+ Add exercise</button>
+          <button id="saveOcrRoutine" class="btn primary" type="button">Save routine</button>
+        </div>
+      </div>
+      <div class="tiny" style="margin-top:10px">Screenshot reading uses on-device/browser OCR. You can edit everything before saving.</div>
+    </div>
+
+    <div class="card" style="margin-top:12px">
+      <div class="row">
+        <div>
+          <strong>Workout routines</strong>
+          <div class="muted">Build a routine once, then start it with one tap.</div>
+        </div>
+      </div>
+      <form id="routineForm" style="margin-top:12px">
+        <input id="routineName" maxlength="60" placeholder="Routine name, e.g. Monday Upper Body">
+        <button class="btn primary">Create routine</button>
+      </form>
+      <div id="routineList" class="list"></div>
+    </div>
+
+    <div id="routineBuilderCard" class="card" style="margin-top:12px;display:none">
+      <div class="row">
+        <div>
+          <strong id="routineBuilderTitle">Edit routine</strong>
+          <div class="muted">Add exercises, sets, reps, or time.</div>
+        </div>
+        <button id="closeRoutineBuilder" class="btn" type="button">Done</button>
+      </div>
+
+      <form id="routineExerciseForm" style="margin-top:12px">
+        <select id="routineExerciseSelect"></select>
+        <div class="grid grid2">
+          <input id="routineSets" type="number" min="1" max="20" value="3" placeholder="Sets">
+          <input id="routineReps" type="number" min="0" max="500" value="10" placeholder="Reps">
+        </div>
+        <input id="routineMinutes" type="number" min="0" max="600" value="0" placeholder="Minutes (optional)">
+        <button class="btn" type="submit">Add to routine</button>
+      </form>
+      <div id="routineExerciseList" class="list"></div>
     </div>
 
     <div class="card" style="margin-top:12px">
@@ -218,6 +291,7 @@ const defaults={
   fasting:false,fastStart:null,fastHours:16,eatHours:8,
   habits:[{id:1,name:'Drink water',done:false},{id:2,name:'Hit protein goal',done:false},{id:3,name:'No late-night snack',done:false}],
   exercises:[{id:1,name:'Walking'},{id:2,name:'Strength training'},{id:3,name:'Running'},{id:4,name:'Cardio'}],
+  routines:[],
   meals:[],workouts:[],
   reminders:{breakfast:'08:30',lunch:'12:30',dinner:'18:30',repeat:'60'}
 };
@@ -250,7 +324,7 @@ function update(){
   $('fastDisplay').textContent=state.fastHours+':'+state.eatHours;
   $('fastSub').textContent=state.fasting?'Fast in progress':'Not fasting';
   $('fastBtn').textContent=state.fasting?'End fast':'Start fast';
-  renderMeals();renderHabits();renderExerciseTypes();renderWorkouts();save();
+  renderMeals();renderHabits();renderExerciseTypes();renderRoutines();renderWorkouts();save();
 }
 function openEdit(type,id,name,num){
   editCtx={type,id};$('editTitle').textContent='Edit '+type;$('editName').value=name||'';$('editNumber').value=(num??'');$('editNumber').style.display=['meal','workout'].includes(type)?'block':'none';$('editModal').classList.add('open');$('editModal').setAttribute('aria-hidden','false')
@@ -279,7 +353,9 @@ function renderMeals(){
   state.meals.slice().reverse().forEach(m=>{
     const r=document.createElement('div');r.className='item';
     const main=document.createElement('div');main.className='item-main';main.innerHTML='<div class="item-title"></div><div class="tiny"></div>';
-    main.children[0].textContent=m.name;main.children[1].textContent=fmt(m.cal)+' cal'+(m.protein||m.carbs||m.fat?` · P ${m.protein||0}g · C ${m.carbs||0}g · F ${m.fat||0}g`:'');
+    main.children[0].textContent=m.name;
+    const weightText=m.weight?` · ${m.weight}${m.weightUnit||'g'}`:'';
+    main.children[1].textContent=fmt(m.cal)+' cal'+weightText+(m.protein||m.carbs||m.fat?` · P ${m.protein||0}g · C ${m.carbs||0}g · F ${m.fat||0}g`:'');
     const b=document.createElement('button');b.className='btn';b.textContent='Edit';b.onclick=()=>openEdit('meal',m.id,m.name,m.cal);
     r.append(main,b);l.append(r)
   })
@@ -288,8 +364,15 @@ $('mealForm').onsubmit=e=>{
   e.preventDefault();
   const name=$('mealName').value.trim(),cal=Number($('mealCal').value);
   if(!name||!Number.isFinite(cal)||cal<=0)return;
-  state.meals.push({id:uid(),name,cal,protein:Number($('mealProtein').value)||0,carbs:Number($('mealCarbs').value)||0,fat:Number($('mealFat').value)||0});
-  ['mealName','mealCal','mealProtein','mealCarbs','mealFat'].forEach(id=>$(id).value='');update()
+  state.meals.push({
+    id:uid(),name,cal,
+    weight:Number($('mealWeight').value)||0,
+    weightUnit:$('mealWeightUnit').value||'g',
+    protein:Number($('mealProtein').value)||0,
+    carbs:Number($('mealCarbs').value)||0,
+    fat:Number($('mealFat').value)||0
+  });
+  ['mealName','mealCal','mealWeight','mealProtein','mealCarbs','mealFat'].forEach(id=>$(id).value='');update()
 };
 $('photo').onchange=()=>{const f=$('photo').files&&$('photo').files[0];if(!f)return;$('preview').src=URL.createObjectURL(f);$('preview').style.display='block'};
 
@@ -326,6 +409,229 @@ function renderWorkouts(){
   })
 }
 $('exerciseForm').onsubmit=e=>{e.preventDefault();const mins=Number($('exerciseMins').value),id=Number($('exerciseSelect').value),ex=state.exercises.find(x=>x.id===id);if(ex&&mins>0&&mins<=600){state.workouts.push({id:uid(),name:ex.name,mins});update()}};
+
+
+
+let workoutShotUrl=null;
+
+$('workoutShot').onchange=()=>{
+  const f=$('workoutShot').files&&$('workoutShot').files[0];
+  if(!f)return;
+  if(workoutShotUrl)URL.revokeObjectURL(workoutShotUrl);
+  workoutShotUrl=URL.createObjectURL(f);
+  $('workoutShotPreview').src=workoutShotUrl;
+  $('workoutShotPreview').style.display='block';
+  $('ocrStatus').textContent='Screenshot loaded. Tap Read workout screenshot.';
+  $('ocrReview').style.display='none';
+};
+
+function addOcrRow(name='',sets=3,reps=10){
+  const row=document.createElement('div');
+  row.className='ocr-row';
+  const n=document.createElement('input');n.className='ocr-name';n.value=name;n.placeholder='Exercise name';
+  const s=document.createElement('input');s.type='number';s.min='1';s.max='20';s.value=sets||3;s.placeholder='Sets';
+  const r=document.createElement('input');r.type='number';r.min='0';r.max='500';r.value=reps||10;r.placeholder='Reps';
+  const b=document.createElement('button');b.type='button';b.className='btn danger ocr-remove';b.textContent='Remove';b.onclick=()=>row.remove();
+  row.append(n,s,r,b);$('ocrExerciseList').append(row);
+}
+
+function parseWorkoutText(text){
+  const lines=text.split(/\n+/).map(x=>x.trim()).filter(Boolean);
+  const ignore=/^(workout|exercise|sets?|reps?|routine|day\s*\d+|week\s*\d+)$/i;
+  const items=[];
+  for(const raw of lines){
+    if(ignore.test(raw) || raw.length<3)continue;
+    let m=raw.match(/^(.+?)\s+(\d{1,2})\s*[xX×]\s*(\d{1,3})(?:\s.*)?$/);
+    if(m){items.push({name:m[1].trim(),sets:Number(m[2]),reps:Number(m[3])});continue;}
+    m=raw.match(/^(.+?)\s+(\d{1,2})\s+sets?\s*(?:of\s*)?(\d{1,3})?/i);
+    if(m){items.push({name:m[1].trim(),sets:Number(m[2]),reps:Number(m[3]||10)});continue;}
+    m=raw.match(/^(.+?)\s+(\d{1,2})\s*[xX×]\s*(\d{1,3})\s*-\s*(\d{1,3})/);
+    if(m){items.push({name:m[1].trim(),sets:Number(m[2]),reps:Number(m[3])});continue;}
+  }
+  if(!items.length){
+    // fallback: use plausible exercise-like lines
+    for(const raw of lines.slice(0,12)){
+      if(/\d/.test(raw) && raw.length>3){
+        const name=raw.replace(/\b\d+\s*[xX×]\s*\d+\b.*$/,'').trim();
+        if(name && name.length>2) items.push({name,sets:3,reps:10});
+      }
+    }
+  }
+  return items.slice(0,20);
+}
+
+$('readWorkoutShot').onclick=async()=>{
+  const f=$('workoutShot').files&&$('workoutShot').files[0];
+  if(!f){$('ocrStatus').textContent='Choose a workout screenshot first.';return;}
+  if(!window.Tesseract){$('ocrStatus').textContent='Workout reader could not load. Check your internet connection and try again.';return;}
+  $('readWorkoutShot').disabled=true;
+  $('ocrStatus').textContent='Reading screenshot... this can take a little while.';
+  try{
+    const result=await Tesseract.recognize(f,'eng',{logger:m=>{
+      if(m.status==='recognizing text' && typeof m.progress==='number'){
+        $('ocrStatus').textContent='Reading screenshot... '+Math.round(m.progress*100)+'%';
+      }
+    }});
+    const items=parseWorkoutText(result.data.text||'');
+    $('ocrExerciseList').innerHTML='';
+    if(items.length){
+      items.forEach(it=>addOcrRow(it.name,it.sets,it.reps));
+      $('ocrStatus').textContent='Workout read. Review the exercises below before saving.';
+    }else{
+      addOcrRow('',3,10);
+      $('ocrStatus').textContent='I could not confidently read the workout. You can still enter or correct it below.';
+    }
+    $('ocrReview').style.display='block';
+  }catch(err){
+    $('ocrStatus').textContent='Could not read that screenshot. Try a clearer image or enter the routine manually.';
+  }finally{
+    $('readWorkoutShot').disabled=false;
+  }
+};
+
+$('ocrAddRow').onclick=()=>addOcrRow('',3,10);
+
+$('saveOcrRoutine').onclick=()=>{
+  const name=$('ocrRoutineName').value.trim()||'Imported Workout';
+  const rows=[...$('ocrExerciseList').querySelectorAll('.ocr-row')];
+  const items=[];
+  rows.forEach(row=>{
+    const inputs=row.querySelectorAll('input');
+    const exName=inputs[0].value.trim();
+    const sets=Math.min(Math.max(Number(inputs[1].value)||1,1),20);
+    const reps=Math.min(Math.max(Number(inputs[2].value)||0,0),500);
+    if(!exName)return;
+    let ex=state.exercises.find(x=>x.name.toLowerCase()===exName.toLowerCase());
+    if(!ex){
+      ex={id:uid(),name:exName};
+      state.exercises.push(ex);
+    }
+    items.push({id:uid(),exerciseId:ex.id,name:ex.name,sets,reps,minutes:0});
+  });
+  if(!items.length){$('ocrStatus').textContent='Add at least one exercise before saving.';return;}
+  state.routines.push({id:uid(),name,items});
+  $('ocrStatus').textContent=name+' saved to Workout Routines.';
+  $('ocrReview').style.display='none';
+  update();
+};
+
+let activeRoutineId=null;
+
+function renderRoutines(){
+  const list=$('routineList');
+  if(!list)return;
+  list.innerHTML='';
+  state.routines=(state.routines||[]);
+  if(!state.routines.length){
+    const empty=document.createElement('div');
+    empty.className='muted';
+    empty.textContent='No routines yet. Create one above.';
+    list.append(empty);
+  }
+  state.routines.forEach(r=>{
+    const row=document.createElement('div'); row.className='item';
+    const main=document.createElement('div'); main.className='item-main';
+    const totalSets=(r.items||[]).reduce((a,x)=>a+(Number(x.sets)||0),0);
+    main.innerHTML='<div class="item-title"></div><div class="tiny"></div>';
+    main.children[0].textContent=r.name;
+    main.children[1].textContent=(r.items||[]).length+' exercises'+(totalSets?' · '+totalSets+' sets':'');
+    const actions=document.createElement('div'); actions.className='actions';
+    const start=document.createElement('button'); start.className='btn primary'; start.type='button'; start.textContent='Start';
+    start.onclick=()=>startRoutine(r.id);
+    const edit=document.createElement('button'); edit.className='btn'; edit.type='button'; edit.textContent='Edit';
+    edit.onclick=()=>openRoutineBuilder(r.id);
+    const del=document.createElement('button'); del.className='btn danger'; del.type='button'; del.textContent='Delete';
+    del.onclick=()=>{state.routines=state.routines.filter(x=>x.id!==r.id); if(activeRoutineId===r.id)closeRoutineBuilder(); update()};
+    actions.append(start,edit,del); row.append(main,actions); list.append(row);
+  });
+
+  const sel=$('routineExerciseSelect');
+  if(sel){
+    const cur=sel.value; sel.innerHTML='';
+    state.exercises.forEach(x=>{const o=document.createElement('option');o.value=x.id;o.textContent=x.name;sel.append(o)});
+    if([...sel.options].some(o=>o.value===cur))sel.value=cur;
+  }
+  renderRoutineExerciseList();
+}
+
+function openRoutineBuilder(id){
+  activeRoutineId=id;
+  const r=state.routines.find(x=>x.id===id); if(!r)return;
+  $('routineBuilderTitle').textContent='Edit: '+r.name;
+  $('routineBuilderCard').style.display='block';
+  renderRoutineExerciseList();
+  $('routineBuilderCard').scrollIntoView({behavior:'smooth',block:'start'});
+}
+function closeRoutineBuilder(){activeRoutineId=null;$('routineBuilderCard').style.display='none'}
+$('closeRoutineBuilder').onclick=closeRoutineBuilder;
+
+function renderRoutineExerciseList(){
+  const list=$('routineExerciseList'); if(!list)return;
+  list.innerHTML='';
+  const r=state.routines.find(x=>x.id===activeRoutineId); if(!r)return;
+  (r.items||[]).forEach((it,idx)=>{
+    const row=document.createElement('div');row.className='item';
+    const main=document.createElement('div');main.className='item-main';
+    main.innerHTML='<div class="item-title"></div><div class="tiny"></div>';
+    main.children[0].textContent=it.name;
+    const detail=[];
+    if(it.sets)detail.push(it.sets+' sets');
+    if(it.reps)detail.push(it.reps+' reps');
+    if(it.minutes)detail.push(it.minutes+' min');
+    main.children[1].textContent=detail.join(' · ');
+    const del=document.createElement('button');del.className='btn danger';del.type='button';del.textContent='Remove';
+    del.onclick=()=>{r.items.splice(idx,1);update()};
+    row.append(main,del);list.append(row);
+  });
+}
+
+$('routineForm').onsubmit=e=>{
+  e.preventDefault();
+  const name=$('routineName').value.trim();
+  if(!name)return;
+  const r={id:uid(),name,items:[]};
+  state.routines.push(r);
+  $('routineName').value='';
+  update();
+  openRoutineBuilder(r.id);
+};
+
+$('routineExerciseForm').onsubmit=e=>{
+  e.preventDefault();
+  const r=state.routines.find(x=>x.id===activeRoutineId); if(!r)return;
+  const exId=Number($('routineExerciseSelect').value);
+  const ex=state.exercises.find(x=>x.id===exId); if(!ex)return;
+  const sets=Math.min(Math.max(Number($('routineSets').value)||1,1),20);
+  const reps=Math.min(Math.max(Number($('routineReps').value)||0,0),500);
+  const minutes=Math.min(Math.max(Number($('routineMinutes').value)||0,0),600);
+  r.items.push({id:uid(),exerciseId:ex.id,name:ex.name,sets,reps,minutes});
+  update();
+};
+
+function startRoutine(id){
+  const r=state.routines.find(x=>x.id===id); if(!r)return;
+  if(!(r.items||[]).length){openRoutineBuilder(id);return;}
+  let totalMinutes=0;
+  r.items.forEach(it=>{
+    const mins=Number(it.minutes)||0;
+    totalMinutes+=mins;
+    state.workouts.push({
+      id:uid(),
+      name:it.name+' ('+r.name+')',
+      mins:mins || Math.max(1,(Number(it.sets)||1)*3),
+      routineId:r.id,
+      sets:it.sets||0,
+      reps:it.reps||0
+    });
+  });
+  update();
+  const msg=document.createElement('div');
+  msg.className='notice';
+  msg.style.marginTop='12px';
+  msg.textContent=r.name+' logged.';
+  $('exerciseLog').parentElement.prepend(msg);
+  setTimeout(()=>msg.remove(),2500);
+}
 
 $('fastBtn').onclick=()=>{state.fasting=!state.fasting;state.fastStart=state.fasting?Date.now():null;update()};
 $('saveFastSettings').onclick=()=>{state.fastHours=Math.min(Math.max(Number($('fastHours').value)||16,1),48);state.eatHours=Math.min(Math.max(Number($('eatHours').value)||8,1),23);update()};
