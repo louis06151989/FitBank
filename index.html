@@ -18,7 +18,7 @@
     body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--text)}
     body::before{content:"";position:fixed;top:0;left:0;right:0;height:env(safe-area-inset-top);background:var(--bg);z-index:50;pointer-events:none}
     .wrap{max-width:860px;margin:0 auto;padding:calc(18px + env(safe-area-inset-top)) 16px calc(24px + env(safe-area-inset-bottom))}
-    .tabs{display:flex;gap:8px;overflow:auto;padding:4px 0 10px;position:sticky;top:0;background:var(--bg);z-index:40;scrollbar-width:none;box-shadow:0 8px 12px var(--bg)}.tabs::-webkit-scrollbar{display:none}.tab{flex:0 0 auto}
+    .tabs{display:flex;gap:8px;overflow:auto;padding:4px 0 10px;position:sticky;top:0;background:var(--bg);z-index:40;scrollbar-width:none;box-shadow:0 2px 0 var(--bg)}.tabs::-webkit-scrollbar{display:none}.tab{flex:0 0 auto}
     button,input,select{font:inherit}
     button{min-height:44px;cursor:pointer}
     .tab,.btn{border:1px solid var(--border);background:transparent;color:var(--text);border-radius:14px;padding:10px 14px}
@@ -78,7 +78,10 @@
 
 
 <style id="fitbank-v30-dashboard-css">
-.dashboard-head{display:grid;grid-template-columns:48px 1fr 48px;align-items:center;gap:8px;margin-bottom:12px}
+
+#home.panel.active{padding-top:2px}
+
+.dashboard-head{display:grid;grid-template-columns:48px 1fr 48px;align-items:center;gap:8px;margin-top:14px;margin-bottom:14px;padding-top:2px}
 .dashboard-title{text-align:center}
 .widget-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
 .dash-widget{border:1px solid var(--border);border-radius:22px;padding:15px;background:var(--card);min-height:118px}
@@ -695,7 +698,7 @@ const defaults={
   habits:[{id:1,name:'Drink water',done:false},{id:2,name:'Hit protein goal',done:false},{id:3,name:'No late-night snack',done:false}],
   exercises:[{id:1,name:'Walking'},{id:2,name:'Strength training'},{id:3,name:'Running'},{id:4,name:'Cardio'}],
   routines:[],
-  meals:[],workouts:[],waterOz:0,waterGoalOz:100,waterLogs:[],weightLogs:[],weightGoalLb:0,fastingLogs:[],habitLogs:[],
+  meals:[],workouts:[],waterOz:0,waterGoalOz:100,waterLastDate:null,waterLogs:[],weightLogs:[],weightGoalLb:0,fastingLogs:[],habitLogs:[],
   reminders:{breakfast:'08:30',lunch:'12:30',dinner:'18:30',repeat:'60'}
 };
 let state=JSON.parse(JSON.stringify(defaults));
@@ -1147,8 +1150,10 @@ function todayKey(){
 }
 
 function syncTodayWaterLog(){
+  resetWaterForNewDay();
   state.waterLogs=Array.isArray(state.waterLogs)?state.waterLogs:[];
   const d=todayKey();
+  state.waterLastDate=d;
   const oz=Math.max(0,Number(state.waterOz)||0);
   const existing=state.waterLogs.find(x=>x.date===d);
   if(existing) existing.oz=oz;
@@ -1164,7 +1169,26 @@ function syncTodayWaterLog(){
   if(db)db.style.width=Math.max(0,Math.min(100,(oz/goal)*100))+'%';
 }
 
+function resetWaterForNewDay(){
+  const today=todayKey();
+  state.waterLogs=Array.isArray(state.waterLogs)?state.waterLogs:[];
+  if(!state.waterLastDate){
+    const existing=state.waterLogs.find(x=>x.date===today);
+    if(existing) state.waterOz=Math.max(0,Number(existing.oz)||0);
+    state.waterLastDate=today;
+    return;
+  }
+  if(state.waterLastDate!==today){
+    state.waterOz=0;
+    state.waterLastDate=today;
+    const existing=state.waterLogs.find(x=>x.date===today);
+    if(existing) existing.oz=0;
+    save();
+  }
+}
+
 function renderWater(){
+  resetWaterForNewDay();
   state.waterLogs=Array.isArray(state.waterLogs)?state.waterLogs:[];
   const localToday=todayKey();
   let todayWater=state.waterLogs.find(x=>x.date===localToday);
@@ -1841,6 +1865,19 @@ if($('mealName')){
 if($('mealWeight'))$('mealWeight').addEventListener('input',autoCalculateFood);
 if($('mealWeightUnit'))$('mealWeightUnit').addEventListener('change',autoCalculateFood);
 
+
+// Reset water automatically when the local date changes at midnight.
+setInterval(()=>{
+  try{
+    const before=state.waterLastDate;
+    resetWaterForNewDay();
+    if(before && before!==state.waterLastDate){
+      renderWater();
+      if(typeof dashboardReady!=='undefined' && dashboardReady && typeof renderDashboard==='function')renderDashboard();
+      save();
+    }
+  }catch(err){}
+},30000);
 
 // Keep fasting elapsed time live while the app is open.
 setInterval(()=>{
