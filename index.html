@@ -1137,6 +1137,13 @@ function syncTodayWaterLog(){
   else state.waterLogs.push({id:uid(),date:d,oz});
   save();
   if(dashboardReady)renderDashboard();
+  const dw=document.getElementById('dashWater');
+  const ds=document.getElementById('dashWaterSub');
+  const db=document.getElementById('dashWaterBar');
+  const goal=Math.max(8,Number(state.waterGoalOz)||100);
+  if(dw)dw.textContent=Math.round(oz)+' oz';
+  if(ds)ds.textContent='of '+Math.round(goal)+' oz';
+  if(db)db.style.width=Math.max(0,Math.min(100,(oz/goal)*100))+'%';
 }
 
 function renderWater(){
@@ -1809,9 +1816,14 @@ function renderDashboard(){
   const bank=Math.max(0,weeklyGoal-weekEaten)*(Number(state.bankPercent ?? 100)/100);
   $('dashBank').textContent='+'+Math.round(bank).toLocaleString()+' cal';
 
-  const water=(key===todayKey())
-    ? (datedWater(key) || Number(state.waterOz)||0)
-    : datedWater(key);
+  let water;
+  if(key===todayKey()){
+    water=Math.max(0,Number(state.waterOz)||0);
+    // If a dated log is newer/available but live state is empty, recover it.
+    if(!water) water=datedWater(key);
+  }else{
+    water=datedWater(key);
+  }
   const waterGoal=Number(state.waterGoalOz)||100;
   if($('dashWater'))$('dashWater').textContent=Math.round(water)+' oz';
   if($('dashWaterSub'))$('dashWaterSub').textContent='of '+Math.round(waterGoal)+' oz';
@@ -1999,6 +2011,12 @@ setTimeout(()=>{
     if(id==='fasting') id = document.getElementById('fasting') ? 'fasting' : 'settings';
     document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('active',p.id===id));
     document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===id));
+    if(id==='home'){
+      try{
+        if(typeof syncTodayWaterLog==='function')syncTodayWaterLog();
+        if(typeof renderDashboard==='function')renderDashboard();
+      }catch(err){console.error('Home refresh error',err)}
+    }
     window.scrollTo({top:0,behavior:'smooth'});
   }
   function openCard(id){
@@ -2090,6 +2108,16 @@ if(b.id==='openDailyCalories'){
     e.preventDefault();
     activatePanel(b.dataset.tab);
   },true);
+
+  // iPhone PWA can keep a rendered Home screen alive while data changes on another tab.
+  // Refresh Home from the same state whenever the app becomes visible/focused again.
+  function refreshHomeNow(){
+    try{
+      if(typeof renderDashboard==='function')renderDashboard();
+    }catch(err){console.error('Dashboard refresh error',err)}
+  }
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshHomeNow()});
+  window.addEventListener('focus',refreshHomeNow);
 
   // Try a fresh dashboard render after everything has loaded, without blocking controls.
   window.addEventListener('load',function(){
