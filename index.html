@@ -307,7 +307,7 @@
 
 <section id="food" class="panel">
     <div class="card">
-      <div class="row"><div><strong>Food Bank</strong><div class="muted">Search foods or scan a packaged-food barcode.</div></div><span class="tiny">V5.2</span></div>
+      <div class="row"><div><strong>Food Bank</strong><div class="muted">Search foods or scan a packaged-food barcode.</div></div><span class="tiny">V5.3</span></div>
       <div class="grid grid2" style="margin-top:12px">
         <input id="foodBankSearch" type="search" placeholder="Search chicken, eggs, rice…" autocomplete="off">
         <button id="foodBankSearchBtn" class="btn primary" type="button">Search food</button>
@@ -2893,23 +2893,51 @@ if(b.id==='openDailyCalories'){
 
 </script>
 <script>
-// ---------- V5.2 Food Bank + Barcode ----------
+// ---------- V5.3 Food Bank + Barcode — standalone ----------
 (function(){
+  'use strict';
   const by=id=>document.getElementById(id);
-  const safeNum=v=>Number.isFinite(Number(v))?Number(v):0;
+  const safeNum=v=>{const n=Number(v);return Number.isFinite(n)?n:0};
+
+  // This database is intentionally standalone so Food Bank still works even
+  // if another FitBank feature has a JavaScript error.
+  const LOCAL_FOODS = {
+    'whole milk':{cal:61,protein:3.2,carbs:4.8,fat:3.3,unit:'100 g'},
+    '2% milk':{cal:50,protein:3.3,carbs:4.8,fat:2.0,unit:'100 g'},
+    '1% milk':{cal:42,protein:3.4,carbs:5.0,fat:1.0,unit:'100 g'},
+    'skim milk':{cal:34,protein:3.4,carbs:5.0,fat:0.1,unit:'100 g'},
+    'chicken breast, cooked':{cal:165,protein:31.0,carbs:0,fat:3.6,unit:'100 g'},
+    'turkey breast, cooked':{cal:135,protein:29.0,carbs:0,fat:1.8,unit:'100 g'},
+    'egg, whole':{cal:143,protein:12.6,carbs:0.7,fat:9.5,unit:'100 g'},
+    'white rice, cooked':{cal:130,protein:2.7,carbs:28.2,fat:0.3,unit:'100 g'},
+    'brown rice, cooked':{cal:123,protein:2.7,carbs:25.6,fat:1.0,unit:'100 g'},
+    'banana':{cal:89,protein:1.1,carbs:22.8,fat:0.3,unit:'100 g'},
+    'apple':{cal:52,protein:0.3,carbs:13.8,fat:0.2,unit:'100 g'},
+    'oatmeal, cooked':{cal:71,protein:2.5,carbs:12.0,fat:1.5,unit:'100 g'},
+    'greek yogurt, nonfat':{cal:59,protein:10.3,carbs:3.6,fat:0.4,unit:'100 g'},
+    'salmon, cooked':{cal:206,protein:22.1,carbs:0,fat:12.4,unit:'100 g'},
+    'ground beef 90/10, cooked':{cal:217,protein:26.1,carbs:0,fat:11.8,unit:'100 g'},
+    'sirloin steak, cooked':{cal:206,protein:27.0,carbs:0,fat:10.0,unit:'100 g'},
+    'sweet potato, baked':{cal:90,protein:2.0,carbs:20.7,fat:0.2,unit:'100 g'},
+    'potato, baked':{cal:93,protein:2.5,carbs:21.2,fat:0.1,unit:'100 g'},
+    'broccoli, cooked':{cal:35,protein:2.4,carbs:7.2,fat:0.4,unit:'100 g'},
+    'peanut butter':{cal:588,protein:25.1,carbs:20.0,fat:50.4,unit:'100 g'},
+    'cheddar cheese':{cal:403,protein:24.9,carbs:1.3,fat:33.1,unit:'100 g'}
+  };
+
+  function status(id,msg){const el=by(id);if(el)el.textContent=msg}
   function fillFood(name, cal, protein, carbs, fat, servingText, grams){
+    const ids=['mealName','mealCal','mealProtein','mealCarbs','mealFat'];
+    if(ids.some(id=>!by(id))){status('foodBankStatus','FitBank food-entry fields could not be found.');return}
     by('mealName').value=name||'Food';
-    by('mealCal').value=Math.max(1,Math.round(safeNum(cal)));
+    by('mealCal').value=Math.max(0,Math.round(safeNum(cal)));
     by('mealProtein').value=safeNum(protein).toFixed(1);
     by('mealCarbs').value=safeNum(carbs).toFixed(1);
     by('mealFat').value=safeNum(fat).toFixed(1);
-    if(grams && grams>0){by('mealWeight').value=Number(grams.toFixed(1));by('mealWeightUnit').value='g'}
-    by('foodAutoCalcHint').textContent=(servingText||'Selected food')+' • Check the serving and nutrition before adding.';
-    by('mealEntryCard').scrollIntoView({behavior:'smooth',block:'start'});
-  }
-  function commonMatches(q){
-    q=(q||'').trim().toLowerCase(); if(!q) return [];
-    return Object.entries(FOOD_DB).filter(([name])=>name.includes(q)||q.split(/\s+/).every(w=>name.includes(w))).slice(0,10);
+    if(grams && grams>0 && by('mealWeight') && by('mealWeightUnit')){by('mealWeight').value=Number(grams.toFixed(1));by('mealWeightUnit').value='g'}
+    if(by('foodAutoCalcHint'))by('foodAutoCalcHint').textContent=(servingText||'Selected food')+' • Check the amount before adding.';
+    const card=by('mealEntryCard')||by('mealName');
+    card?.scrollIntoView({behavior:'smooth',block:'center'});
   }
   function resultRow(title, sub, onUse){
     const row=document.createElement('div');row.className='item';
@@ -2919,54 +2947,88 @@ if(b.id==='openDailyCalories'){
     const b=document.createElement('button');b.type='button';b.className='btn';b.textContent='Use';b.addEventListener('click',onUse);
     main.append(t,sm);row.append(main,b);return row;
   }
+  function localMatches(q){
+    const words=q.toLowerCase().trim().split(/\s+/).filter(Boolean);
+    return Object.entries(LOCAL_FOODS).filter(([name])=>words.every(w=>name.includes(w))).slice(0,10);
+  }
   async function searchFoodBank(){
-    const q=by('foodBankSearch').value.trim(), out=by('foodBankResults'), status=by('foodBankStatus');out.innerHTML='';
-    if(!q){status.textContent='Type a food name first.';return}
-    const local=commonMatches(q);
-    local.forEach(([name,n])=>out.append(resultRow(name,`${n.cal} cal • ${n.protein}g protein • per 100 g`,()=>fillFood(name,n.cal,n.protein,n.carbs,n.fat,'100 g serving',100))));
-    status.textContent=local.length?`${local.length} common food match${local.length===1?'':'es'} found. Checking packaged foods…`:'Checking packaged foods…';
+    const input=by('foodBankSearch'),out=by('foodBankResults');
+    if(!input||!out)return;
+    const q=input.value.trim();out.innerHTML='';
+    if(!q){status('foodBankStatus','Type a food name first.');return}
+    status('foodBankStatus','Searching…');
+    const local=localMatches(q);
+    local.forEach(([name,n])=>out.append(resultRow(name,`${n.cal} cal • ${n.protein}g protein • ${n.unit}`,()=>fillFood(name,n.cal,n.protein,n.carbs,n.fat,n.unit,100))));
+    if(local.length)status('foodBankStatus',`${local.length} common-food match${local.length===1?'':'es'} found. Checking packaged foods…`);
     try{
       const url='https://world.openfoodfacts.org/cgi/search.pl?search_terms='+encodeURIComponent(q)+'&search_simple=1&action=process&json=1&page_size=8&fields=code,product_name,brands,serving_size,serving_quantity,nutriments';
-      const r=await fetch(url);if(!r.ok)throw new Error('search failed');const data=await r.json();
-      const products=(data.products||[]).filter(p=>p.product_name&&p.nutriments);
-      products.slice(0,8).forEach(p=>{
-        const n=p.nutriments||{}, grams=safeNum(p.serving_quantity)||100;
-        let cal=safeNum(n['energy-kcal_serving']);let protein=safeNum(n.proteins_serving),carbs=safeNum(n.carbohydrates_serving),fat=safeNum(n.fat_serving);
+      const r=await fetch(url,{headers:{'Accept':'application/json'}});
+      if(!r.ok)throw new Error('Open Food Facts search '+r.status);
+      const data=await r.json();
+      const products=(data.products||[]).filter(p=>p&&p.product_name&&p.nutriments);
+      let added=0;
+      products.forEach(p=>{
+        const n=p.nutriments||{},grams=safeNum(p.serving_quantity)||100;
+        let cal=safeNum(n['energy-kcal_serving']),protein=safeNum(n.proteins_serving),carbs=safeNum(n.carbohydrates_serving),fat=safeNum(n.fat_serving);
         if(!cal){cal=safeNum(n['energy-kcal_100g'])*grams/100;protein=safeNum(n.proteins_100g)*grams/100;carbs=safeNum(n.carbohydrates_100g)*grams/100;fat=safeNum(n.fat_100g)*grams/100}
-        if(!cal)return;const title=(p.product_name+(p.brands?' • '+p.brands:'')).slice(0,100),serv=p.serving_size||((grams!==100)?grams+' g':'100 g');
-        out.append(resultRow(title,`${Math.round(cal)} cal • ${protein.toFixed(1)}g protein • ${serv}`,()=>fillFood(p.product_name,cal,protein,carbs,fat,serv,grams)));
+        if(!cal)return;
+        const serv=p.serving_size||`${grams} g`,title=(p.product_name+(p.brands?' • '+p.brands:'')).slice(0,100);
+        out.append(resultRow(title,`${Math.round(cal)} cal • ${protein.toFixed(1)}g protein • ${serv}`,()=>fillFood(p.product_name,cal,protein,carbs,fat,serv,grams)));added++;
       });
-      status.textContent=(local.length||products.length)?'Choose a result, then adjust the serving if needed.':'No match found. You can still enter the food manually.';
-    }catch(e){console.warn(e);status.textContent=local.length?'Common-food results are ready. Packaged-food search is unavailable right now.':'Online food search is unavailable right now; try a common food or enter it manually.'}
+      if(local.length||added)status('foodBankStatus','Choose a result below. You can edit the serving before adding it.');
+      else status('foodBankStatus','No match found. Try a simpler name or enter the food manually.');
+    }catch(err){
+      console.warn('Food Bank online search:',err);
+      if(local.length)status('foodBankStatus','Common-food results are ready. Packaged-food search is unavailable right now.');
+      else status('foodBankStatus','Online search is unavailable right now. Try milk, chicken, eggs, rice, turkey, banana, or enter the food manually.');
+    }
   }
-  by('foodBankSearchBtn')?.addEventListener('click',searchFoodBank);
-  by('foodBankSearch')?.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();searchFoodBank()}});
-
   async function lookupBarcode(code){
-    code=String(code||'').replace(/\D/g,'');const st=by('barcodeStatus');if(code.length<6){st.textContent='Enter or scan a valid barcode.';return}
-    st.textContent='Looking up barcode…';
+    code=String(code||'').replace(/\D/g,'');
+    if(code.length<6){status('barcodeStatus','Enter or scan a valid barcode.');return}
+    status('barcodeStatus','Looking up barcode…');
     try{
       const fields='code,product_name,brands,serving_size,serving_quantity,nutriments';
-      const r=await fetch(`https://world.openfoodfacts.org/api/v2/product/${encodeURIComponent(code)}.json?fields=${fields}`);if(!r.ok)throw new Error('lookup failed');const d=await r.json();
-      if(d.status!==1||!d.product){st.textContent='Barcode not found. You can enter this food manually.';return}
+      const r=await fetch(`https://world.openfoodfacts.org/api/v2/product/${encodeURIComponent(code)}.json?fields=${fields}`,{headers:{'Accept':'application/json'}});
+      if(!r.ok)throw new Error('Barcode lookup '+r.status);
+      const d=await r.json();
+      if(d.status!==1||!d.product){status('barcodeStatus','Barcode not found. You can enter this food manually.');return}
       const p=d.product,n=p.nutriments||{},grams=safeNum(p.serving_quantity)||100;
       let cal=safeNum(n['energy-kcal_serving']),protein=safeNum(n.proteins_serving),carbs=safeNum(n.carbohydrates_serving),fat=safeNum(n.fat_serving);
       if(!cal){cal=safeNum(n['energy-kcal_100g'])*grams/100;protein=safeNum(n.proteins_100g)*grams/100;carbs=safeNum(n.carbohydrates_100g)*grams/100;fat=safeNum(n.fat_100g)*grams/100}
-      if(!cal){st.textContent='Product found, but its calorie information is missing. Enter nutrition manually.';return}
-      const serv=p.serving_size||((grams!==100)?grams+' g':'100 g');fillFood(p.product_name||('Barcode '+code),cal,protein,carbs,fat,serv,grams);st.textContent=`Found ${p.product_name||'product'} • ${Math.round(cal)} cal per ${serv}.`;
-    }catch(e){console.warn(e);st.textContent='Could not reach the food database. Check your connection and try again.'}
+      if(!cal){status('barcodeStatus','Product found, but nutrition numbers are missing. Enter them manually.');return}
+      const serv=p.serving_size||`${grams} g`;
+      fillFood(p.product_name||('Barcode '+code),cal,protein,carbs,fat,serv,grams);
+      status('barcodeStatus',`Found ${p.product_name||'product'} • ${Math.round(cal)} cal per ${serv}.`);
+    }catch(err){console.warn('Barcode lookup:',err);status('barcodeStatus','Could not reach the barcode database. Check your connection and try again.');}
   }
-  by('lookupBarcode')?.addEventListener('click',()=>lookupBarcode(by('barcodeManual').value));
-  let qr=null, scanning=false;
-  by('startBarcodeScan')?.addEventListener('click',async()=>{
-    const reader=by('barcodeReader'),btn=by('startBarcodeScan'),st=by('barcodeStatus');
-    if(scanning&&qr){try{await qr.stop();qr.clear()}catch(e){} scanning=false;reader.style.display='none';btn.textContent='▦ Scan barcode';return}
-    if(!window.Html5Qrcode){st.textContent='Camera barcode reader could not load. Enter the barcode number instead.';return}
-    reader.style.display='block';st.textContent='Point the camera at the barcode.';btn.textContent='Stop scanner';scanning=true;qr=new Html5Qrcode('barcodeReader');
-    try{await qr.start({facingMode:'environment'},{fps:10,qrbox:{width:260,height:150},formatsToSupport:[Html5QrcodeSupportedFormats.UPC_A,Html5QrcodeSupportedFormats.UPC_E,Html5QrcodeSupportedFormats.EAN_13,Html5QrcodeSupportedFormats.EAN_8]},async decoded=>{by('barcodeManual').value=decoded;st.textContent='Barcode read. Looking up food…';try{await qr.stop();qr.clear()}catch(e){}scanning=false;reader.style.display='none';btn.textContent='▦ Scan barcode';lookupBarcode(decoded)},()=>{});}catch(e){console.warn(e);scanning=false;reader.style.display='none';btn.textContent='▦ Scan barcode';st.textContent='Camera could not start. Allow camera access, or enter the barcode number manually.'}
-  });
-})();
 
+  const searchBtn=by('foodBankSearchBtn');
+  const searchInput=by('foodBankSearch');
+  if(searchBtn){searchBtn.addEventListener('click',searchFoodBank);searchBtn.dataset.ready='1'}
+  if(searchInput)searchInput.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();searchFoodBank()}});
+  by('lookupBarcode')?.addEventListener('click',()=>lookupBarcode(by('barcodeManual')?.value||''));
+
+  let qr=null,scanning=false;
+  by('startBarcodeScan')?.addEventListener('click',async()=>{
+    const reader=by('barcodeReader'),btn=by('startBarcodeScan');
+    if(!reader||!btn)return;
+    if(scanning&&qr){try{await qr.stop();qr.clear()}catch(e){}scanning=false;reader.style.display='none';btn.textContent='▦ Scan barcode';return}
+    if(!window.Html5Qrcode){status('barcodeStatus','Camera scanner could not load. Enter the barcode number instead.');return}
+    reader.style.display='block';status('barcodeStatus','Point the camera at the barcode.');btn.textContent='Stop scanner';scanning=true;qr=new Html5Qrcode('barcodeReader');
+    try{
+      const formats=window.Html5QrcodeSupportedFormats?[Html5QrcodeSupportedFormats.UPC_A,Html5QrcodeSupportedFormats.UPC_E,Html5QrcodeSupportedFormats.EAN_13,Html5QrcodeSupportedFormats.EAN_8]:undefined;
+      const config={fps:10,qrbox:{width:260,height:150}};if(formats)config.formatsToSupport=formats;
+      await qr.start({facingMode:'environment'},config,async decoded=>{
+        if(by('barcodeManual'))by('barcodeManual').value=decoded;status('barcodeStatus','Barcode read. Looking up food…');
+        try{await qr.stop();qr.clear()}catch(e){}scanning=false;reader.style.display='none';btn.textContent='▦ Scan barcode';lookupBarcode(decoded);
+      },()=>{});
+    }catch(e){console.warn('Camera:',e);scanning=false;reader.style.display='none';btn.textContent='▦ Scan barcode';status('barcodeStatus','Camera could not start. Allow camera access, or enter the barcode number manually.');}
+  });
+
+  // Visible self-check: if this text appears, the standalone module loaded.
+  if(searchBtn)status('foodBankStatus','Food Bank ready. Try “milk”, “chicken”, “eggs”, or “rice”.');
+})();
 </script>
 
 </body>
