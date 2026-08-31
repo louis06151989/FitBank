@@ -307,7 +307,7 @@
 
 <section id="food" class="panel">
     <div class="card">
-      <div class="row"><div><strong>Food Bank</strong><div class="muted">Search foods or scan a packaged-food barcode.</div></div><span class="tiny">V5.1</span></div>
+      <div class="row"><div><strong>Food Bank</strong><div class="muted">Search foods or scan a packaged-food barcode.</div></div><span class="tiny">V5.2</span></div>
       <div class="grid grid2" style="margin-top:12px">
         <input id="foodBankSearch" type="search" placeholder="Search chicken, eggs, rice…" autocomplete="off">
         <button id="foodBankSearchBtn" class="btn primary" type="button">Search food</button>
@@ -2891,7 +2891,9 @@ if(b.id==='openDailyCalories'){
 })();
 
 
-// ---------- V5.1 Food Bank + Barcode ----------
+</script>
+<script>
+// ---------- V5.2 Food Bank + Barcode ----------
 (function(){
   const by=id=>document.getElementById(id);
   const safeNum=v=>Number.isFinite(Number(v))?Number(v):0;
@@ -2964,6 +2966,7 @@ if(b.id==='openDailyCalories'){
     try{await qr.start({facingMode:'environment'},{fps:10,qrbox:{width:260,height:150},formatsToSupport:[Html5QrcodeSupportedFormats.UPC_A,Html5QrcodeSupportedFormats.UPC_E,Html5QrcodeSupportedFormats.EAN_13,Html5QrcodeSupportedFormats.EAN_8]},async decoded=>{by('barcodeManual').value=decoded;st.textContent='Barcode read. Looking up food…';try{await qr.stop();qr.clear()}catch(e){}scanning=false;reader.style.display='none';btn.textContent='▦ Scan barcode';lookupBarcode(decoded)},()=>{});}catch(e){console.warn(e);scanning=false;reader.style.display='none';btn.textContent='▦ Scan barcode';st.textContent='Camera could not start. Allow camera access, or enter the barcode number manually.'}
   });
 })();
+
 </script>
 
 </body>
