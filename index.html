@@ -1,15 +1,17 @@
-<!doctype html>
+<!DOCTYPE html>
+
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#0a1220">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <link rel="manifest" href="manifest.webmanifest">
-  <link rel="apple-touch-icon" href="icon-192.png">
-  <title>FitBank</title>
-  <style>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
+<meta content="#0a1220" name="theme-color"/>
+<meta content="yes" name="apple-mobile-web-app-capable"/>
+<meta content="black" name="apple-mobile-web-app-status-bar-style"/>
+<link href="manifest.webmanifest" rel="manifest"/>
+<link href="icon-192.png" rel="apple-touch-icon"/>
+<title>FitBank</title>
+<style>
+
     :root{
       --bg:#0a1220;--card:#111827;--panel:#182334;--text:#f8fafc;--muted:#94a3b8;
       --border:#2f3d52;--accent:#22c55e;--danger:#ef4444;
@@ -53,7 +55,7 @@
 .habit-trend-card{border:1px solid var(--border);border-radius:16px;padding:12px;background:rgba(255,255,255,.015)}
 .habit-trend-grid{display:grid;grid-template-columns:repeat(14,minmax(0,1fr));gap:4px;margin-top:10px;align-items:end}
 .habit-day{height:28px;border-radius:6px;background:rgba(148,163,184,.14);border:1px solid rgba(148,163,184,.18);position:relative}
-.habit-day.done{background:var(--green);border-color:var(--green)}
+.habit-day.done{background:var(--accent);border-color:var(--accent)}
 .habit-day.future{opacity:.28}
 .habit-day-labels{display:grid;grid-template-columns:repeat(14,minmax(0,1fr));gap:4px;margin-top:5px}
 .habit-day-labels span{font-size:9px;color:var(--muted);text-align:center;overflow:hidden}
@@ -88,11 +90,8 @@
 .fast-history-list .item{align-items:flex-start}
 @media(min-width:520px){.fast-edit-grid{grid-template-columns:1fr 1fr}.group-row{grid-template-columns:1fr 1fr}}
 
-</style>
-<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
-<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+/* ---- consolidated FitBank styles ---- */
 
-<style id="fitbank-v25-exercise-css">
 .workout-card{border:1px solid var(--border);border-radius:16px;padding:14px;margin-top:12px;background:var(--card)}
 .workout-card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
 .workout-card-title{font-size:18px;font-weight:800}
@@ -117,10 +116,10 @@
 }
 
 .morning-options{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:12px}.morning-btn{padding:10px 3px;border:1px solid var(--border);border-radius:14px;background:transparent;color:var(--text);font-size:12px;min-width:0}.morning-btn .face{display:block;font-size:24px;margin-bottom:3px}.morning-btn.selected{border-color:#22c55e;box-shadow:inset 0 0 0 1px #22c55e}.habit-day.note{border-color:#22c55e!important;box-shadow:inset 0 0 0 1px #22c55e}.habit-history-grid{display:grid;grid-template-columns:repeat(14,minmax(0,1fr));gap:4px;margin-top:10px}.range-row{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px}.range-row .btn{white-space:nowrap;padding:9px 12px}.weight-form-stack{display:grid;grid-template-columns:1fr;gap:10px}.journey-message{padding:12px;border:1px solid var(--border);border-radius:14px;margin-top:12px;color:var(--muted)}
-</style>
 
 
-<style id="fitbank-v30-dashboard-css">
+/* ---- consolidated FitBank styles ---- */
+
 
 #home.panel.active{padding-top:2px}
 
@@ -159,667 +158,606 @@
 }
 
 .morning-options{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:12px}.morning-btn{padding:10px 3px;border:1px solid var(--border);border-radius:14px;background:transparent;color:var(--text);font-size:12px;min-width:0}.morning-btn .face{display:block;font-size:24px;margin-bottom:3px}.morning-btn.selected{border-color:#22c55e;box-shadow:inset 0 0 0 1px #22c55e}.habit-day.note{border-color:#22c55e!important;box-shadow:inset 0 0 0 1px #22c55e}.habit-history-grid{display:grid;grid-template-columns:repeat(14,minmax(0,1fr));gap:4px;margin-top:10px}.range-row{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px}.range-row .btn{white-space:nowrap;padding:9px 12px}.weight-form-stack{display:grid;grid-template-columns:1fr;gap:10px}.journey-message{padding:12px;border:1px solid var(--border);border-radius:14px;margin-top:12px;color:var(--muted)}
-</style>
 
-</head>
+</style>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+
+
+<meta content="6.0-clean-baseline" name="fitbank-build"/></head>
 <body>
 <div class="wrap">
-  <div class="tabs">
-    <button class="tab active" data-tab="home">Home</button>
-    <button class="tab" data-tab="food">Food</button>
-    <button class="tab" data-tab="fasting">Fasting</button>
-    <button class="tab" data-tab="habits">Habits</button>
-    <button class="tab" data-tab="exercise">Exercise</button>
-    <button class="tab" data-tab="history">History</button><button class="tab" data-tab="weight">Weight</button><button class="tab" data-tab="settings">Settings</button>
-  </div>
-
-  <div class="dashboard-head global-date-nav">
-    <button id="dashPrevDay" class="btn" type="button">←</button>
-    <div class="dashboard-title">
-      <div class="tiny" style="letter-spacing:.14em;text-transform:uppercase">FitBank</div>
-      <div id="dashDayLabel" style="font-size:22px;font-weight:900">Today</div>
-    </div>
-    <button id="dashNextDay" class="btn" type="button">→</button>
-  </div>
-
-<section id="home" class="panel active">
-
-  <div id="legacyHomeCompat" style="display:none!important" aria-hidden="true">
-    <span id="remaining"></span><span id="eaten"></span><span id="goal"></span>
-    <span id="bank"></span><span id="weekTarget"></span><span id="weekendBudget"></span>
-    <span id="homeHabits"></span><span id="homeExercise"></span><span id="homeFast"></span>
-    <div id="bar"></div>
-  </div>
-
-
-  <button id="openDailyCalories" class="hero-widget" type="button" style="width:100%;color:inherit">
-    <div class="muted">Calories left</div>
-    <div id="dashCaloriesLeft" class="hero-number">—</div>
-    <div id="dashCalorieSub" class="muted" style="margin-top:6px">—</div>
-    <div class="mini-progress"><div id="dashCalorieBar" style="width:0%"></div></div>
-    <div style="margin-top:14px;text-align:left">
-      <div class="row">
-        <div class="muted">Protein</div>
-        <div id="dashProteinRemaining" style="font-weight:900">—</div>
-      </div>
-      <div class="mini-progress"><div id="dashProteinBar" style="width:0%"></div></div>
-      <div id="dashProteinSub" class="tiny" style="margin-top:5px">—</div>
-    </div>
-    <div class="stat3" style="opacity:.82">
-      <div class="stat-box"><div class="k">Protein</div><div id="dashProtein" class="v">0g</div></div>
-      <div class="stat-box"><div class="k">Carbs</div><div id="dashCarbs" class="v">0g</div></div>
-      <div class="stat-box"><div class="k">Fat</div><div id="dashFat" class="v">0g</div></div>
-    </div>
-  </button>
-
-  <div class="widget-grid" style="margin-top:12px">
-    <button class="dash-widget" type="button" data-open-tab="history" style="text-align:left">
-      <div style="font-size:24px">🏦</div><div class="dash-widget-title">Weekly bank</div>
-      <div id="dashBank" class="dash-widget-value">—</div><div class="dash-widget-sub">available this week</div>
-    </button>
-    <button class="dash-widget" type="button" data-open-tab="fasting" style="text-align:left">
-      <div style="font-size:24px">⏱️</div><div class="dash-widget-title">Fasting</div>
-      <div id="dashFasting" class="dash-widget-value">—</div><div id="dashFastingSub" class="dash-widget-sub">—</div>
-    </button>
-    <button class="dash-widget" type="button" data-open-tab="food" style="text-align:left">
-      <div style="font-size:24px">💧</div><div class="dash-widget-title">Water</div>
-      <div id="dashWater" class="dash-widget-value">—</div><div id="dashWaterSub" class="dash-widget-sub">—</div>
-      <div class="mini-progress"><div id="dashWaterBar" style="width:0%"></div></div>
-    </button>
-    <button class="dash-widget" type="button" data-open-tab="weight" style="text-align:left">
-      <div style="font-size:24px">⚖️</div><div class="dash-widget-title">Weight</div>
-      <div id="dashWeight" class="dash-widget-value">—</div><div id="dashWeightSub" class="dash-widget-sub">—</div>
-    </button>
-  </div>
-
-  <div class="widget-grid" style="margin-top:12px">
-    <div class="dash-widget">
-      <div style="font-size:24px">🔥</div><div class="dash-widget-title">Logging streak</div>
-      <div id="dashStreak" class="dash-widget-value">0 days</div><div class="dash-widget-sub">days with food logged</div>
-    </div>
-    <button id="dashHabitsWidget" class="dash-widget" type="button" data-open-tab="habits" style="text-align:left">
-      <div class="row" style="align-items:flex-start">
-        <div><div style="font-size:24px">✓</div><div class="dash-widget-title">Habits</div></div>
-        <div style="font-size:22px;color:#22c55e;font-weight:900" id="dashHabitsCount">0 of 0</div>
-      </div>
-      <div id="dashHabitsSub" class="dash-widget-sub">completed today</div>
-      <div id="dashHabits7" class="habit7" aria-label="7 day habit progress"></div>
-      <div id="dashHabitStreak" class="tiny" style="margin-top:9px">—</div>
-      <div style="display:none"><span id="dashPR"></span><span id="dashPRSub"></span></div>
-    </button>
-  </div>
-
-  <div class="card" style="margin-top:12px">
-    <div class="row">
-      <div><div class="muted">Today's workout</div><div id="dashWorkoutName" style="font-size:20px;font-weight:900;margin-top:2px">No routine selected</div></div>
-      <button id="dashStartWorkout" class="btn primary" type="button">Start</button>
-    </div>
-    <div id="dashWorkoutSub" class="tiny" style="margin-top:6px">Choose a routine from Workouts.</div>
-  </div>
-
-  <div class="card" style="margin-top:12px">
-    <div class="row">
-      <div><div class="muted">Weekly report</div><div id="dashWeekHeadline" style="font-size:20px;font-weight:900;margin-top:2px">This week</div></div>
-      <button id="openWeeklyReport" class="btn" type="button">View</button>
-    </div>
-    <div class="weekly-report-grid">
-      <div class="stat-box"><div class="k">Avg cal</div><div id="dashAvgCal" class="v">—</div></div>
-      <div class="stat-box"><div class="k">Weight</div><div id="dashWeekWeight" class="v">—</div></div>
-      <div class="stat-box"><div class="k">Workouts</div><div id="dashWeekWorkouts" class="v">0</div></div>
-      <div class="stat-box"><div class="k">Water avg</div><div id="dashWaterAvg" class="v">—</div></div>
-    </div>
-  </div>
-
-  <div class="widget-grid" style="margin-top:12px">
-    <button id="openProgressPhotos" class="dash-widget" type="button" style="text-align:left">
-      <div style="font-size:24px">📸</div><div class="dash-widget-title">Progress photos</div>
-      <div class="dash-widget-value" style="font-size:18px">Compare by date</div><div id="dashPhotoCount" class="dash-widget-sub">0 photos</div>
-    </button>
-    <button id="openDailyNote" class="dash-widget" type="button" style="text-align:left">
-      <div style="font-size:24px">📝</div><div class="dash-widget-title">Daily note</div>
-      <div id="dashNoteStatus" class="dash-widget-value" style="font-size:18px">Add note</div><div class="dash-widget-sub">how did today feel?</div>
-    </button>
-  </div>
-
-  <div style="display:none" aria-hidden="true"><span id="dashHabitText"></span><span id="dashHabitPct"></span><span id="dashHabitBar"></span></div>
-
-  <div id="weeklyReportPanel" class="card quick-panel">
-    <div class="row"><strong>Weekly report</strong><button class="btn" type="button" data-close-panel="weeklyReportPanel">Close</button></div>
-    <div id="weeklyReportBody" style="margin-top:10px"></div>
-  </div>
-
-  <div id="progressPhotosPanel" class="card quick-panel">
-    <div class="row"><strong>Progress photos</strong><button class="btn" type="button" data-close-panel="progressPhotosPanel">Close</button></div>
-    <div class="grid grid2" style="margin-top:10px">
-      <input id="progressPhotoDate" type="date">
-      <input id="progressPhotoFile" type="file" accept="image/*">
-    </div>
-    <button id="saveProgressPhoto" class="btn primary" type="button">Save progress photo</button>
-    <div id="progressPhotoGrid" class="photo-grid"></div>
-  </div>
-
-  <div id="dailyNotePanel" class="card quick-panel">
-    <div class="row"><strong>Daily note</strong><button class="btn" type="button" data-close-panel="dailyNotePanel">Close</button></div>
-    <textarea id="dailyNoteText" class="exercise-notes" placeholder="How did today feel? Hunger, energy, sleep, workout, eating out..."></textarea>
-    <button id="saveDailyNote" class="btn primary" type="button">Save note</button>
-  </div>
+<div class="tabs">
+<button class="tab active" data-tab="home">Home</button>
+<button class="tab" data-tab="food">Food</button>
+<button class="tab" data-tab="fasting">Fasting</button>
+<button class="tab" data-tab="habits">Habits</button>
+<button class="tab" data-tab="exercise">Exercise</button>
+<button class="tab" data-tab="history">History</button><button class="tab" data-tab="weight">Weight</button><button class="tab" data-tab="settings">Settings</button>
+</div>
+<div class="dashboard-head global-date-nav">
+<button class="btn" id="dashPrevDay" type="button">←</button>
+<div class="dashboard-title">
+<div class="tiny" style="letter-spacing:.14em;text-transform:uppercase">FitBank</div>
+<div id="dashDayLabel" style="font-size:22px;font-weight:900">Today</div>
+</div>
+<button class="btn" id="dashNextDay" type="button">→</button>
+</div>
+<section class="panel active" id="home">
+<div aria-hidden="true" id="legacyHomeCompat" style="display:none!important">
+<span id="remaining"></span><span id="eaten"></span><span id="goal"></span>
+<span id="bank"></span><span id="weekTarget"></span><span id="weekendBudget"></span>
+<span id="homeHabits"></span><span id="homeExercise"></span><span id="homeFast"></span>
+<div id="bar"></div>
+</div>
+<button class="hero-widget" id="openDailyCalories" style="width:100%;color:inherit" type="button">
+<div class="muted">Calories left</div>
+<div class="hero-number" id="dashCaloriesLeft">—</div>
+<div class="muted" id="dashCalorieSub" style="margin-top:6px">—</div>
+<div class="mini-progress"><div id="dashCalorieBar" style="width:0%"></div></div>
+<div style="margin-top:14px;text-align:left">
+<div class="row">
+<div class="muted">Protein</div>
+<div id="dashProteinRemaining" style="font-weight:900">—</div>
+</div>
+<div class="mini-progress"><div id="dashProteinBar" style="width:0%"></div></div>
+<div class="tiny" id="dashProteinSub" style="margin-top:5px">—</div>
+</div>
+<div class="stat3" style="opacity:.82">
+<div class="stat-box"><div class="k">Protein</div><div class="v" id="dashProtein">0g</div></div>
+<div class="stat-box"><div class="k">Carbs</div><div class="v" id="dashCarbs">0g</div></div>
+<div class="stat-box"><div class="k">Fat</div><div class="v" id="dashFat">0g</div></div>
+</div>
+</button>
+<div class="widget-grid" style="margin-top:12px">
+<button class="dash-widget" data-open-tab="history" style="text-align:left" type="button">
+<div style="font-size:24px">🏦</div><div class="dash-widget-title">Weekly bank</div>
+<div class="dash-widget-value" id="dashBank">—</div><div class="dash-widget-sub">available this week</div>
+</button>
+<button class="dash-widget" data-open-tab="fasting" style="text-align:left" type="button">
+<div style="font-size:24px">⏱️</div><div class="dash-widget-title">Fasting</div>
+<div class="dash-widget-value" id="dashFasting">—</div><div class="dash-widget-sub" id="dashFastingSub">—</div>
+</button>
+<button class="dash-widget" data-open-tab="food" style="text-align:left" type="button">
+<div style="font-size:24px">💧</div><div class="dash-widget-title">Water</div>
+<div class="dash-widget-value" id="dashWater">—</div><div class="dash-widget-sub" id="dashWaterSub">—</div>
+<div class="mini-progress"><div id="dashWaterBar" style="width:0%"></div></div>
+</button>
+<button class="dash-widget" data-open-tab="weight" style="text-align:left" type="button">
+<div style="font-size:24px">⚖️</div><div class="dash-widget-title">Weight</div>
+<div class="dash-widget-value" id="dashWeight">—</div><div class="dash-widget-sub" id="dashWeightSub">—</div>
+</button>
+</div>
+<div class="widget-grid" style="margin-top:12px">
+<div class="dash-widget">
+<div style="font-size:24px">🔥</div><div class="dash-widget-title">Logging streak</div>
+<div class="dash-widget-value" id="dashStreak">0 days</div><div class="dash-widget-sub">days with food logged</div>
+</div>
+<button class="dash-widget" data-open-tab="habits" id="dashHabitsWidget" style="text-align:left" type="button">
+<div class="row" style="align-items:flex-start">
+<div><div style="font-size:24px">✓</div><div class="dash-widget-title">Habits</div></div>
+<div id="dashHabitsCount" style="font-size:22px;color:#22c55e;font-weight:900">0 of 0</div>
+</div>
+<div class="dash-widget-sub" id="dashHabitsSub">completed today</div>
+<div aria-label="7 day habit progress" class="habit7" id="dashHabits7"></div>
+<div class="tiny" id="dashHabitStreak" style="margin-top:9px">—</div>
+<div style="display:none"><span id="dashPR"></span><span id="dashPRSub"></span></div>
+</button>
+</div>
+<div class="card" style="margin-top:12px">
+<div class="row">
+<div><div class="muted">Today's workout</div><div id="dashWorkoutName" style="font-size:20px;font-weight:900;margin-top:2px">No routine selected</div></div>
+<button class="btn primary" id="dashStartWorkout" type="button">Start</button>
+</div>
+<div class="tiny" id="dashWorkoutSub" style="margin-top:6px">Choose a routine from Workouts.</div>
+</div>
+<div class="card" style="margin-top:12px">
+<div class="row">
+<div><div class="muted">Weekly report</div><div id="dashWeekHeadline" style="font-size:20px;font-weight:900;margin-top:2px">This week</div></div>
+<button class="btn" id="openWeeklyReport" type="button">View</button>
+</div>
+<div class="weekly-report-grid">
+<div class="stat-box"><div class="k">Avg cal</div><div class="v" id="dashAvgCal">—</div></div>
+<div class="stat-box"><div class="k">Weight</div><div class="v" id="dashWeekWeight">—</div></div>
+<div class="stat-box"><div class="k">Workouts</div><div class="v" id="dashWeekWorkouts">0</div></div>
+<div class="stat-box"><div class="k">Water avg</div><div class="v" id="dashWaterAvg">—</div></div>
+</div>
+</div>
+<div class="widget-grid" style="margin-top:12px">
+<button class="dash-widget" id="openProgressPhotos" style="text-align:left" type="button">
+<div style="font-size:24px">📸</div><div class="dash-widget-title">Progress photos</div>
+<div class="dash-widget-value" style="font-size:18px">Compare by date</div><div class="dash-widget-sub" id="dashPhotoCount">0 photos</div>
+</button>
+<button class="dash-widget" id="openDailyNote" style="text-align:left" type="button">
+<div style="font-size:24px">📝</div><div class="dash-widget-title">Daily note</div>
+<div class="dash-widget-value" id="dashNoteStatus" style="font-size:18px">Add note</div><div class="dash-widget-sub">how did today feel?</div>
+</button>
+</div>
+<div aria-hidden="true" style="display:none"><span id="dashHabitText"></span><span id="dashHabitPct"></span><span id="dashHabitBar"></span></div>
+<div class="card quick-panel" id="weeklyReportPanel">
+<div class="row"><strong>Weekly report</strong><button class="btn" data-close-panel="weeklyReportPanel" type="button">Close</button></div>
+<div id="weeklyReportBody" style="margin-top:10px"></div>
+</div>
+<div class="card quick-panel" id="progressPhotosPanel">
+<div class="row"><strong>Progress photos</strong><button class="btn" data-close-panel="progressPhotosPanel" type="button">Close</button></div>
+<div class="grid grid2" style="margin-top:10px">
+<input id="progressPhotoDate" type="date"/>
+<input accept="image/*" id="progressPhotoFile" type="file"/>
+</div>
+<button class="btn primary" id="saveProgressPhoto" type="button">Save progress photo</button>
+<div class="photo-grid" id="progressPhotoGrid"></div>
+</div>
+<div class="card quick-panel" id="dailyNotePanel">
+<div class="row"><strong>Daily note</strong><button class="btn" data-close-panel="dailyNotePanel" type="button">Close</button></div>
+<textarea class="exercise-notes" id="dailyNoteText" placeholder="How did today feel? Hunger, energy, sleep, workout, eating out..."></textarea>
+<button class="btn primary" id="saveDailyNote" type="button">Save note</button>
+</div>
 </section>
-
-<section id="food" class="panel">
-    <div class="card">
-      <div class="row"><div><strong>Food Bank</strong><div class="muted">Search foods or scan a packaged-food barcode.</div></div><span class="tiny">V5.3</span></div>
-      <div class="grid grid2" style="margin-top:12px">
-        <input id="foodBankSearch" type="search" placeholder="Search chicken, eggs, rice…" autocomplete="off">
-        <button id="foodBankSearchBtn" class="btn primary" type="button">Search food</button>
-      </div>
-      <div id="foodBankStatus" class="tiny" style="margin-top:7px">Common foods search instantly. Packaged foods also search Open Food Facts.</div>
-      <div id="foodBankResults" class="list" style="margin-top:8px"></div>
-      <div style="height:1px;background:var(--line);margin:16px 0"></div>
-      <div class="row"><div><strong>Barcode scanner</strong><div class="tiny">Scan the UPC on a packaged food.</div></div><button id="startBarcodeScan" class="btn" type="button">▦ Scan barcode</button></div>
-      <div id="barcodeReader" style="display:none;margin-top:10px;overflow:hidden;border-radius:14px"></div>
-      <div class="grid grid2" style="margin-top:10px">
-        <input id="barcodeManual" inputmode="numeric" placeholder="Or enter barcode number">
-        <button id="lookupBarcode" class="btn" type="button">Look up</button>
-      </div>
-      <div id="barcodeStatus" class="tiny" style="margin-top:7px"></div>
-    </div>
-
-    <div class="card" style="margin-top:12px">
-      <div class="row">
-        <div>
-          <strong>Water intake</strong>
-          <div class="muted">Track your water here with your food.</div>
-        </div>
-        <div style="text-align:right">
-          <div id="waterTotal" style="font-size:24px;font-weight:800">0 oz</div>
-          <div id="waterGoalText" class="tiny">Goal: 100 oz</div>
-        </div>
-      </div>
-
-      <div style="height:10px;background:rgba(127,127,127,.18);border-radius:999px;overflow:hidden;margin-top:12px">
-        <div id="waterBar" style="height:100%;width:0%;background:var(--accent);border-radius:999px"></div>
-      </div>
-
-      <div class="actions" style="margin-top:12px;flex-wrap:wrap">
-        <button class="btn waterQuick" type="button" data-oz="8">+8 oz</button>
-        <button class="btn waterQuick" type="button" data-oz="16">+16 oz</button>
-        <button class="btn waterQuick" type="button" data-oz="20">+20 oz</button>
-        <button class="btn waterQuick" type="button" data-oz="32">+32 oz</button>
-      </div>
-
-      <div class="grid grid2" style="margin-top:10px">
-      </div>
-
-      <div class="grid grid2" style="margin-top:10px">
-        <input id="waterGoalInput" type="number" min="8" max="300" step="1" placeholder="Daily goal (oz)">
-        <button id="saveWaterGoal" class="btn" type="button">Set daily goal</button>
-      </div>
-
-      <div class="actions" style="margin-top:10px">
-        <button id="undoWater" class="btn" type="button">Undo 8 oz</button>
-        <button id="resetWater" class="btn danger" type="button">Reset today</button>
-      </div>
-    </div>
-
-    <div class="card" style="margin-top:12px">
-      <strong>Portion accuracy</strong>
-      <div class="muted" style="margin-top:6px">For best results, weigh the food after cooking and enter the weight in grams or ounces. When AI nutrition is connected, FitBank will use that portion weight to improve calories, macros, and micronutrients.</div>
-    </div>
-
-    <div id="mealEntryCard" class="card" style="margin-top:12px">
-      <div class="row">
-        <div>
-          <strong id="mealDayTitle">Today's calories</strong>
-          <div id="mealDaySub" class="muted">0 eaten of 0</div>
-        </div>
-        <div style="text-align:right">
-          <div id="mealDayLeft" style="font-size:24px;font-weight:900">—</div>
-          <div class="tiny">cal left</div>
-        </div>
-      </div>
-      <div class="mini-progress"><div id="mealDayBar" style="width:0%"></div></div>
-      <div style="margin-top:14px">
-        <div class="row">
-          <div class="muted">Protein</div>
-          <div id="mealProteinRemaining" style="font-weight:900">—</div>
-        </div>
-        <div class="mini-progress"><div id="mealProteinBar" style="width:0%"></div></div>
-        <div id="mealProteinSub" class="tiny" style="margin-top:5px">—</div>
-      </div>
-
-      <div class="stat3">
-        <div class="stat-box"><div class="k">Protein</div><div id="mealDayProtein" class="v">0g</div></div>
-        <div class="stat-box"><div class="k">Carbs</div><div id="mealDayCarbs" class="v">0g</div></div>
-        <div class="stat-box"><div class="k">Fat</div><div id="mealDayFat" class="v">0g</div></div>
-      </div>
-
-      <div class="row" style="margin-top:16px">
-        <strong>Add meal</strong>
-        <button id="toggleLabelScan" class="btn" type="button">📷 Scan nutrition label</button>
-      </div>
-      <div id="labelScanPanel" class="label-scan-panel">
-        <div class="row"><div><strong>Nutrition label scan</strong><div class="tiny">Reads the label on this phone, then fills the food form.</div></div><button id="closeLabelScan" class="btn" type="button">Close</button></div>
-        <input id="labelPhoto" type="file" accept="image/*" capture="environment" style="margin-top:10px">
-        <img id="labelPreview" class="label-scan-preview" alt="Nutrition label preview">
-        <button id="readNutritionLabel" class="btn primary" type="button" style="margin-top:10px;width:100%">Read nutrition label</button>
-        <div id="labelScanStatus" class="muted" style="margin-top:8px"></div>
-        <div id="labelScanResults" style="display:none;margin-top:10px">
-          <div class="label-scan-grid">
-            <div class="label-scan-result"><div class="k">Calories / serving</div><div class="v" id="scanCalories">—</div></div>
-            <div class="label-scan-result"><div class="k">Protein</div><div class="v" id="scanProtein">—</div></div>
-            <div class="label-scan-result"><div class="k">Carbs</div><div class="v" id="scanCarbs">—</div></div>
-            <div class="label-scan-result"><div class="k">Fat</div><div class="v" id="scanFat">—</div></div>
-          </div>
-          <div class="grid grid2" style="margin-top:10px">
-            <div><label class="tiny">Serving size from label</label><input id="scanServingSize" placeholder="e.g. 28 g"></div>
-            <div><label class="tiny">Servings you ate</label><input id="scanServingsEaten" type="number" min="0.1" max="50" step="0.1" value="1"></div>
-          </div>
-          <button id="applyNutritionLabel" class="btn primary" type="button" style="width:100%;margin-top:10px">Use these numbers</button>
-          <div class="tiny" style="margin-top:7px">Check the numbers before saving. Label OCR can misread small print.</div>
-        </div>
-      </div>
-      <form id="mealForm" style="margin-top:12px">
-        <label class="tiny" for="mealDate">Date</label>
-        <input id="mealDate" type="date">
-        <input id="mealName" placeholder="Food" required list="foodSuggestions">
-        <datalist id="foodSuggestions">
-          <option value="White rice, cooked"></option>
-          <option value="Brown rice, cooked"></option>
-          <option value="Chicken breast, cooked"></option>
-          <option value="Ground beef 90/10, cooked"></option>
-          <option value="Egg, whole"></option>
-          <option value="Oatmeal, cooked"></option>
-          <option value="Potato, baked"></option>
-          <option value="Sweet potato, baked"></option>
-          <option value="Broccoli, cooked"></option>
-          <option value="Banana"></option>
-          <option value="Apple"></option>
-          <option value="Greek yogurt, nonfat"></option>
-        </datalist>
-        <input id="mealCal" type="number" min="1" max="5000" placeholder="Calories (auto or manual)" required>
-        <div class="grid grid2">
-          <input id="mealWeight" type="number" min="0" max="10000" step="0.1" placeholder="Food weight">
-          <select id="mealWeightUnit">
-            <option value="g">grams (g)</option>
-            <option value="oz">ounces (oz)</option>
-          </select>
-        <div id="foodAutoCalcHint" class="tiny" style="margin-top:6px">Choose a common food and enter its weight to calculate calories and macros automatically.</div>
-        </div>
-        <div class="grid grid4">
-          <input id="mealProtein" type="number" min="0" max="1000" placeholder="Protein g">
-          <input id="mealCarbs" type="number" min="0" max="1000" placeholder="Carbs g">
-          <input id="mealFat" type="number" min="0" max="1000" placeholder="Fat g">
-          <button class="btn primary" type="submit">Add meal</button>
-        </div>
-        <div class="tiny">Tip: weighing food makes calorie, macro, and micronutrient estimates more accurate.</div>
-      </form>
-      <div id="meals" class="list"></div>
-    </div>
-  </section>
-
-  <section id="fasting" class="panel">
-    <div class="card" style="text-align:center">
-      <div class="muted">Intermittent fasting</div>
-      <div id="fastStartedLine" class="muted" style="margin-top:7px;display:none">⭐ Started —</div>
-      <div id="fastDisplay" class="big" style="margin-top:8px">16:8</div>
-      <div id="fastSub" class="muted">Not fasting</div>
-      <div id="fastElapsed" class="muted" style="margin-top:8px;display:none">Elapsed: —</div>
-      <div id="fastEndsLine" class="muted" style="margin-top:6px;display:none">Ends at: —</div>
-      <button id="fastBtn" class="btn primary" style="margin-top:16px">Start fast</button>
-    </div>
-
-    <div id="todayFastCard" class="card" style="margin-top:12px;display:none">
-      <div class="row"><strong>Today's Fast</strong><span id="todayFastBadge" class="tiny" style="color:#22c55e">Completed</span></div>
-      <div class="fast-total" id="todayFastDuration">—</div>
-      <div class="muted">Total fasting time</div>
-      <div id="todayFastOver" class="fast-over"></div>
-      <div class="fast-pair">
-        <div class="fast-mini"><div class="tiny">Started</div><div class="v" id="todayFastStarted">—</div><div class="tiny" id="todayFastStartedDate"></div></div>
-        <div class="fast-mini"><div class="tiny">Ended</div><div class="v" id="todayFastEnded">—</div><div class="tiny" id="todayFastEndedDate"></div></div>
-      </div>
-      <div class="tiny" id="todayFastGoal" style="margin-top:12px"></div>
-      <button id="editCompletedFast" class="btn" type="button" style="width:100%;margin-top:12px">✎ Edit fast</button>
-      <div id="fastEditPanel" class="fast-edit">
-        <div class="fast-edit-grid">
-          <div><label>Actual start date & time</label><input id="editFastStart" type="datetime-local"></div>
-          <div><label>Actual end date & time</label><input id="editFastEnd" type="datetime-local"></div>
-        </div>
-        <div id="fastEditError" class="tiny" style="margin-top:7px;color:#fca5a5"></div>
-        <div class="fast-action-row"><button id="saveFastEdit" class="btn primary" type="button">Save changes</button><button id="cancelFastEdit" class="btn" type="button">Cancel</button></div>
-      </div>
-    </div>
-
-    <div class="card" style="margin-top:12px">
-      <div class="row"><div><strong>Weekly fasting report</strong><div class="muted" id="fastWeekLabel">This week</div></div><div class="fast-week-nav"><button id="fastPrevWeek" class="btn" type="button">←</button><button id="fastThisWeek" class="btn" type="button">Today</button><button id="fastNextWeek" class="btn" type="button">→</button></div></div>
-      <div class="fast-week-grid">
-        <div class="fast-week-stat"><div class="k">Average fast</div><div class="v" id="fastWeekAvg">—</div></div>
-        <div class="fast-week-stat"><div class="k">Total fasted</div><div class="v" id="fastWeekTotal">—</div></div>
-        <div class="fast-week-stat"><div class="k">Longest fast</div><div class="v" id="fastWeekLongest">—</div></div>
-        <div class="fast-week-stat"><div class="k">Goal achieved</div><div class="v" id="fastWeekGoals">—</div></div>
-      </div>
-      <div id="fastWeekDays" style="margin-top:12px"></div>
-    </div>
-
-    <div class="card" style="margin-top:12px">
-      <div class="row"><div><strong>Fast history</strong><div class="muted">Your completed fasts stay editable.</div></div><button id="toggleFastHistory" class="btn" type="button">View</button></div>
-      <div id="fastHistoryList" class="list fast-history-list" style="display:none;margin-top:10px"></div>
-    </div>
-
-    <div class="card" style="margin-top:12px">
-      <strong>Fasting settings</strong>
-      <div class="grid grid2" style="margin-top:12px">
-        <div><label class="muted">Fast length (hours)</label><input id="fastHours" type="number" min="1" max="48" value="16"></div>
-        <div><label class="muted">Eating window (hours)</label><input id="eatHours" type="number" min="1" max="23" value="8"></div>
-      </div>
-
-      <div class="grid grid2" style="margin-top:12px">
-        <div>
-          <label class="muted">Start time ⭐</label>
-          <input id="fastStartTime" type="time">
-          <div class="tiny">Set the time you actually started.</div>
-        </div>
-        <div>
-          <label class="muted">Expected end time</label>
-          <input id="fastEndTime" type="time">
-          <div class="tiny">Updates from your fasting length, or change it yourself.</div>
-        </div>
-      </div>
-
-      <div class="tiny" id="fastTimeHint" style="margin-top:10px">If you forgot to start FitBank on time, enter the real start time before tapping Start fast.</div>
-      <button id="saveFastSettings" class="btn" style="margin-top:10px">Save fasting settings</button>
-    </div>
-  </section>
-
-  <section id="habits" class="panel">
-    <div class="card morning-card">
-      <div class="morning-top">
-        <div><div class="morning-title">☀️ Morning check-in</div><div class="muted">How did you wake up?</div></div>
-        <div class="morning-status"><span id="morningTodayLabel">Today</span><span id="morningPickedLabel"></span></div>
-      </div>
-      <div id="morningOptions" class="morning-options"></div>
-      <div class="morning-note-row"><textarea id="morningNote" placeholder="Optional note — sleep, energy, how you feel..."></textarea><button id="saveMorning" class="btn primary" type="button">Save</button></div>
-      <div class="tiny" style="margin-top:9px">Use this to spot patterns in your energy, sleep, fasting, and habits.</div>
-    </div>
-    <div class="card" style="margin-top:12px">
-      <strong>Your habits</strong>
-      <form id="habitForm" style="margin-top:12px">
-        <input id="habitName" maxlength="60" placeholder="Add a new habit">
-        <button class="btn primary">Add habit</button>
-      </form>
-      <div id="habitList" class="list"></div>
-    </div>
-    <div class="card" style="margin-top:12px">
-      <div class="row"><div><strong>Habit trends</strong><div class="muted">Last 14 days</div></div></div>
-      <div id="habitTrendList" class="list" style="margin-top:12px"></div>
-    </div>
-  </section>
-
-  
-<section id="exercise" class="panel">
-  <div class="card">
-    <div class="row">
-      <div>
-        <strong>Workout routines</strong>
-        <div class="muted">Build a routine manually or import one from a screenshot.</div>
-      </div>
-    </div>
-
-    <div class="grid grid2" style="margin-top:12px">
-      <button id="showManualRoutine" class="btn primary" type="button">+ Create routine</button>
-      <button id="showScreenshotImport" class="btn" type="button">Import screenshot</button>
-    </div>
-
-    <div id="manualRoutinePanel" style="display:none;margin-top:12px">
-      <form id="routineForm">
-        <input id="routineName" maxlength="60" placeholder="Routine name, e.g. Legs #1">
-        <button class="btn primary">Create routine</button>
-      </form>
-    </div>
-
-    <div id="screenshotImportPanel" style="display:none;margin-top:12px">
-      <input id="workoutShot" type="file" accept="image/*">
-      <img id="workoutShotPreview" style="display:none" alt="Workout screenshot preview">
-      <button id="readWorkoutShot" class="btn primary" type="button" style="margin-top:10px">Read workout screenshot</button>
-      <div id="ocrStatus" class="muted" style="margin-top:10px"></div>
-
-      <div id="ocrReview" style="display:none;margin-top:14px">
-        <label class="muted">Routine name</label>
-        <input id="ocrRoutineName" value="Imported Workout">
-        <div id="ocrExerciseList"></div>
-        <div class="actions" style="margin-top:10px">
-          <button id="ocrAddRow" class="btn" type="button">+ Add exercise</button>
-          <button id="saveOcrRoutine" class="btn primary" type="button">Save routine</button>
-        </div>
-      </div>
-    </div>
-
-    <div id="routineList" class="list" style="margin-top:12px"></div>
-  </div>
-
-  <div id="routineBuilderCard" class="card" style="margin-top:12px;display:none">
-    <div class="row">
-      <div>
-        <strong id="routineBuilderTitle">Edit routine</strong>
-        <div class="muted">Set reps, percentage of max, and max weight for each exercise.</div>
-      </div>
-      <button id="closeRoutineBuilder" class="btn" type="button">Done</button>
-    </div>
-
-    <form id="routineExerciseForm" style="margin-top:12px">
-      <div class="group-row"><select id="routineMuscleGroup"><option value="legs">Legs</option><option value="chest">Chest</option><option value="back">Back</option><option value="shoulders">Shoulders</option><option value="arms">Arms</option><option value="core">Core</option><option value="full">Full Body</option></select><div id="routineGroupHint" class="tiny" style="align-self:center">Choose a muscle group for suggestions, or type any exercise.</div></div>
-      <input id="routineExerciseName" list="routineExerciseSuggestions" maxlength="80" placeholder="Exercise name or choose from list"><datalist id="routineExerciseSuggestions"></datalist>
-      <div class="grid grid2">
-        <input id="routineSets" type="number" min="1" max="20" value="3" placeholder="Working sets">
-        <input id="routineReps" type="text" value="8-10" placeholder="Target reps, e.g. 8-10">
-      </div>
-      <div class="grid grid2">
-        <input id="routinePercent" type="number" min="0" max="100" step="1" placeholder="% of max">
-        <input id="routineMax" type="number" min="0" max="2000" step="0.5" placeholder="Your max (lb)">
-      </div>
-      <div class="grid grid2">
-        <input id="routineRpe" type="text" placeholder="RPE, e.g. 8-9">
-        <input id="routineRest" type="text" placeholder="Rest, e.g. 3-4 min">
-      </div>
-      <textarea id="routineNotes" class="exercise-notes" placeholder="Notes or substitutions"></textarea>
-      <button class="btn primary" type="submit">Add exercise</button>
-    </form>
-    <div id="routineExerciseList"></div>
-  </div>
-
-  <div id="currentWorkoutCard" class="card current-workout" style="display:none">
-    <div class="row">
-      <div>
-        <strong id="currentWorkoutTitle">Current workout</strong>
-        <div class="muted">Log the weight and reps you actually complete.</div>
-      </div>
-      <button id="finishWorkout" class="btn primary" type="button">Finish</button>
-    </div>
-    <div id="currentWorkoutExercises"></div>
-  </div>
-
-  <div class="card" style="margin-top:12px">
-    <strong>Quick exercise log</strong>
-    <div class="muted">For walking, cardio, yard work, or anything you just want to track by time.</div>
-    <form id="exerciseForm" style="margin-top:12px">
-      <input id="quickExerciseName" maxlength="60" placeholder="Exercise name">
-      <input id="exerciseMins" type="number" min="1" max="600" value="30" placeholder="Minutes">
-      <button class="btn">Log workout</button>
-    </form>
-    <div id="exerciseLog" class="list"></div>
-  </div>
+<section class="panel" id="food">
+<div class="card">
+<div class="row"><div><strong>Food Bank</strong><div class="muted">Search foods or scan a packaged-food barcode.</div></div><span class="tiny">V5.3</span></div>
+<div class="grid grid2" style="margin-top:12px">
+<input autocomplete="off" id="foodBankSearch" placeholder="Search chicken, eggs, rice…" type="search"/>
+<button class="btn primary" id="foodBankSearchBtn" type="button">Search food</button>
+</div>
+<div class="tiny" id="foodBankStatus" style="margin-top:7px">Common foods search instantly. Packaged foods also search Open Food Facts.</div>
+<div class="list" id="foodBankResults" style="margin-top:8px"></div>
+<div style="height:1px;background:var(--line);margin:16px 0"></div>
+<div class="row"><div><strong>Barcode scanner</strong><div class="tiny">Scan the UPC on a packaged food.</div></div><button class="btn" id="startBarcodeScan" type="button">▦ Scan barcode</button></div>
+<div id="barcodeReader" style="display:none;margin-top:10px;overflow:hidden;border-radius:14px"></div>
+<div class="grid grid2" style="margin-top:10px">
+<input id="barcodeManual" inputmode="numeric" placeholder="Or enter barcode number"/>
+<button class="btn" id="lookupBarcode" type="button">Look up</button>
+</div>
+<div class="tiny" id="barcodeStatus" style="margin-top:7px"></div>
+</div>
+<div class="card" style="margin-top:12px">
+<div class="row">
+<div>
+<strong>Water intake</strong>
+<div class="muted">Track your water here with your food.</div>
+</div>
+<div style="text-align:right">
+<div id="waterTotal" style="font-size:24px;font-weight:800">0 oz</div>
+<div class="tiny" id="waterGoalText">Goal: 100 oz</div>
+</div>
+</div>
+<div style="height:10px;background:rgba(127,127,127,.18);border-radius:999px;overflow:hidden;margin-top:12px">
+<div id="waterBar" style="height:100%;width:0%;background:var(--accent);border-radius:999px"></div>
+</div>
+<div class="actions" style="margin-top:12px;flex-wrap:wrap">
+<button class="btn waterQuick" data-oz="8" type="button">+8 oz</button>
+<button class="btn waterQuick" data-oz="16" type="button">+16 oz</button>
+<button class="btn waterQuick" data-oz="20" type="button">+20 oz</button>
+<button class="btn waterQuick" data-oz="32" type="button">+32 oz</button>
+</div>
+<div class="grid grid2" style="margin-top:10px">
+</div>
+<div class="grid grid2" style="margin-top:10px">
+<input id="waterGoalInput" max="300" min="8" placeholder="Daily goal (oz)" step="1" type="number"/>
+<button class="btn" id="saveWaterGoal" type="button">Set daily goal</button>
+</div>
+<div class="actions" style="margin-top:10px">
+<button class="btn" id="undoWater" type="button">Undo 8 oz</button>
+<button class="btn danger" id="resetWater" type="button">Reset today</button>
+</div>
+</div>
+<div class="card" style="margin-top:12px">
+<strong>Portion accuracy</strong>
+<div class="muted" style="margin-top:6px">For best results, weigh the food after cooking and enter the weight in grams or ounces. When AI nutrition is connected, FitBank will use that portion weight to improve calories, macros, and micronutrients.</div>
+</div>
+<div class="card" id="mealEntryCard" style="margin-top:12px">
+<div class="row">
+<div>
+<strong id="mealDayTitle">Today's calories</strong>
+<div class="muted" id="mealDaySub">0 eaten of 0</div>
+</div>
+<div style="text-align:right">
+<div id="mealDayLeft" style="font-size:24px;font-weight:900">—</div>
+<div class="tiny">cal left</div>
+</div>
+</div>
+<div class="mini-progress"><div id="mealDayBar" style="width:0%"></div></div>
+<div style="margin-top:14px">
+<div class="row">
+<div class="muted">Protein</div>
+<div id="mealProteinRemaining" style="font-weight:900">—</div>
+</div>
+<div class="mini-progress"><div id="mealProteinBar" style="width:0%"></div></div>
+<div class="tiny" id="mealProteinSub" style="margin-top:5px">—</div>
+</div>
+<div class="stat3">
+<div class="stat-box"><div class="k">Protein</div><div class="v" id="mealDayProtein">0g</div></div>
+<div class="stat-box"><div class="k">Carbs</div><div class="v" id="mealDayCarbs">0g</div></div>
+<div class="stat-box"><div class="k">Fat</div><div class="v" id="mealDayFat">0g</div></div>
+</div>
+<div class="row" style="margin-top:16px">
+<strong>Add meal</strong>
+<button class="btn" id="toggleLabelScan" type="button">📷 Scan nutrition label</button>
+</div>
+<div class="label-scan-panel" id="labelScanPanel">
+<div class="row"><div><strong>Nutrition label scan</strong><div class="tiny">Reads the label on this phone, then fills the food form.</div></div><button class="btn" id="closeLabelScan" type="button">Close</button></div>
+<input accept="image/*" capture="environment" id="labelPhoto" style="margin-top:10px" type="file"/>
+<img alt="Nutrition label preview" class="label-scan-preview" id="labelPreview"/>
+<button class="btn primary" id="readNutritionLabel" style="margin-top:10px;width:100%" type="button">Read nutrition label</button>
+<div class="muted" id="labelScanStatus" style="margin-top:8px"></div>
+<div id="labelScanResults" style="display:none;margin-top:10px">
+<div class="label-scan-grid">
+<div class="label-scan-result"><div class="k">Calories / serving</div><div class="v" id="scanCalories">—</div></div>
+<div class="label-scan-result"><div class="k">Protein</div><div class="v" id="scanProtein">—</div></div>
+<div class="label-scan-result"><div class="k">Carbs</div><div class="v" id="scanCarbs">—</div></div>
+<div class="label-scan-result"><div class="k">Fat</div><div class="v" id="scanFat">—</div></div>
+</div>
+<div class="grid grid2" style="margin-top:10px">
+<div><label class="tiny">Serving size from label</label><input id="scanServingSize" placeholder="e.g. 28 g"/></div>
+<div><label class="tiny">Servings you ate</label><input id="scanServingsEaten" max="50" min="0.1" step="0.1" type="number" value="1"/></div>
+</div>
+<button class="btn primary" id="applyNutritionLabel" style="width:100%;margin-top:10px" type="button">Use these numbers</button>
+<div class="tiny" style="margin-top:7px">Check the numbers before saving. Label OCR can misread small print.</div>
+</div>
+</div>
+<form id="mealForm" style="margin-top:12px">
+<label class="tiny" for="mealDate">Date</label>
+<input id="mealDate" type="date"/>
+<input id="mealName" list="foodSuggestions" placeholder="Food" required=""/>
+<datalist id="foodSuggestions">
+<option value="White rice, cooked"></option>
+<option value="Brown rice, cooked"></option>
+<option value="Chicken breast, cooked"></option>
+<option value="Ground beef 90/10, cooked"></option>
+<option value="Egg, whole"></option>
+<option value="Oatmeal, cooked"></option>
+<option value="Potato, baked"></option>
+<option value="Sweet potato, baked"></option>
+<option value="Broccoli, cooked"></option>
+<option value="Banana"></option>
+<option value="Apple"></option>
+<option value="Greek yogurt, nonfat"></option>
+</datalist>
+<input id="mealCal" max="5000" min="1" placeholder="Calories (auto or manual)" required="" type="number"/>
+<div class="grid grid2">
+<input id="mealWeight" max="10000" min="0" placeholder="Food weight" step="0.1" type="number"/>
+<select id="mealWeightUnit">
+<option value="g">grams (g)</option>
+<option value="oz">ounces (oz)</option>
+</select>
+<div class="tiny" id="foodAutoCalcHint" style="margin-top:6px">Choose a common food and enter its weight to calculate calories and macros automatically.</div>
+</div>
+<div class="grid grid4">
+<input id="mealProtein" max="1000" min="0" placeholder="Protein g" type="number"/>
+<input id="mealCarbs" max="1000" min="0" placeholder="Carbs g" type="number"/>
+<input id="mealFat" max="1000" min="0" placeholder="Fat g" type="number"/>
+<button class="btn primary" type="submit">Add meal</button>
+</div>
+<div class="tiny">Tip: weighing food makes calorie, macro, and micronutrient estimates more accurate.</div>
+</form>
+<div class="list" id="meals"></div>
+</div>
 </section>
-
-
-
-<section id="history" class="panel">
-  <div class="card">
-    <div class="row">
-      <div>
-        <strong>Weekly history</strong>
-        <div class="muted">Go back and review what you logged in previous weeks.</div>
-      </div>
-    </div>
-
-    <div class="grid grid3" style="margin-top:12px">
-      <button id="prevWeek" class="btn" type="button">← Previous</button>
-      <button id="thisWeek" class="btn primary" type="button">This week</button>
-      <button id="nextWeek" class="btn" type="button">Next →</button>
-    </div>
-
-    <div id="historyWeekLabel" style="font-size:20px;font-weight:800;margin-top:14px"></div>
-    <div id="historySummary" class="muted" style="margin-top:6px"></div>
-  </div>
-
-  <div class="card" style="margin-top:12px">
-    <strong>Food</strong>
-    <div id="historyMeals" class="list"></div>
-  </div>
-
-  <div class="card" style="margin-top:12px">
-    <strong>Water</strong>
-    <div id="historyWater" class="list"></div>
-  </div>
-
-  <div class="card" style="margin-top:12px">
-    <strong>Workouts</strong>
-    <div id="historyWorkouts" class="list"></div>
-  </div>
-
-  <div class="card" style="margin-top:12px">
-    <strong>Body weight</strong>
-    <div id="historyWeight" class="list"></div>
-  </div>
-
-  <div class="card" style="margin-top:12px">
-    <strong>Fasting</strong>
-    <div id="historyFasting" class="list"></div>
-  </div>
-
-  <div class="card" style="margin-top:12px">
-    <strong>Habit history</strong>
-    <div class="muted">Review consistency and notes up to one year back.</div>
-    <div id="habitHistoryRanges" class="range-row" style="margin-top:12px"></div>
-    <select id="habitHistorySelect" style="margin-top:10px"></select>
-    <div id="habitHistoryStats" class="muted" style="margin-top:10px"></div>
-    <div id="habitHistoryGraph" style="margin-top:10px"></div>
-    <div id="habitHistoryNotes" class="list" style="margin-top:10px"></div>
-    <div style="display:none"><div id="historyHabits"></div></div>
-  </div>
-
-  <div class="card" style="margin-top:12px">
-    <strong>Morning check-in history</strong>
-    <div class="muted">See how your energy and mornings have been trending.</div>
-    <div id="morningHistoryRanges" class="range-row" style="margin-top:12px"></div>
-    <div id="morningHistorySummary" class="weekly-report-grid" style="margin-top:10px"></div>
-    <div id="morningHistoryList" class="list" style="margin-top:10px"></div>
-  </div>
+<section class="panel" id="fasting">
+<div class="card" style="text-align:center">
+<div class="muted">Intermittent fasting</div>
+<div class="muted" id="fastStartedLine" style="margin-top:7px;display:none">⭐ Started —</div>
+<div class="big" id="fastDisplay" style="margin-top:8px">16:8</div>
+<div class="muted" id="fastSub">Not fasting</div>
+<div class="muted" id="fastElapsed" style="margin-top:8px;display:none">Elapsed: —</div>
+<div class="muted" id="fastEndsLine" style="margin-top:6px;display:none">Ends at: —</div>
+<button class="btn primary" id="fastBtn" style="margin-top:16px">Start fast</button>
+</div>
+<div class="card" id="todayFastCard" style="margin-top:12px;display:none">
+<div class="row"><strong>Today's Fast</strong><span class="tiny" id="todayFastBadge" style="color:#22c55e">Completed</span></div>
+<div class="fast-total" id="todayFastDuration">—</div>
+<div class="muted">Total fasting time</div>
+<div class="fast-over" id="todayFastOver"></div>
+<div class="fast-pair">
+<div class="fast-mini"><div class="tiny">Started</div><div class="v" id="todayFastStarted">—</div><div class="tiny" id="todayFastStartedDate"></div></div>
+<div class="fast-mini"><div class="tiny">Ended</div><div class="v" id="todayFastEnded">—</div><div class="tiny" id="todayFastEndedDate"></div></div>
+</div>
+<div class="tiny" id="todayFastGoal" style="margin-top:12px"></div>
+<button class="btn" id="editCompletedFast" style="width:100%;margin-top:12px" type="button">✎ Edit fast</button>
+<div class="fast-edit" id="fastEditPanel">
+<div class="fast-edit-grid">
+<div><label>Actual start date &amp; time</label><input id="editFastStart" type="datetime-local"/></div>
+<div><label>Actual end date &amp; time</label><input id="editFastEnd" type="datetime-local"/></div>
+</div>
+<div class="tiny" id="fastEditError" style="margin-top:7px;color:#fca5a5"></div>
+<div class="fast-action-row"><button class="btn primary" id="saveFastEdit" type="button">Save changes</button><button class="btn" id="cancelFastEdit" type="button">Cancel</button></div>
+</div>
+</div>
+<div class="card" style="margin-top:12px">
+<div class="row"><div><strong>Weekly fasting report</strong><div class="muted" id="fastWeekLabel">This week</div></div><div class="fast-week-nav"><button class="btn" id="fastPrevWeek" type="button">←</button><button class="btn" id="fastThisWeek" type="button">Today</button><button class="btn" id="fastNextWeek" type="button">→</button></div></div>
+<div class="fast-week-grid">
+<div class="fast-week-stat"><div class="k">Average fast</div><div class="v" id="fastWeekAvg">—</div></div>
+<div class="fast-week-stat"><div class="k">Total fasted</div><div class="v" id="fastWeekTotal">—</div></div>
+<div class="fast-week-stat"><div class="k">Longest fast</div><div class="v" id="fastWeekLongest">—</div></div>
+<div class="fast-week-stat"><div class="k">Goal achieved</div><div class="v" id="fastWeekGoals">—</div></div>
+</div>
+<div id="fastWeekDays" style="margin-top:12px"></div>
+</div>
+<div class="card" style="margin-top:12px">
+<div class="row"><div><strong>Fast history</strong><div class="muted">Your completed fasts stay editable.</div></div><button class="btn" id="toggleFastHistory" type="button">View</button></div>
+<div class="list fast-history-list" id="fastHistoryList" style="display:none;margin-top:10px"></div>
+</div>
+<div class="card" style="margin-top:12px">
+<strong>Fasting settings</strong>
+<div class="grid grid2" style="margin-top:12px">
+<div><label class="muted">Fast length (hours)</label><input id="fastHours" max="48" min="1" type="number" value="16"/></div>
+<div><label class="muted">Eating window (hours)</label><input id="eatHours" max="23" min="1" type="number" value="8"/></div>
+</div>
+<div class="grid grid2" style="margin-top:12px">
+<div>
+<label class="muted">Start time ⭐</label>
+<input id="fastStartTime" type="time"/>
+<div class="tiny">Set the time you actually started.</div>
+</div>
+<div>
+<label class="muted">Expected end time</label>
+<input id="fastEndTime" type="time"/>
+<div class="tiny">Updates from your fasting length, or change it yourself.</div>
+</div>
+</div>
+<div class="tiny" id="fastTimeHint" style="margin-top:10px">If you forgot to start FitBank on time, enter the real start time before tapping Start fast.</div>
+<button class="btn" id="saveFastSettings" style="margin-top:10px">Save fasting settings</button>
+</div>
 </section>
-
-<section id="weight" class="panel">
-  <div class="card">
-    <div class="journey-title">Overall weight journey</div>
-    <div class="journey-summary">
-      <div class="journey-stat start"><div class="ico">⚑</div><div class="k">Starting Weight</div><div id="journeyStart" class="v">—</div><div id="journeyStartDate" class="d">—</div></div>
-      <div class="journey-stat current"><div class="ico">⚖️</div><div class="k">Current Weight</div><div id="journeyCurrent" class="v">—</div><div id="journeyCurrentDate" class="d">—</div></div>
-      <div class="journey-stat lost"><div class="ico">📉</div><div class="k">Lost Weight</div><div id="journeyChange" class="v">—</div><div id="journeyPercent" class="d">—</div></div>
-    </div>
-    <div style="display:none"><span id="journeyLow"></span><span id="journeyHigh"></span><span id="journeyLabel"></span></div>
-  </div>
-
-  <div class="card" style="margin-top:12px">
-    <div class="chart-head"><strong>Weight Over Time</strong><select id="weightRange" class="chart-filter"><option value="all">All Time</option><option value="30">30 Days</option><option value="90">90 Days</option><option value="180">180 Days</option><option value="365">1 Year</option></select></div>
-    <div id="weightChartWrap" style="margin-top:8px;overflow-x:auto"><svg id="weightChart" viewBox="0 0 700 260" role="img" aria-label="Body weight trend chart" style="width:100%;min-width:560px;height:auto;display:block"></svg></div>
-    <div id="journeyMessage" class="journey-message" style="display:none"></div>
-  </div>
-
-  <div class="card" style="margin-top:12px">
-    <div class="row"><div><strong>Add weigh-in</strong><div class="muted">Log your weight for the selected day.</div></div><div style="text-align:right"><div id="latestWeight" style="font-size:24px;font-weight:900">—</div><div id="weightChange" class="tiny">No entries yet</div></div></div>
-    <form id="weightForm" style="margin-top:12px"><div class="weight-form-stack"><input id="weightValue" type="number" min="50" max="1000" step="0.1" placeholder="Weight (lb)"><input id="weightDate" type="date"></div><button class="btn primary" type="submit" style="width:100%">＋ Add Weigh-in</button></form>
-    <div class="grid grid2" style="margin-top:12px"><input id="weightGoalInput" type="number" min="50" max="1000" step="0.1" placeholder="Goal weight (optional)"><button id="saveWeightGoal" class="btn" type="button">Set goal</button></div><div id="weightGoalText" class="muted" style="margin-top:10px"></div>
-  </div>
-
-  <div class="card" style="margin-top:12px"><div class="row"><strong>Recent Weigh-ins</strong><span class="tiny">Latest first</span></div><div id="weightHistory" class="list"></div></div>
+<section class="panel" id="habits">
+<div class="card morning-card">
+<div class="morning-top">
+<div><div class="morning-title">☀️ Morning check-in</div><div class="muted">How did you wake up?</div></div>
+<div class="morning-status"><span id="morningTodayLabel">Today</span><span id="morningPickedLabel"></span></div>
+</div>
+<div class="morning-options" id="morningOptions"></div>
+<div class="morning-note-row"><textarea id="morningNote" placeholder="Optional note — sleep, energy, how you feel..."></textarea><button class="btn primary" id="saveMorning" type="button">Save</button></div>
+<div class="tiny" style="margin-top:9px">Use this to spot patterns in your energy, sleep, fasting, and habits.</div>
+</div>
+<div class="card" style="margin-top:12px">
+<strong>Your habits</strong>
+<form id="habitForm" style="margin-top:12px">
+<input id="habitName" maxlength="60" placeholder="Add a new habit"/>
+<button class="btn primary">Add habit</button>
+</form>
+<div class="list" id="habitList"></div>
+</div>
+<div class="card" style="margin-top:12px">
+<div class="row"><div><strong>Habit trends</strong><div class="muted">Last 14 days</div></div></div>
+<div class="list" id="habitTrendList" style="margin-top:12px"></div>
+</div>
 </section>
-
-<section id="settings" class="panel">
-    <div class="card">
-      <strong>Calories & weekly bank</strong>
-      <div class="grid grid2" style="margin-top:12px">
-        <div><label class="muted">Daily calorie goal</label><input id="goalInput" type="number" min="800" max="6000"></div>
-        <div><label class="muted">Bank percentage</label>
-          <select id="bankPercent">
-            <option value="0">Off</option>
-            <option value="50">Bank 50%</option>
-            <option value="75">Bank 75%</option>
-            <option value="100">Bank 100%</option>
-          </select>
-        </div>
-      </div>
-      <button id="saveCalSettings" class="btn primary" style="margin-top:10px">Save calorie settings</button>
-    </div>
-
-    <div class="card" style="margin-top:12px">
-      <strong>Meal reminders</strong>
-      <div class="muted">Times are saved here. Push notifications require the native/secure backend version.</div>
-      <div class="grid grid2" style="margin-top:12px">
-        <div><label class="muted">Breakfast</label><input id="breakfastTime" type="time"></div>
-        <div><label class="muted">Lunch</label><input id="lunchTime" type="time"></div>
-        <div><label class="muted">Dinner</label><input id="dinnerTime" type="time"></div>
-        <div><label class="muted">Repeat reminders</label>
-          <select id="reminderRepeat">
-            <option value="30">Every 30 min</option>
-            <option value="60">Every hour</option>
-            <option value="120">Every 2 hours</option>
-          </select>
-        </div>
-      </div>
-      <button id="saveReminderSettings" class="btn" style="margin-top:10px">Save reminder settings</button>
-    </div>
-
-    <div class="card" style="margin-top:12px">
-      <strong>Data</strong>
-      <div class="muted">All entries are saved on this device.</div>
-      <div class="tiny" style="margin-top:6px">FitBank V5.0 • Full punch-list test build</div>
-      <button id="resetAll" class="btn danger" style="margin-top:10px">Reset all FitBank data</button>
-    </div>
-  
-  <div class="card" style="margin-top:12px">
-    <strong>Protein goal</strong>
-    <div class="grid grid2" style="margin-top:10px">
-      <input id="proteinGoal" type="number" min="0" step="1" placeholder="Daily protein goal (g)">
-      <button id="saveProteinGoal" class="btn primary" type="button">Save goal</button>
-    </div>
-    <div class="tiny">Used for your Food and Home protein progress.</div>
-  </div>
+<section class="panel" id="exercise">
+<div class="card">
+<div class="row">
+<div>
+<strong>Workout routines</strong>
+<div class="muted">Build a routine manually or import one from a screenshot.</div>
+</div>
+</div>
+<div class="grid grid2" style="margin-top:12px">
+<button class="btn primary" id="showManualRoutine" type="button">+ Create routine</button>
+<button class="btn" id="showScreenshotImport" type="button">Import screenshot</button>
+</div>
+<div id="manualRoutinePanel" style="display:none;margin-top:12px">
+<form id="routineForm">
+<input id="routineName" maxlength="60" placeholder="Routine name, e.g. Legs #1"/>
+<button class="btn primary">Create routine</button>
+</form>
+</div>
+<div id="screenshotImportPanel" style="display:none;margin-top:12px">
+<input accept="image/*" id="workoutShot" type="file"/>
+<img alt="Workout screenshot preview" id="workoutShotPreview" style="display:none"/>
+<button class="btn primary" id="readWorkoutShot" style="margin-top:10px" type="button">Read workout screenshot</button>
+<div class="muted" id="ocrStatus" style="margin-top:10px"></div>
+<div id="ocrReview" style="display:none;margin-top:14px">
+<label class="muted">Routine name</label>
+<input id="ocrRoutineName" value="Imported Workout"/>
+<div id="ocrExerciseList"></div>
+<div class="actions" style="margin-top:10px">
+<button class="btn" id="ocrAddRow" type="button">+ Add exercise</button>
+<button class="btn primary" id="saveOcrRoutine" type="button">Save routine</button>
+</div>
+</div>
+</div>
+<div class="list" id="routineList" style="margin-top:12px"></div>
+</div>
+<div class="card" id="routineBuilderCard" style="margin-top:12px;display:none">
+<div class="row">
+<div>
+<strong id="routineBuilderTitle">Edit routine</strong>
+<div class="muted">Set reps, percentage of max, and max weight for each exercise.</div>
+</div>
+<button class="btn" id="closeRoutineBuilder" type="button">Done</button>
+</div>
+<form id="routineExerciseForm" style="margin-top:12px">
+<div class="group-row"><select id="routineMuscleGroup"><option value="legs">Legs</option><option value="chest">Chest</option><option value="back">Back</option><option value="shoulders">Shoulders</option><option value="arms">Arms</option><option value="core">Core</option><option value="full">Full Body</option></select><div class="tiny" id="routineGroupHint" style="align-self:center">Choose a muscle group for suggestions, or type any exercise.</div></div>
+<input id="routineExerciseName" list="routineExerciseSuggestions" maxlength="80" placeholder="Exercise name or choose from list"/><datalist id="routineExerciseSuggestions"></datalist>
+<div class="grid grid2">
+<input id="routineSets" max="20" min="1" placeholder="Working sets" type="number" value="3"/>
+<input id="routineReps" placeholder="Target reps, e.g. 8-10" type="text" value="8-10"/>
+</div>
+<div class="grid grid2">
+<input id="routinePercent" max="100" min="0" placeholder="% of max" step="1" type="number"/>
+<input id="routineMax" max="2000" min="0" placeholder="Your max (lb)" step="0.5" type="number"/>
+</div>
+<div class="grid grid2">
+<input id="routineRpe" placeholder="RPE, e.g. 8-9" type="text"/>
+<input id="routineRest" placeholder="Rest, e.g. 3-4 min" type="text"/>
+</div>
+<textarea class="exercise-notes" id="routineNotes" placeholder="Notes or substitutions"></textarea>
+<button class="btn primary" type="submit">Add exercise</button>
+</form>
+<div id="routineExerciseList"></div>
+</div>
+<div class="card current-workout" id="currentWorkoutCard" style="display:none">
+<div class="row">
+<div>
+<strong id="currentWorkoutTitle">Current workout</strong>
+<div class="muted">Log the weight and reps you actually complete.</div>
+</div>
+<button class="btn primary" id="finishWorkout" type="button">Finish</button>
+</div>
+<div id="currentWorkoutExercises"></div>
+</div>
+<div class="card" style="margin-top:12px">
+<strong>Quick exercise log</strong>
+<div class="muted">For walking, cardio, yard work, or anything you just want to track by time.</div>
+<form id="exerciseForm" style="margin-top:12px">
+<input id="quickExerciseName" maxlength="60" placeholder="Exercise name"/>
+<input id="exerciseMins" max="600" min="1" placeholder="Minutes" type="number" value="30"/>
+<button class="btn">Log workout</button>
+</form>
+<div class="list" id="exerciseLog"></div>
+</div>
+</section>
+<section class="panel" id="history">
+<div class="card">
+<div class="row">
+<div>
+<strong>Weekly history</strong>
+<div class="muted">Go back and review what you logged in previous weeks.</div>
+</div>
+</div>
+<div class="grid grid3" style="margin-top:12px">
+<button class="btn" id="prevWeek" type="button">← Previous</button>
+<button class="btn primary" id="thisWeek" type="button">This week</button>
+<button class="btn" id="nextWeek" type="button">Next →</button>
+</div>
+<div id="historyWeekLabel" style="font-size:20px;font-weight:800;margin-top:14px"></div>
+<div class="muted" id="historySummary" style="margin-top:6px"></div>
+</div>
+<div class="card" style="margin-top:12px">
+<strong>Food</strong>
+<div class="list" id="historyMeals"></div>
+</div>
+<div class="card" style="margin-top:12px">
+<strong>Water</strong>
+<div class="list" id="historyWater"></div>
+</div>
+<div class="card" style="margin-top:12px">
+<strong>Workouts</strong>
+<div class="list" id="historyWorkouts"></div>
+</div>
+<div class="card" style="margin-top:12px">
+<strong>Body weight</strong>
+<div class="list" id="historyWeight"></div>
+</div>
+<div class="card" style="margin-top:12px">
+<strong>Fasting</strong>
+<div class="list" id="historyFasting"></div>
+</div>
+<div class="card" style="margin-top:12px">
+<strong>Habit history</strong>
+<div class="muted">Review consistency and notes up to one year back.</div>
+<div class="range-row" id="habitHistoryRanges" style="margin-top:12px"></div>
+<select id="habitHistorySelect" style="margin-top:10px"></select>
+<div class="muted" id="habitHistoryStats" style="margin-top:10px"></div>
+<div id="habitHistoryGraph" style="margin-top:10px"></div>
+<div class="list" id="habitHistoryNotes" style="margin-top:10px"></div>
+<div style="display:none"><div id="historyHabits"></div></div>
+</div>
+<div class="card" style="margin-top:12px">
+<strong>Morning check-in history</strong>
+<div class="muted">See how your energy and mornings have been trending.</div>
+<div class="range-row" id="morningHistoryRanges" style="margin-top:12px"></div>
+<div class="weekly-report-grid" id="morningHistorySummary" style="margin-top:10px"></div>
+<div class="list" id="morningHistoryList" style="margin-top:10px"></div>
+</div>
+</section>
+<section class="panel" id="weight">
+<div class="card">
+<div class="journey-title">Overall weight journey</div>
+<div class="journey-summary">
+<div class="journey-stat start"><div class="ico">⚑</div><div class="k">Starting Weight</div><div class="v" id="journeyStart">—</div><div class="d" id="journeyStartDate">—</div></div>
+<div class="journey-stat current"><div class="ico">⚖️</div><div class="k">Current Weight</div><div class="v" id="journeyCurrent">—</div><div class="d" id="journeyCurrentDate">—</div></div>
+<div class="journey-stat lost"><div class="ico">📉</div><div class="k">Lost Weight</div><div class="v" id="journeyChange">—</div><div class="d" id="journeyPercent">—</div></div>
+</div>
+<div style="display:none"><span id="journeyLow"></span><span id="journeyHigh"></span><span id="journeyLabel"></span></div>
+</div>
+<div class="card" style="margin-top:12px">
+<div class="chart-head"><strong>Weight Over Time</strong><select class="chart-filter" id="weightRange"><option value="all">All Time</option><option value="30">30 Days</option><option value="90">90 Days</option><option value="180">180 Days</option><option value="365">1 Year</option></select></div>
+<div id="weightChartWrap" style="margin-top:8px;overflow-x:auto"><svg aria-label="Body weight trend chart" id="weightChart" role="img" style="width:100%;min-width:560px;height:auto;display:block" viewbox="0 0 700 260"></svg></div>
+<div class="journey-message" id="journeyMessage" style="display:none"></div>
+</div>
+<div class="card" style="margin-top:12px">
+<div class="row"><div><strong>Add weigh-in</strong><div class="muted">Log your weight for the selected day.</div></div><div style="text-align:right"><div id="latestWeight" style="font-size:24px;font-weight:900">—</div><div class="tiny" id="weightChange">No entries yet</div></div></div>
+<form id="weightForm" style="margin-top:12px"><div class="weight-form-stack"><input id="weightValue" max="1000" min="50" placeholder="Weight (lb)" step="0.1" type="number"/><input id="weightDate" type="date"/></div><button class="btn primary" style="width:100%" type="submit">＋ Add Weigh-in</button></form>
+<div class="grid grid2" style="margin-top:12px"><input id="weightGoalInput" max="1000" min="50" placeholder="Goal weight (optional)" step="0.1" type="number"/><button class="btn" id="saveWeightGoal" type="button">Set goal</button></div><div class="muted" id="weightGoalText" style="margin-top:10px"></div>
+</div>
+<div class="card" style="margin-top:12px"><div class="row"><strong>Recent Weigh-ins</strong><span class="tiny">Latest first</span></div><div class="list" id="weightHistory"></div></div>
+</section>
+<section class="panel" id="settings">
+<div class="card">
+<strong>Calories &amp; weekly bank</strong>
+<div class="grid grid2" style="margin-top:12px">
+<div><label class="muted">Daily calorie goal</label><input id="goalInput" max="6000" min="800" type="number"/></div>
+<div><label class="muted">Bank percentage</label>
+<select id="bankPercent">
+<option value="0">Off</option>
+<option value="50">Bank 50%</option>
+<option value="75">Bank 75%</option>
+<option value="100">Bank 100%</option>
+</select>
+</div>
+</div>
+<button class="btn primary" id="saveCalSettings" style="margin-top:10px">Save calorie settings</button>
+</div>
+<div class="card" style="margin-top:12px">
+<strong>Meal reminders</strong>
+<div class="muted">Times are saved here. Push notifications require the native/secure backend version.</div>
+<div class="grid grid2" style="margin-top:12px">
+<div><label class="muted">Breakfast</label><input id="breakfastTime" type="time"/></div>
+<div><label class="muted">Lunch</label><input id="lunchTime" type="time"/></div>
+<div><label class="muted">Dinner</label><input id="dinnerTime" type="time"/></div>
+<div><label class="muted">Repeat reminders</label>
+<select id="reminderRepeat">
+<option value="30">Every 30 min</option>
+<option value="60">Every hour</option>
+<option value="120">Every 2 hours</option>
+</select>
+</div>
+</div>
+<button class="btn" id="saveReminderSettings" style="margin-top:10px">Save reminder settings</button>
+</div>
+<div class="card" style="margin-top:12px">
+<strong>Data</strong>
+<div class="muted">All entries are saved on this device.</div>
+<div class="tiny" style="margin-top:6px">FitBank V5.0 • Full punch-list test build</div>
+<button class="btn danger" id="resetAll" style="margin-top:10px">Reset all FitBank data</button>
+</div>
+<div class="card" style="margin-top:12px">
+<strong>Protein goal</strong>
+<div class="grid grid2" style="margin-top:10px">
+<input id="proteinGoal" min="0" placeholder="Daily protein goal (g)" step="1" type="number"/>
+<button class="btn primary" id="saveProteinGoal" type="button">Save goal</button>
+</div>
+<div class="tiny">Used for your Food and Home protein progress.</div>
+</div>
 </section>
 </div>
-
-<div id="moreMenu" class="more-menu">
-  <button class="btn" data-tab="habits" type="button">✓ Habits</button>
-  <button class="btn" data-tab="weight" type="button">⚖️ Weight</button>
-  <button class="btn" data-tab="history" type="button">▥ History</button>
-  <button class="btn" data-tab="settings" type="button">⚙️ Settings</button>
+<div class="more-menu" id="moreMenu">
+<button class="btn" data-tab="habits" type="button">✓ Habits</button>
+<button class="btn" data-tab="weight" type="button">⚖️ Weight</button>
+<button class="btn" data-tab="history" type="button">▥ History</button>
+<button class="btn" data-tab="settings" type="button">⚙️ Settings</button>
 </div>
-<nav class="bottom-nav" aria-label="Main navigation">
-  <button class="active" data-tab="home" type="button"><span class="nav-ico">⌂</span><span>Home</span></button>
-  <button data-tab="food" type="button"><span class="nav-ico">🍴</span><span>Food</span></button>
-  <button data-tab="exercise" type="button"><span class="nav-ico">🏋️</span><span>Exercise</span></button>
-  <button data-tab="fasting" type="button"><span class="nav-ico">◷</span><span>Fasting</span></button>
-  <button id="moreNavBtn" type="button"><span class="nav-ico">•••</span><span>More</span></button>
+<nav aria-label="Main navigation" class="bottom-nav">
+<button class="active" data-tab="home" type="button"><span class="nav-ico">⌂</span><span>Home</span></button>
+<button data-tab="food" type="button"><span class="nav-ico">🍴</span><span>Food</span></button>
+<button data-tab="exercise" type="button"><span class="nav-ico">🏋️</span><span>Exercise</span></button>
+<button data-tab="fasting" type="button"><span class="nav-ico">◷</span><span>Fasting</span></button>
+<button id="moreNavBtn" type="button"><span class="nav-ico">•••</span><span>More</span></button>
 </nav>
-
-<div id="editModal" class="modal" aria-hidden="true">
-  <div class="sheet">
-    <div class="row"><strong id="editTitle">Edit</strong><button id="closeEdit" class="btn">Close</button></div>
-    <form id="editForm" style="margin-top:12px">
-      <input id="editName" placeholder="Name">
-      <input id="editNumber" type="number" placeholder="Value">
-      <div class="actions"><button class="btn primary" type="submit">Save changes</button><button id="deleteEdit" class="btn danger" type="button">Delete</button></div>
-    </form>
-  </div>
+<div aria-hidden="true" class="modal" id="editModal">
+<div class="sheet">
+<div class="row"><strong id="editTitle">Edit</strong><button class="btn" id="closeEdit">Close</button></div>
+<form id="editForm" style="margin-top:12px">
+<input id="editName" placeholder="Name"/>
+<input id="editNumber" placeholder="Value" type="number"/>
+<div class="actions"><button class="btn primary" type="submit">Save changes</button><button class="btn danger" id="deleteEdit" type="button">Delete</button></div>
+</form>
 </div>
-
+</div>
 <script>
+
+/* ===== Runtime module 1 ===== */
 const defaults={
   goal:2000,eaten:0,bankPercent:100,priorBank:0,
   fasting:false,fastStart:null,fastExpectedEnd:null,fastHours:16,eatHours:8,
@@ -835,7 +773,7 @@ const $=id=>document.getElementById(id),fmt=n=>Math.round(Number(n)||0).toLocale
 function uid(){return Date.now()+Math.floor(Math.random()*10000)}
 function save(){localStorage.setItem('fitbank-v2',JSON.stringify(state))}
 function load(){try{const x=JSON.parse(localStorage.getItem('fitbank-v2'));if(x)state={...defaults,...x,reminders:{...defaults.reminders,...(x.reminders||{})}}}catch{}}
-function show(id){document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('active',p.id===id));document.querySelectorAll('[data-tab]').forEach(b=>b.classList.toggle('active',b.dataset.tab===id));const mm=document.getElementById('moreMenu');if(mm)mm.classList.remove('open');if(['habits','weight','history','settings'].includes(id)){const mb=document.getElementById('moreNavBtn');if(mb)mb.classList.add('active')}}
+function show(id){document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('active',p.id===id));document.querySelectorAll('[data-tab]').forEach(b=>b.classList.toggle('active',b.dataset.tab===id));document.querySelectorAll('.bottom-nav button').forEach(b=>b.classList.remove('active'));const direct=document.querySelector('.bottom-nav [data-tab=\"'+id+'\"]');if(direct)direct.classList.add('active');const mm=document.getElementById('moreMenu');if(mm)mm.classList.remove('open');if(['habits','weight','history','settings'].includes(id)){const mb=document.getElementById('moreNavBtn');if(mb)mb.classList.add('active')}}
 document.querySelectorAll('[data-tab]').forEach(b=>b.addEventListener('click',()=>show(b.dataset.tab)));
 document.querySelectorAll('[data-jump]').forEach(b=>b.addEventListener('click',()=>show(b.dataset.jump)));
 
@@ -920,7 +858,7 @@ $('mealForm').onsubmit=e=>{
   update();
   renderMealDaySummary($('mealDate').value||todayKey());
 };
-$('photo').onchange=()=>{const f=$('photo').files&&$('photo').files[0];if(!f)return;$('preview').src=URL.createObjectURL(f);$('preview').style.display='block'};
+if($('photo')&&$('preview')){$('photo').onchange=()=>{const f=$('photo').files&&$('photo').files[0];if(!f)return;$('preview').src=URL.createObjectURL(f);$('preview').style.display='block'};}
 
 function habitDoneOnDate(habitId,date=todayKey()){
   return (state.habitLogs||[]).some(x=>x.habitId===habitId && x.date===date && x.done);
@@ -956,7 +894,7 @@ function renderHabits(){
 $('habitForm').onsubmit=e=>{e.preventDefault();const n=$('habitName').value.trim();if(n){state.habits.push({id:uid(),name:n,done:false});$('habitName').value='';update()}};
 
 function renderExerciseTypes(){
-  const l=$('exerciseTypes');l.innerHTML='';const s=$('exerciseSelect');const current=s.value;s.innerHTML='';
+  const l=$('exerciseTypes'),s=$('exerciseSelect');if(!l||!s)return;const current=s.value;l.innerHTML='';s.innerHTML='';
   state.exercises.forEach(x=>{
     const o=document.createElement('option');o.value=x.id;o.textContent=x.name;s.append(o);
     const r=document.createElement('div');r.className='item';const t=document.createElement('div');t.className='item-title';t.textContent=x.name;
@@ -974,7 +912,7 @@ function renderWorkouts(){
     const b=document.createElement('button');b.className='btn';b.textContent='Edit';b.onclick=()=>openEdit('workout',w.id,w.name,w.mins);r.append(main,b);l.append(r)
   })
 }
-$('exerciseForm').onsubmit=e=>{e.preventDefault();const mins=Number($('exerciseMins').value),id=Number($('exerciseSelect').value),ex=state.exercises.find(x=>x.id===id);if(ex&&mins>0&&mins<=600){state.workouts.push({id:uid(),name:ex.name,mins});update()}};
+if($('exerciseForm')&&$('exerciseSelect'))$('exerciseForm').onsubmit=e=>{e.preventDefault();const mins=Number($('exerciseMins').value),id=Number($('exerciseSelect').value),ex=state.exercises.find(x=>x.id===id);if(ex&&mins>0&&mins<=600){state.workouts.push({id:uid(),date:todayKey(),name:ex.name,mins});update()}};
 
 
 
@@ -1884,7 +1822,15 @@ $('saveCalSettings').onclick=()=>{state.goal=Math.min(Math.max(Number($('goalInp
 $('saveReminderSettings').onclick=()=>{state.reminders={breakfast:$('breakfastTime').value,lunch:$('lunchTime').value,dinner:$('dinnerTime').value,repeat:$('reminderRepeat').value};update()};
 $('resetAll').onclick=()=>{if(confirm('Reset all FitBank data on this device?')){state=JSON.parse(JSON.stringify(defaults));update()}};
 
-load();try{update();}catch(e){console.error('FitBank startup update error',e)}
+load();
+// Clean-baseline migration: normalize arrays and attach dates to legacy timestamp-based rows.
+(function migrateLegacyRows(){
+  const arrays=['meals','workouts','waterLogs','weightLogs','fastingLogs','habitLogs','morningLogs','dailyNotes','progressPhotos','routines'];
+  arrays.forEach(k=>{if(!Array.isArray(state[k]))state[k]=[]});
+  ['meals','workouts'].forEach(k=>state[k].forEach(row=>{if(!row.date){const n=Number(row.id);row.date=(Number.isFinite(n)&&n>1000000000000)?localDateKey(new Date(n)):todayKey();}}));
+  save();
+})();
+try{update();}catch(e){console.error('FitBank startup update error',e)}
 if('serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js').then(r=>r.update()).catch(()=>{})}
 
 
@@ -2331,9 +2277,8 @@ setTimeout(()=>{
   }catch(err){console.error('FitBank delayed refresh error',err)}
 },0);
 
-</script>
 
-<script id="fitbank-home-controls-v32">
+/* ===== Runtime module 2 ===== */
 (function(){
   function el(id){return document.getElementById(id)}
   function activatePanel(id){
@@ -2453,10 +2398,9 @@ if(b.id==='openDailyCalories'){
     try{ if(typeof renderDashboard==='function')renderDashboard() }catch(err){console.error('Dashboard render error',err)}
   });
 })();
-</script>
 
 
-<script>
+/* ===== Runtime module 3 ===== */
 // ---------- FitBank 4.4 date system + habit trends ----------
 (function(){
   function selectedKey(){ return typeof dashKey==='function' ? dashKey() : todayKey(); }
@@ -2611,10 +2555,9 @@ if(b.id==='openDailyCalories'){
   // Initial sync for the current day.
   syncSelectedDateEverywhere();
 })();
-</script>
 
 
-<script>
+/* ===== Runtime module 4 ===== */
 (function(){
   // V4.5 additions: habit notes, morning check-in, long-range habit history, exercise suggestions.
   state.habitLogs=Array.isArray(state.habitLogs)?state.habitLogs:[];
@@ -2691,10 +2634,9 @@ if(b.id==='openDailyCalories'){
   const oldRenderHabits2=renderHabits;renderHabits=function(){oldRenderHabits2();renderMorning();};
   renderMorning();renderHabitHistory();updateExerciseSuggestions();
 })();
-</script>
 
-<script>
 
+/* ===== Runtime module 5 ===== */
 // ---------- FitBank V4.6 approved UI behavior ----------
 (function(){
   function fmtDur(ms){
@@ -2736,9 +2678,9 @@ if(b.id==='openDailyCalories'){
   const obs=new MutationObserver(()=>{const picked=document.querySelector('#morningOptions .morning-btn.selected');const lab=$('morningPickedLabel');if(lab)lab.textContent=picked?' '+picked.textContent.trim().replace(/[\n\r]+/g,' '):'';});if($('morningOptions'))obs.observe($('morningOptions'),{subtree:true,attributes:true,childList:true});
   renderCompletedFastUI();renderFastingWeeklyReport();
 })();
-</script>
 
-<script>
+
+/* ===== Runtime module 6 ===== */
 // ---------- FitBank V5.0 full punch-list behavior ----------
 (function(){
   const $v=id=>document.getElementById(id);
@@ -2891,8 +2833,7 @@ if(b.id==='openDailyCalories'){
 })();
 
 
-</script>
-<script>
+/* ===== Runtime module 7 ===== */
 // ---------- V5.3 Food Bank + Barcode — standalone ----------
 (function(){
   'use strict';
@@ -3029,7 +2970,37 @@ if(b.id==='openDailyCalories'){
   // Visible self-check: if this text appears, the standalone module loaded.
   if(searchBtn)status('foodBankStatus','Food Bank ready. Try “milk”, “chicken”, “eggs”, or “rice”.');
 })();
+
+
+/* ===== V6.0 clean-baseline health check ===== */
+(function(){
+  const VERSION='6.0';
+  function addBuildBadge(){
+    const settings=document.getElementById('settings');
+    if(!settings||document.getElementById('fitbankBuildInfo'))return;
+    const d=document.createElement('div');d.id='fitbankBuildInfo';d.className='tiny';d.style.cssText='text-align:center;margin:18px 0 4px;opacity:.7';
+    d.textContent='FitBank V'+VERSION+' · Clean Baseline';settings.append(d);
+  }
+  addBuildBadge();
+  window.addEventListener('error',function(e){console.error('FitBank runtime error:',e.error||e.message)});
+  window.addEventListener('unhandledrejection',function(e){console.error('FitBank promise error:',e.reason)});
+  // Re-render once after every module has initialized. This avoids module-order startup gaps.
+  setTimeout(function(){
+    try{
+      if(typeof syncSelectedDateEverywhere==='function')syncSelectedDateEverywhere();
+      else if(typeof update==='function')update();
+      const status=document.getElementById('foodBankStatus');
+      if(status && !status.textContent.trim()) status.textContent='Food Bank ready. Try “milk”, “chicken”, “eggs”, or “rice”.';
+    }catch(err){console.error('FitBank final initialization error',err)}
+  },0);
+})();
+
 </script>
+
+
+
+
+
 
 </body>
 </html>
