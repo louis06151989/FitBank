@@ -160,7 +160,7 @@
 .morning-options{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:12px}.morning-btn{padding:10px 3px;border:1px solid var(--border);border-radius:14px;background:transparent;color:var(--text);font-size:12px;min-width:0}.morning-btn .face{display:block;font-size:24px;margin-bottom:3px}.morning-btn.selected{border-color:#22c55e;box-shadow:inset 0 0 0 1px #22c55e}.habit-day.note{border-color:#22c55e!important;box-shadow:inset 0 0 0 1px #22c55e}.habit-history-grid{display:grid;grid-template-columns:repeat(14,minmax(0,1fr));gap:4px;margin-top:10px}.range-row{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px}.range-row .btn{white-space:nowrap;padding:9px 12px}.weight-form-stack{display:grid;grid-template-columns:1fr;gap:10px}.journey-message{padding:12px;border:1px solid var(--border);border-radius:14px;margin-top:12px;color:var(--muted)}
 
 
-/* ===== FitBank V6.1 stability / food / workout ===== */
+/* ===== FitBank V6.2 stability / food / workout ===== */
 .food-v61-summary{order:0}
 .food-v61-actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:14px}
 .food-v61-actions .btn{padding:10px 6px;font-size:13px}
@@ -170,12 +170,53 @@
 .import-warning{padding:10px 12px;border:1px solid #785b1f;background:rgba(245,158,11,.08);border-radius:12px;margin-top:10px;color:#fde68a;font-size:12px}
 @media(max-width:520px){.food-v61-actions{grid-template-columns:1fr 1fr}.food-v61-actions .btn:last-child{grid-column:1/-1}}
 
+
+/* ===== FitBank V6.2 mobile UI + edit/delete reliability ===== */
+#food{overflow-x:hidden}
+#food .card{min-width:0;overflow:hidden}
+#food input,#food select,#food button,#food textarea{min-width:0;max-width:100%}
+#food input[type="date"]{-webkit-appearance:none;appearance:none;display:block;width:100%;max-width:100%;min-width:0}
+#mealEntryCard{margin-top:0!important}
+#mealForm{display:grid;grid-template-columns:minmax(0,1fr);gap:12px;margin-top:14px}
+#mealForm>.grid,#mealForm .grid2,#mealForm .grid4{grid-template-columns:minmax(0,1fr)!important;gap:10px}
+#mealForm .tiny{line-height:1.35}
+#mealForm .btn.primary[type="submit"]{width:100%;min-height:52px;font-size:17px}
+#foodV61Actions{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px!important}
+#foodV61Actions .btn{min-height:52px;font-size:15px!important}
+#foodV61Actions .btn:last-child{grid-column:1/-1}
+#toggleLabelScan{display:none!important}
+.food-section-label{font-size:12px;color:var(--muted);margin:18px 0 8px;text-transform:uppercase;letter-spacing:.08em}
+#foodBankCardV62{margin-top:12px}
+#waterCardV62{margin-top:12px}
+#portionCardV62{display:none}
+
+/* Modal must sit above the fixed nav and remain usable with the iOS keyboard open. */
+.modal{z-index:200!important;padding-top:calc(12px + env(safe-area-inset-top));padding-bottom:0;overflow:hidden}
+.modal.open{display:flex!important}
+.sheet{display:flex;flex-direction:column;width:min(100%,720px);max-height:calc(100% - 12px);overflow:hidden;padding:0!important;border-radius:22px 22px 0 0!important;background:var(--card)}
+.sheet>.row{padding:16px 16px 10px;flex:0 0 auto}
+#editForm{display:flex!important;flex-direction:column;gap:12px;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:4px 16px calc(116px + env(safe-area-inset-bottom));min-height:0}
+#editForm input{flex:0 0 auto}
+#editForm .actions{position:sticky;bottom:0;z-index:4;display:grid!important;grid-template-columns:1fr 1fr;gap:10px;background:linear-gradient(to bottom,rgba(17,24,39,0),var(--card) 18%);padding:24px 0 10px;margin-top:2px}
+#editForm .actions .btn{min-height:52px;font-weight:800}
+#deleteEdit{background:rgba(239,68,68,.10)}
+body.modal-open{overflow:hidden}
+@media(max-width:520px){
+  .wrap{padding-left:16px;padding-right:16px}
+  #food .row{align-items:flex-start}
+  #foodBankCardV62 .grid2,#waterCardV62 .grid2{grid-template-columns:1fr!important}
+  #mealEntryCard .stat3{gap:6px}
+  #mealEntryCard .stat-box{min-width:0}
+  #mealEntryCard .stat-box .v{font-size:16px}
+  .sheet{width:100%;max-height:88%;}
+}
+
 </style>
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 
 
-<meta content="6.1-stability-food-workout" name="fitbank-build"/></head>
+<meta content="6.2-mobile-ui-edit-fix" name="fitbank-build"/></head>
 <body>
 <div class="wrap">
 <div class="tabs">
@@ -305,8 +346,8 @@
 </div>
 </section>
 <section class="panel" id="food">
-<div class="card">
-<div class="row"><div><strong>Food Bank</strong><div class="muted">Search foods or scan a packaged-food barcode.</div></div><span class="tiny">V6.1</span></div>
+<div class="card" id="foodBankCardV62">
+<div class="row"><div><strong>Food Bank</strong><div class="muted">Search foods or scan a packaged-food barcode.</div></div><span class="tiny">V6.2</span></div>
 <div class="grid grid2" style="margin-top:12px">
 <input autocomplete="off" id="foodBankSearch" placeholder="Start typing a food…" type="search"/>
 <button class="btn primary" id="foodBankSearchBtn" type="button">Search food</button>
@@ -322,7 +363,7 @@
 </div>
 <div class="tiny" id="barcodeStatus" style="margin-top:7px"></div>
 </div>
-<div class="card" style="margin-top:12px">
+<div class="card" id="waterCardV62" style="margin-top:12px">
 <div class="row">
 <div>
 <strong>Water intake</strong>
@@ -353,7 +394,7 @@
 <button class="btn danger" id="resetWater" type="button">Reset today</button>
 </div>
 </div>
-<div class="card" style="margin-top:12px">
+<div class="card" id="portionCardV62" style="margin-top:12px">
 <strong>Portion accuracy</strong>
 <div class="muted" style="margin-top:6px">For best results, weigh the food after cooking and enter the weight in grams or ounces. When AI nutrition is connected, FitBank will use that portion weight to improve calories, macros, and micronutrients.</div>
 </div>
@@ -730,7 +771,7 @@
 <div class="card" style="margin-top:12px">
 <strong>Data</strong>
 <div class="muted">All entries are saved on this device.</div>
-<div class="tiny" style="margin-top:6px">FitBank V5.0 • Full punch-list test build</div>
+<div class="tiny" style="margin-top:6px">FitBank V6.2 • Mobile UI + Edit/Delete Fix</div>
 <button class="btn danger" id="resetAll" style="margin-top:10px">Reset all FitBank data</button>
 </div>
 <div class="card" style="margin-top:12px">
@@ -3250,6 +3291,42 @@ if(b.id==='openDailyCalories'){
 
 
 
+
+
+<script>
+/* ===== FitBank V6.2 UI stabilization ===== */
+(function(){
+  const by=id=>document.getElementById(id);
+  function arrangeFood(){
+    const food=by('food'), meal=by('mealEntryCard'), bank=by('foodBankCardV62'), water=by('waterCardV62'), portion=by('portionCardV62');
+    if(!food||!meal)return;
+    // Put the calorie/protein summary and Add Food workflow first.
+    if(food.firstElementChild!==meal) food.insertBefore(meal,food.firstElementChild);
+    // Food bank follows the main entry area, then water.
+    if(bank && meal.nextElementSibling!==bank) meal.insertAdjacentElement('afterend',bank);
+    if(water && bank && bank.nextElementSibling!==water) bank.insertAdjacentElement('afterend',water);
+    if(portion) portion.style.display='none';
+    const title=meal.querySelector('.row strong');
+    if(title && title.textContent.trim()==='Add meal') title.textContent='Add food';
+    const submit=meal.querySelector('#mealForm button[type="submit"]'); if(submit)submit.textContent='Add food';
+  }
+  function setupEditSheet(){
+    const modal=by('editModal'), close=by('closeEdit'), form=by('editForm');
+    if(!modal||!form)return;
+    const sync=()=>document.body.classList.toggle('modal-open',modal.classList.contains('open'));
+    new MutationObserver(sync).observe(modal,{attributes:true,attributeFilter:['class']});
+    sync();
+    form.addEventListener('focusin',e=>{if(e.target.matches('input,select,textarea'))setTimeout(()=>e.target.scrollIntoView({block:'center',behavior:'smooth'}),180)});
+    close?.addEventListener('click',()=>setTimeout(sync,0));
+  }
+  function fixFoodJump(){
+    const btn=by('openDailyCalories');
+    if(!btn)return;
+    btn.addEventListener('click',()=>setTimeout(()=>{by('food')?.scrollIntoView({block:'start'});window.scrollTo({top:0,behavior:'instant'});},0),true);
+  }
+  arrangeFood(); setupEditSheet(); fixFoodJump();
+})();
+</script>
 
 </body>
 </html>
