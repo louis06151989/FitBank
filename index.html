@@ -159,12 +159,23 @@
 
 .morning-options{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:12px}.morning-btn{padding:10px 3px;border:1px solid var(--border);border-radius:14px;background:transparent;color:var(--text);font-size:12px;min-width:0}.morning-btn .face{display:block;font-size:24px;margin-bottom:3px}.morning-btn.selected{border-color:#22c55e;box-shadow:inset 0 0 0 1px #22c55e}.habit-day.note{border-color:#22c55e!important;box-shadow:inset 0 0 0 1px #22c55e}.habit-history-grid{display:grid;grid-template-columns:repeat(14,minmax(0,1fr));gap:4px;margin-top:10px}.range-row{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px}.range-row .btn{white-space:nowrap;padding:9px 12px}.weight-form-stack{display:grid;grid-template-columns:1fr;gap:10px}.journey-message{padding:12px;border:1px solid var(--border);border-radius:14px;margin-top:12px;color:var(--muted)}
 
+
+/* ===== FitBank V6.1 stability / food / workout ===== */
+.food-v61-summary{order:0}
+.food-v61-actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:14px}
+.food-v61-actions .btn{padding:10px 6px;font-size:13px}
+.food-search-note{padding:10px 12px;border:1px solid var(--border);border-radius:12px;background:rgba(255,255,255,.02);margin-top:8px}
+.food-result-source{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-top:2px}
+.import-confidence{font-size:11px;color:var(--muted);margin-top:6px}
+.import-warning{padding:10px 12px;border:1px solid #785b1f;background:rgba(245,158,11,.08);border-radius:12px;margin-top:10px;color:#fde68a;font-size:12px}
+@media(max-width:520px){.food-v61-actions{grid-template-columns:1fr 1fr}.food-v61-actions .btn:last-child{grid-column:1/-1}}
+
 </style>
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 
 
-<meta content="6.0-clean-baseline" name="fitbank-build"/></head>
+<meta content="6.1-stability-food-workout" name="fitbank-build"/></head>
 <body>
 <div class="wrap">
 <div class="tabs">
@@ -295,14 +306,14 @@
 </section>
 <section class="panel" id="food">
 <div class="card">
-<div class="row"><div><strong>Food Bank</strong><div class="muted">Search foods or scan a packaged-food barcode.</div></div><span class="tiny">V5.3</span></div>
+<div class="row"><div><strong>Food Bank</strong><div class="muted">Search foods or scan a packaged-food barcode.</div></div><span class="tiny">V6.1</span></div>
 <div class="grid grid2" style="margin-top:12px">
-<input autocomplete="off" id="foodBankSearch" placeholder="Search chicken, eggs, rice…" type="search"/>
+<input autocomplete="off" id="foodBankSearch" placeholder="Start typing a food…" type="search"/>
 <button class="btn primary" id="foodBankSearchBtn" type="button">Search food</button>
 </div>
-<div class="tiny" id="foodBankStatus" style="margin-top:7px">Common foods search instantly. Packaged foods also search Open Food Facts.</div>
+<div class="tiny" id="foodBankStatus" style="margin-top:7px">Start typing for instant common/recent foods, or search for packaged foods.</div>
 <div class="list" id="foodBankResults" style="margin-top:8px"></div>
-<div style="height:1px;background:var(--line);margin:16px 0"></div>
+<div style="height:1px;background:var(--border);margin:16px 0"></div>
 <div class="row"><div><strong>Barcode scanner</strong><div class="tiny">Scan the UPC on a packaged food.</div></div><button class="btn" id="startBarcodeScan" type="button">▦ Scan barcode</button></div>
 <div id="barcodeReader" style="display:none;margin-top:10px;overflow:hidden;border-radius:14px"></div>
 <div class="grid grid2" style="margin-top:10px">
@@ -376,10 +387,10 @@
 <button class="btn" id="toggleLabelScan" type="button">📷 Scan nutrition label</button>
 </div>
 <div class="label-scan-panel" id="labelScanPanel">
-<div class="row"><div><strong>Nutrition label scan</strong><div class="tiny">Reads the label on this phone, then fills the food form.</div></div><button class="btn" id="closeLabelScan" type="button">Close</button></div>
+<div class="row"><div><strong>Nutrition label scan</strong><div class="tiny">Reads the label on this phone and fills the food form automatically.</div></div><button class="btn" id="closeLabelScan" type="button">Close</button></div>
 <input accept="image/*" capture="environment" id="labelPhoto" style="margin-top:10px" type="file"/>
 <img alt="Nutrition label preview" class="label-scan-preview" id="labelPreview"/>
-<button class="btn primary" id="readNutritionLabel" style="margin-top:10px;width:100%" type="button">Read nutrition label</button>
+<button class="btn primary" id="readNutritionLabel" style="margin-top:10px;width:100%" type="button">Scan &amp; fill nutrition</button>
 <div class="muted" id="labelScanStatus" style="margin-top:8px"></div>
 <div id="labelScanResults" style="display:none;margin-top:10px">
 <div class="label-scan-grid">
@@ -392,7 +403,7 @@
 <div><label class="tiny">Serving size from label</label><input id="scanServingSize" placeholder="e.g. 28 g"/></div>
 <div><label class="tiny">Servings you ate</label><input id="scanServingsEaten" max="50" min="0.1" step="0.1" type="number" value="1"/></div>
 </div>
-<button class="btn primary" id="applyNutritionLabel" style="width:100%;margin-top:10px" type="button">Use these numbers</button>
+<button class="btn primary" id="applyNutritionLabel" style="width:100%;margin-top:10px" type="button">Apply corrected numbers</button>
 <div class="tiny" style="margin-top:7px">Check the numbers before saving. Label OCR can misread small print.</div>
 </div>
 </div>
@@ -1962,11 +1973,11 @@ if($('mealDate')){
 }
 
 if($('mealName')){
-  $('mealName').addEventListener('input',autoCalculateFood);
-  $('mealName').addEventListener('change',autoCalculateFood);
+  $('mealName').addEventListener('input',()=>window.autoCalculateFood());
+  $('mealName').addEventListener('change',()=>window.autoCalculateFood());
 }
-if($('mealWeight'))$('mealWeight').addEventListener('input',autoCalculateFood);
-if($('mealWeightUnit'))$('mealWeightUnit').addEventListener('change',autoCalculateFood);
+if($('mealWeight'))$('mealWeight').addEventListener('input',()=>window.autoCalculateFood());
+if($('mealWeightUnit'))$('mealWeightUnit').addEventListener('change',()=>window.autoCalculateFood());
 
 
 // Reset water automatically when the local date changes at midnight.
@@ -2175,10 +2186,7 @@ $('openDailyCalories').onclick=()=>{
   const key=dashKey();
   switchTabById('food');
   renderMealDaySummary(key);
-  setTimeout(()=>{
-    const card=$('mealEntryCard');
-    if(card)card.scrollIntoView({behavior:'smooth',block:'start'});
-  },40);
+  setTimeout(()=>window.scrollTo({top:0,behavior:'smooth'}),40);
 };
 
 document.querySelectorAll('[data-open-tab]').forEach(b=>b.onclick=()=>{
@@ -2311,7 +2319,7 @@ if(b.id==='openDailyCalories'){
       const key=(typeof dashKey==='function')?dashKey():todayKey();
       activatePanel('food');
       try{ if(typeof renderMealDaySummary==='function')renderMealDaySummary(key) }catch(err){console.error(err)}
-      setTimeout(()=>{const card=el('mealEntryCard');if(card)card.scrollIntoView({behavior:'smooth',block:'start'})},20);
+      setTimeout(()=>window.scrollTo({top:0,behavior:'smooth'}),20);
       return;
     }
 
@@ -2702,7 +2710,7 @@ if(b.id==='openDailyCalories'){
     const anchorKey=keyForDate(anchor),today=todayKey();
     let through=new Date(anchor); through.setHours(12,0,0,0);
     // Today's remaining calories are not "earned" yet. Past selected dates count through that day.
-    if(anchorKey>=today) through.setDate(through.getDate()-1);
+    if(anchorKey>=today){ through=new Date(); through.setHours(12,0,0,0); through.setDate(through.getDate()-1); }
     let total=0;
     for(let d=new Date(start);d<=through;d.setDate(d.getDate()+1)){
       const k=keyForDate(d),eaten=(state.meals||[]).filter(m=>m.date===k).reduce((a,m)=>a+(Number(m.cal)||0),0);
@@ -2972,14 +2980,255 @@ if(b.id==='openDailyCalories'){
 })();
 
 
-/* ===== V6.0 clean-baseline health check ===== */
+
+/* ===== V6.1 authoritative stability / Food / Workout layer ===== */
 (function(){
-  const VERSION='6.0';
+  'use strict';
+  const by=id=>document.getElementById(id);
+  const num=v=>{const n=Number(v);return Number.isFinite(n)?n:0};
+  const keyToday=()=>typeof todayKey==='function'?todayKey():new Date().toISOString().slice(0,10);
+
+  // ---------- Food layout: high-frequency calorie logging first ----------
+  function arrangeFood(){
+    const food=by('food'), summary=by('mealEntryCard');
+    if(!food||!summary)return;
+    summary.classList.add('food-v61-summary');
+    if(food.firstElementChild!==summary) food.insertBefore(summary,food.firstElementChild);
+    if(!by('foodV61Actions')){
+      const bar=document.createElement('div');bar.id='foodV61Actions';bar.className='food-v61-actions';
+      bar.innerHTML='<button class="btn primary" type="button" data-v61-food="search">🔎 Search food</button><button class="btn" type="button" data-v61-food="barcode">▦ Scan barcode</button><button class="btn" type="button" data-v61-food="label">📷 Nutrition label</button>';
+      const anchor=summary.querySelector('.row[style*="margin-top:16px"]');
+      if(anchor) anchor.before(bar); else summary.append(bar);
+      bar.addEventListener('click',e=>{
+        const b=e.target.closest('[data-v61-food]');if(!b)return;
+        const kind=b.dataset.v61Food;
+        if(kind==='label'){by('labelScanPanel')?.classList.add('open');by('labelPhoto')?.click();return}
+        const bank=by('foodBankSearch')?.closest('.card');
+        if(bank){bank.scrollIntoView({behavior:'smooth',block:'start'});setTimeout(()=>{if(kind==='search')by('foodBankSearch')?.focus();if(kind==='barcode')by('startBarcodeScan')?.click()},250)}
+      });
+    }
+  }
+
+  // ---------- Date-scoped compatibility totals ----------
+  window.recalcEaten=function(){
+    const k=(by('mealDate')&&by('mealDate').value)||keyToday();
+    state.eaten=(state.meals||[]).filter(m=>(m.date||keyToday())===k).reduce((a,m)=>a+num(m.cal),0);
+  };
+  window.todayExercise=function(){
+    const k=(typeof dashKey==='function'?dashKey():keyToday());
+    return (state.workouts||[]).filter(w=>(w.date||keyToday())===k).reduce((a,w)=>a+num(w.mins),0);
+  };
+
+  // ---------- Water rollover: preserve an already-existing today's log ----------
+  if(typeof resetWaterForNewDay==='function'){
+    window.resetWaterForNewDay=function(){
+      const today=keyToday();
+      state.waterLogs=Array.isArray(state.waterLogs)?state.waterLogs:[];
+      if(state.waterLastDate===today)return;
+      const existing=state.waterLogs.find(x=>x.date===today);
+      state.waterOz=existing?num(existing.oz):0;
+      state.waterLastDate=today;
+    };
+  }
+
+  // ---------- Retained nutrition source for reliable portion recalculation ----------
+  let activeFoodSource=null;
+  function gramsFromServingText(s){
+    const m=String(s||'').match(/(\d+(?:\.\d+)?)\s*g\b/i);return m?num(m[1]):0;
+  }
+  function setFoodSource(src){
+    activeFoodSource=src&&src.cal100>0?src:null;
+    window.fitbankActiveFoodSource=activeFoodSource;
+  }
+  function sourceForCurrentName(){
+    const name=String(by('mealName')?.value||'').trim().toLowerCase();
+    if(activeFoodSource && (!activeFoodSource.name || name===activeFoodSource.name.toLowerCase())) return activeFoodSource;
+    const built=typeof findFoodNutrition==='function'?findFoodNutrition(name):null;
+    return built?{name,cal100:num(built.cal),protein100:num(built.protein),carbs100:num(built.carbs),fat100:num(built.fat),source:'common'}:null;
+  }
+  window.autoCalculateFood=function(){
+    const src=sourceForCurrentName(),hint=by('foodAutoCalcHint');
+    if(!src){if(hint)hint.textContent='Choose a search result or enter nutrition manually.';return}
+    const grams=typeof weightToGrams==='function'?weightToGrams(by('mealWeight')?.value,by('mealWeightUnit')?.value||'g'):num(by('mealWeight')?.value);
+    if(!grams){if(hint)hint.textContent='Enter the portion weight to recalculate calories and macros.';return}
+    const f=grams/100;
+    by('mealCal').value=Math.round(src.cal100*f);
+    by('mealProtein').value=(src.protein100*f).toFixed(1);
+    by('mealCarbs').value=(src.carbs100*f).toFixed(1);
+    by('mealFat').value=(src.fat100*f).toFixed(1);
+    if(hint)hint.textContent=`${src.source||'Nutrition'} • calculated for ${Math.round(grams)} g. You can edit any value.`;
+  };
+  ['mealWeight','mealWeightUnit'].forEach(id=>by(id)?.addEventListener(id==='mealWeight'?'input':'change',()=>window.autoCalculateFood()));
+  by('mealName')?.addEventListener('input',()=>{if(activeFoodSource&&String(by('mealName').value).trim().toLowerCase()!==String(activeFoodSource.name||'').toLowerCase())setFoodSource(null)});
+
+  // Expanded common food set for instant autocomplete. Values are approximate per 100 g.
+  const EXTRA={
+    'egg whites':{cal:52,p:10.9,c:0.7,f:0.2},'scrambled eggs':{cal:149,p:10,c:1.6,f:11},'bacon cooked':{cal:541,p:37,c:1.4,f:42},
+    'sausage cooked':{cal:301,p:12,c:2,f:27},'chicken thigh cooked':{cal:209,p:26,c:0,f:11},'rotisserie chicken':{cal:190,p:28,c:0,f:8},
+    'turkey ground 93/7 cooked':{cal:203,p:27,c:0,f:10},'ham sliced':{cal:145,p:21,c:1.5,f:6},'tilapia cooked':{cal:128,p:26,c:0,f:2.7},
+    'catfish cooked':{cal:144,p:18,c:0,f:7},'cod cooked':{cal:89,p:19.9,c:0,f:0.7},'crab cooked':{cal:97,p:19,c:0,f:1.5},
+    'crawfish cooked':{cal:82,p:16.8,c:0,f:1.2},'white bread':{cal:266,p:8.9,c:49.4,f:3.3},'whole wheat bread':{cal:247,p:13,c:41,f:4.2},
+    'flour tortilla':{cal:312,p:8.3,c:52,f:8.3},'corn tortilla':{cal:218,p:5.7,c:44.6,f:2.9},'bagel plain':{cal:257,p:10,c:50,f:1.7},
+    'english muffin':{cal:235,p:8,c:46,f:1.8},'pancakes':{cal:227,p:6.4,c:28.3,f:9.7},'waffle':{cal:291,p:7.9,c:33.1,f:14.1},
+    'grits cooked':{cal:59,p:1.4,c:13,f:0.2},'mashed potatoes':{cal:88,p:1.7,c:15.7,f:2.8},'french fries':{cal:312,p:3.4,c:41,f:15},
+    'macaroni and cheese':{cal:164,p:6.2,c:20.7,f:6.4},'spaghetti cooked':{cal:158,p:5.8,c:30.9,f:0.9},'marinara sauce':{cal:51,p:1.4,c:8.5,f:1.5},
+    'green beans cooked':{cal:35,p:1.9,c:7.9,f:0.3},'corn cooked':{cal:96,p:3.4,c:21,f:1.5},'peas cooked':{cal:84,p:5.4,c:15.6,f:0.2},
+    'carrots cooked':{cal:35,p:0.8,c:8.2,f:0.2},'spinach cooked':{cal:23,p:3,c:3.8,f:0.3},'lettuce romaine':{cal:17,p:1.2,c:3.3,f:0.3},
+    'tomato':{cal:18,p:0.9,c:3.9,f:0.2},'cucumber':{cal:15,p:0.7,c:3.6,f:0.1},'onion':{cal:40,p:1.1,c:9.3,f:0.1},
+    'pineapple':{cal:50,p:0.5,c:13.1,f:0.1},'grapes':{cal:69,p:0.7,c:18.1,f:0.2},'watermelon':{cal:30,p:0.6,c:7.6,f:0.2},
+    'peach':{cal:39,p:0.9,c:9.5,f:0.3},'pear':{cal:57,p:0.4,c:15.2,f:0.1},'raspberries':{cal:52,p:1.2,c:12,f:0.7},
+    'cottage cheese lowfat':{cal:82,p:11.1,c:3.4,f:2.3},'mozzarella cheese':{cal:280,p:28,c:3.1,f:17},'cream cheese':{cal:342,p:5.9,c:4.1,f:34},
+    'butter':{cal:717,p:0.9,c:0.1,f:81},'olive oil':{cal:884,p:0,c:0,f:100},'ranch dressing':{cal:430,p:1.5,c:5.9,f:45},
+    'mayonnaise':{cal:680,p:1,c:0.6,f:75},'ketchup':{cal:101,p:1,c:27,f:0.1},'honey':{cal:304,p:0.3,c:82.4,f:0},
+    'almonds':{cal:579,p:21.2,c:21.6,f:49.9},'cashews':{cal:553,p:18.2,c:30.2,f:43.9},'protein shake':{cal:80,p:15,c:3,f:1},
+    'whey protein powder':{cal:370,p:75,c:8,f:5},'chocolate milk':{cal:83,p:3.2,c:10.3,f:3.4},'skim milk':{cal:34,p:3.4,c:5,f:0.1}
+  };
+
+  function allLocalFoods(){
+    const rows=[];
+    if(typeof FOOD_DB==='object')Object.entries(FOOD_DB).forEach(([name,v])=>rows.push({name,cal100:num(v.cal),protein100:num(v.protein),carbs100:num(v.carbs),fat100:num(v.fat),source:'Common food'}));
+    Object.entries(EXTRA).forEach(([name,v])=>rows.push({name,cal100:v.cal,protein100:v.p,carbs100:v.c,fat100:v.f,source:'Common food'}));
+    const recent=[];for(const m of [...(state.meals||[])].reverse()){const n=String(m.name||'').trim();if(n&&!recent.some(x=>x.name.toLowerCase()===n.toLowerCase()))recent.push({name:n,cal:num(m.cal),protein:num(m.protein),carbs:num(m.carbs),fat:num(m.fat),grams:typeof weightToGrams==='function'?weightToGrams(m.weight,m.weightUnit):num(m.weight),source:'Recent'});if(recent.length>=12)break}
+    return {rows,recent};
+  }
+  function scoreName(name,q){name=name.toLowerCase();q=q.toLowerCase();if(name===q)return 100;if(name.startsWith(q))return 80;if(name.includes(' '+q))return 65;if(name.includes(q))return 50;return 0}
+  function localMatches(q){
+    const {rows,recent}=allLocalFoods(),out=[];
+    recent.forEach(r=>{const s=scoreName(r.name,q);if(s)out.push({...r,score:s+30})});
+    rows.forEach(r=>{const s=scoreName(r.name,q);if(s)out.push({...r,score:s})});
+    const seen=new Set();return out.sort((a,b)=>b.score-a.score).filter(x=>{const k=x.name.toLowerCase();if(seen.has(k))return false;seen.add(k);return true}).slice(0,14);
+  }
+  function resultButton(item){
+    const b=document.createElement('button');b.className='item';b.type='button';b.style.cssText='width:100%;text-align:left;color:inherit;border:0;cursor:pointer';
+    const serving=item.grams?`${Math.round(item.grams)} g serving`:'per 100 g';
+    const cal=item.grams?item.cal:Math.round(item.cal100);
+    b.innerHTML=`<span class="item-main"><span class="item-title"></span><span class="tiny"></span><span class="food-result-source"></span></span><span style="font-weight:900"></span>`;
+    b.querySelector('.item-title').textContent=item.name;b.querySelector('.tiny').textContent=serving;b.querySelector('.food-result-source').textContent=item.source||'';b.lastElementChild.textContent=Math.round(cal||0)+' cal';
+    b.addEventListener('click',()=>{
+      by('mealName').value=item.name;
+      if(item.grams){by('mealWeight').value=Math.round(item.grams*10)/10;by('mealWeightUnit').value='g';const cal100=item.grams?num(item.cal)*100/item.grams:0;setFoodSource({name:item.name,cal100,protein100:num(item.protein)*100/item.grams,carbs100:num(item.carbs)*100/item.grams,fat100:num(item.fat)*100/item.grams,source:item.source||'Recent'});}
+      else{by('mealWeight').value=100;by('mealWeightUnit').value='g';setFoodSource(item)}
+      window.autoCalculateFood();
+      by('mealName').scrollIntoView({behavior:'smooth',block:'center'});
+    });return b;
+  }
+  function showLocalSuggestions(q){
+    const out=by('foodBankResults');if(!out)return;out.innerHTML='';
+    if(!q||q.length<1){by('foodBankStatus').textContent='Start typing to see common and recent foods.';return}
+    const rows=localMatches(q);rows.forEach(x=>out.append(resultButton(x)));
+    by('foodBankStatus').textContent=rows.length?`${rows.length} instant match${rows.length===1?'':'es'}. Tap one or Search food for packaged products.`:'No instant match. Tap Search food to check packaged products.';
+  }
+  let liveTimer=null;
+  by('foodBankSearch')?.addEventListener('input',e=>{clearTimeout(liveTimer);liveTimer=setTimeout(()=>showLocalSuggestions(e.target.value.trim()),120)});
+
+  async function offSearch(q){
+    const out=by('foodBankResults'),status=by('foodBankStatus');
+    showLocalSuggestions(q);const existing=[...out.children].length;
+    status.textContent=(existing?'Instant matches shown. ':'')+'Checking packaged foods…';
+    try{
+      const url='https://world.openfoodfacts.org/cgi/search.pl?search_terms='+encodeURIComponent(q)+'&search_simple=1&action=process&json=1&page_size=12&fields=code,product_name,brands,serving_size,serving_quantity,nutriments';
+      const r=await fetch(url);if(!r.ok)throw new Error('HTTP '+r.status);const d=await r.json();
+      let added=0;const seen=new Set([...out.querySelectorAll('.item-title')].map(x=>x.textContent.toLowerCase()));
+      for(const p of (d.products||[])){
+        const n=p.nutriments||{},name=(p.product_name||'').trim();if(!name||seen.has(name.toLowerCase()))continue;
+        const cal100=num(n['energy-kcal_100g']),protein100=num(n.proteins_100g),carbs100=num(n.carbohydrates_100g),fat100=num(n.fat_100g);if(!cal100)continue;
+        const grams=num(p.serving_quantity)||gramsFromServingText(p.serving_size)||100;
+        const item={name,cal100,protein100,carbs100,fat100,grams,cal:cal100*grams/100,protein:protein100*grams/100,carbs:carbs100*grams/100,fat:fat100*grams/100,source:(p.brands?`Packaged • ${p.brands}`:'Packaged')};
+        out.append(resultButton(item));seen.add(name.toLowerCase());if(++added>=8)break;
+      }
+      status.textContent=(existing||added)?'Choose a food below. Portion changes will recalculate automatically.':'No food found. Try a simpler search or add it manually.';
+    }catch(e){console.warn(e);status.textContent=existing?'Instant common/recent foods are available. Packaged-food search is offline right now.':'Online food search is unavailable right now.'}
+  }
+  // Capture the search button so old Food Bank listeners cannot create duplicate/conflicting result cards.
+  by('foodBankSearchBtn')?.addEventListener('click',e=>{e.preventDefault();e.stopImmediatePropagation();const q=by('foodBankSearch').value.trim();if(!q){showLocalSuggestions('');return}offSearch(q)},true);
+  by('foodBankSearch')?.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();e.stopImmediatePropagation();const q=e.currentTarget.value.trim();if(q)offSearch(q)}},true);
+
+  // ---------- Nutrition label OCR: auto-fill successful reads ----------
+  function firstNumber(text,re){const m=text.match(re);return m?num(String(m[1]).replace(',','.')):0}
+  function parseNutritionLabel(text){
+    const lines=String(text||'').replace(/\r/g,'\n').split(/\n+/).map(x=>x.replace(/[|]/g,' ').replace(/\s+/g,' ').trim()).filter(Boolean);
+    const joined=lines.join(' ');
+    let cal=firstNumber(joined,/\bcalories?\b\s*[:\-]?\s*(\d{1,4})/i);
+    const protein=firstNumber(joined,/\bprotein\b\s*[:\-]?\s*(\d+(?:[\.,]\d+)?)\s*g\b/i);
+    const carbs=firstNumber(joined,/\b(?:total\s+)?carbohydrate(?:s)?\b\s*[:\-]?\s*(\d+(?:[\.,]\d+)?)\s*g\b/i);
+    const fat=firstNumber(joined,/\b(?:total\s+)?fat\b\s*[:\-]?\s*(\d+(?:[\.,]\d+)?)\s*g\b/i);
+    if(!cal){for(const l of lines){if(/calories/i.test(l)){const nums=l.match(/\b\d{2,4}\b/g)||[];if(nums.length){cal=num(nums[0]);break}}}}
+    const sm=joined.match(/serving\s+size\s*[:\-]?\s*(.{1,55}?)(?=\b(?:calories|amount per|servings per|total fat|protein)\b|$)/i);
+    const serving=sm?sm[1].trim():'';return {cal,protein,carbs,fat,serving,grams:gramsFromServingText(serving)};
+  }
+  let lastScan=null;
+  const scanBtn=by('readNutritionLabel');
+  if(scanBtn)scanBtn.addEventListener('click',async e=>{
+    e.preventDefault();e.stopImmediatePropagation();const f=by('labelPhoto')?.files?.[0];
+    if(!f){by('labelScanStatus').textContent='Take or choose a nutrition-label photo first.';return}
+    if(!window.Tesseract){by('labelScanStatus').textContent='Nutrition reader could not load. Check your connection.';return}
+    scanBtn.disabled=true;by('labelScanStatus').textContent='Reading label…';
+    try{
+      const result=await Tesseract.recognize(f,'eng',{logger:m=>{if(m.status==='recognizing text')by('labelScanStatus').textContent='Reading label… '+Math.round((m.progress||0)*100)+'%'}});
+      lastScan=parseNutritionLabel(result?.data?.text||'');
+      by('scanCalories').textContent=lastScan.cal||'—';by('scanProtein').textContent=lastScan.protein?lastScan.protein+'g':'—';by('scanCarbs').textContent=lastScan.carbs?lastScan.carbs+'g':'—';by('scanFat').textContent=lastScan.fat?lastScan.fat+'g':'—';by('scanServingSize').value=lastScan.serving||'';by('labelScanResults').style.display='block';
+      if(lastScan.cal>0){
+        const servings=Math.max(.1,num(by('scanServingsEaten').value)||1);by('mealCal').value=Math.round(lastScan.cal*servings);by('mealProtein').value=(lastScan.protein*servings).toFixed(1);by('mealCarbs').value=(lastScan.carbs*servings).toFixed(1);by('mealFat').value=(lastScan.fat*servings).toFixed(1);if(!by('mealName').value)by('mealName').value='Scanned food';
+        const g=lastScan.grams||0;if(g){by('mealWeight').value=(g*servings).toFixed(1);by('mealWeightUnit').value='g';setFoodSource({name:by('mealName').value,cal100:lastScan.cal*100/g,protein100:lastScan.protein*100/g,carbs100:lastScan.carbs*100/g,fat100:lastScan.fat*100/g,source:'Nutrition label'})}
+        by('foodAutoCalcHint').textContent='Nutrition label filled the food form automatically. Check the numbers before adding.';by('labelScanStatus').textContent='Filled the food form. Check the highlighted nutrition numbers before saving.';
+      } else by('labelScanStatus').textContent='I could not confidently find Calories. Try a closer, straight-on photo.';
+    }catch(err){console.error(err);by('labelScanStatus').textContent='Could not read that label. Try a clearer photo.'}finally{scanBtn.disabled=false}
+  },true);
+  by('applyNutritionLabel')?.addEventListener('click',e=>{
+    e.preventDefault();e.stopImmediatePropagation();if(!lastScan||!lastScan.cal){by('labelScanStatus').textContent='Scan a label successfully first.';return}
+    const servings=Math.max(.1,num(by('scanServingsEaten').value)||1);by('mealCal').value=Math.round(lastScan.cal*servings);by('mealProtein').value=(lastScan.protein*servings).toFixed(1);by('mealCarbs').value=(lastScan.carbs*servings).toFixed(1);by('mealFat').value=(lastScan.fat*servings).toFixed(1);if(lastScan.grams){by('mealWeight').value=(lastScan.grams*servings).toFixed(1);by('mealWeightUnit').value='g'}by('labelScanPanel').classList.remove('open');
+  },true);
+
+  // ---------- Barcode nutrition source retention ----------
+  // Observe successful legacy barcode fills and convert the filled serving to a retained source.
+  const barcodeStatus=by('barcodeStatus');if(barcodeStatus){new MutationObserver(()=>{
+    if(!/found/i.test(barcodeStatus.textContent||''))return;const grams=typeof weightToGrams==='function'?weightToGrams(by('mealWeight')?.value,by('mealWeightUnit')?.value):num(by('mealWeight')?.value);if(!grams)return;
+    setFoodSource({name:by('mealName').value,cal100:num(by('mealCal').value)*100/grams,protein100:num(by('mealProtein').value)*100/grams,carbs100:num(by('mealCarbs').value)*100/grams,fat100:num(by('mealFat').value)*100/grams,source:'Barcode'});
+  }).observe(barcodeStatus,{childList:true,subtree:true,characterData:true})}
+
+  // ---------- Workout screenshot parser: row-oriented + known-exercise detection ----------
+  const EX_NAMES=['Pause Squat','Back Squat','Front Squat','Hack Squat','Goblet Squat','Leg Press','Romanian Deadlift','Barbell RDL','Dumbbell RDL','Deadlift','Walking Lunge','Reverse Lunge','Bulgarian Split Squat','Leg Extension','Seated Leg Curl','Lying Leg Curl','Hamstring Curl','Hip Thrust','Standing Calf Raise','Seated Calf Raise','Bench Press','Incline Bench Press','Dumbbell Bench Press','Incline Dumbbell Press','Chest Press','Cable Fly','Pec Deck','Overhead Press','Shoulder Press','Lateral Raise','Rear Delt Fly','Face Pull','Barbell Row','Dumbbell Row','Lat Pulldown','Pull Up','Pull-Up','Chin Up','Chin-Up','Seated Cable Row','Chest Supported Row','T-Bar Row','Barbell Curl','Dumbbell Curl','Hammer Curl','Preacher Curl','Triceps Pushdown','Skull Crusher','Cable Curl','Plank','Cable Crunch','Hanging Leg Raise'];
+  function headingLine(s){const x=s.toLowerCase().replace(/[^a-z0-9 ]/g,' ').replace(/\s+/g,' ').trim();return !x||/^(day|week|workout|exercise|exercises|sets?|reps?|load|rpe|rest|notes?|option|substitution|warm up|working sets?)(\s+\d+)?$/.test(x)||/^(day|week)\s*\d+\b/.test(x)}
+  function parseSegment(seg){
+    const clean=seg.replace(/[|]/g,' ').replace(/[—–]/g,'-').replace(/\s+/g,' ').trim();let sets=3,reps='8-10',rest='',rpe='';
+    let m=clean.match(/\b([1-8])\s*[x×]\s*(\d{1,2}(?:\s*-\s*\d{1,2})?)\b/i);if(m){sets=num(m[1]);reps=m[2].replace(/\s/g,'')}
+    else{const ranges=[...clean.matchAll(/\b(\d{1,2})\s*-\s*(\d{1,2})\b/g)].filter(x=>num(x[1])>=3&&num(x[2])<=30&&num(x[2])>=num(x[1]));if(ranges.length)reps=ranges[0][1]+'-'+ranges[0][2];const sm=clean.match(/(?:sets?\s*[:\-]?\s*|\b)([1-8])\s+(?=\d{1,2}(?:\s*-\s*\d{1,2})?\b)/i);if(sm)sets=num(sm[1])}
+    const rm=clean.match(/(?:rest\s*[:\-]?\s*)?(\d+(?:\.\d+)?(?:\s*-\s*\d+(?:\.\d+)?)?)\s*(min(?:ute)?s?|sec(?:ond)?s?)\b/i);if(rm)rest=(rm[1].replace(/\s/g,'')+' '+rm[2]).replace(/utes?/i,'').replace(/onds?/i,'');
+    const rp=clean.match(/\bRPE\s*[:\-]?\s*(\d(?:\.\d)?(?:\s*-\s*\d(?:\.\d)?)?)/i);if(rp)rpe=rp[1].replace(/\s/g,'');
+    return {sets:Math.min(8,Math.max(1,sets||3)),reps,rest,rpe};
+  }
+  window.parseWorkoutText=function(text){
+    const lines=String(text||'').split(/\n+/).map(x=>x.trim()).filter(Boolean),items=[],seen=new Set();
+    for(const raw of lines){if(headingLine(raw))continue;const lower=raw.toLowerCase();const found=[];
+      for(const name of EX_NAMES){let idx=lower.indexOf(name.toLowerCase());if(idx>=0)found.push({idx,name})}
+      found.sort((a,b)=>a.idx-b.idx);const filtered=found.filter((x,i)=>!found.some((y,j)=>j!==i&&y.idx<=x.idx&&y.idx+y.name.length>=x.idx+x.name.length));
+      if(filtered.length){for(let i=0;i<filtered.length;i++){const hit=filtered[i],end=i+1<filtered.length?filtered[i+1].idx:raw.length,seg=raw.slice(hit.idx,end),k=hit.name.toLowerCase();if(seen.has(k))continue;seen.add(k);items.push({name:hit.name,...parseSegment(seg),percent:'',maxWeight:'',notes:''});if(items.length>=20)break}continue}
+      let name=raw.split(/\s+(?=\d)/)[0].replace(/[^A-Za-z0-9+\- '()]/g,' ').replace(/\s+/g,' ').trim();if(headingLine(name)||name.length<4||name.split(' ').length>8)continue;name=name.slice(0,70);const k=name.toLowerCase();if(seen.has(k))continue;seen.add(k);items.push({name,...parseSegment(raw),percent:'',maxWeight:'',notes:''});if(items.length>=20)break;
+    }
+    return items.filter(x=>!/^day\b|^week\b|^sets?\b|^reps?\b/i.test(x.name));
+  };
+  const readBtn=by('readWorkoutShot');if(readBtn)readBtn.addEventListener('click',async e=>{
+    e.preventDefault();e.stopImmediatePropagation();const f=by('workoutShot')?.files?.[0];if(!f){by('ocrStatus').textContent='Choose a workout screenshot first.';return}if(!window.Tesseract){by('ocrStatus').textContent='Workout reader could not load. Check your connection.';return}
+    readBtn.disabled=true;by('ocrStatus').textContent='Reading screenshot…';try{const result=await Tesseract.recognize(f,'eng',{logger:m=>{if(m.status==='recognizing text')by('ocrStatus').textContent='Reading screenshot… '+Math.round((m.progress||0)*100)+'%'}});const items=window.parseWorkoutText(result?.data?.text||'');by('ocrExerciseList').innerHTML='';if(items.length){items.forEach(addOcrRow);by('ocrStatus').textContent=`Found ${items.length} exercise${items.length===1?'':'s'}. Review each one before saving.`}else{addOcrRow({name:'',sets:3,reps:'8-10'});by('ocrStatus').textContent='I could not separate this workout confidently. Add or correct exercises below.'}by('ocrReview').style.display='block';if(!by('ocrV61Warning')){const w=document.createElement('div');w.id='ocrV61Warning';w.className='import-warning';w.textContent='Screenshot import is OCR, so always review exercise names, sets, and reps before saving.';by('ocrReview').prepend(w)}}catch(err){console.error(err);by('ocrStatus').textContent='Could not read that screenshot. Try a tighter, clearer screenshot.'}finally{readBtn.disabled=false}
+  },true);
+
+  // ---------- Home Calories must open Food at the top ----------
+  by('openDailyCalories')?.addEventListener('click',e=>{e.preventDefault();e.stopImmediatePropagation();const k=typeof dashKey==='function'?dashKey():keyToday();show('food');if(typeof renderMealDaySummary==='function')renderMealDaySummary(k);requestAnimationFrame(()=>window.scrollTo({top:0,behavior:'smooth'}))},true);
+
+  // Clear retained source after a meal is actually submitted.
+  by('mealForm')?.addEventListener('submit',()=>{setTimeout(()=>setFoodSource(null),0)});
+
+  arrangeFood();showLocalSuggestions('');
+})();
+
+/* ===== V6.1 stability health check ===== */
+(function(){
+  const VERSION='6.1';
   function addBuildBadge(){
     const settings=document.getElementById('settings');
     if(!settings||document.getElementById('fitbankBuildInfo'))return;
     const d=document.createElement('div');d.id='fitbankBuildInfo';d.className='tiny';d.style.cssText='text-align:center;margin:18px 0 4px;opacity:.7';
-    d.textContent='FitBank V'+VERSION+' · Clean Baseline';settings.append(d);
+    d.textContent='FitBank V'+VERSION+' · Stability + Food + Workout';settings.append(d);
   }
   addBuildBadge();
   window.addEventListener('error',function(e){console.error('FitBank runtime error:',e.error||e.message)});
